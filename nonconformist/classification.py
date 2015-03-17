@@ -30,14 +30,19 @@ def margin(prediction, y):
 # Nonconformity functions
 # -----------------------------------------------------------------------------
 class PetClassifierNc(object):
-	def __init__(self, model, err_func):
+	def __init__(self, model_class, err_func, model_params=None):
 		self.last_x, self.last_y = None, None
 		self.last_prediction = None
-		self.model = model
 		self.clean = False
 		self.err_func = err_func
 
+		self.model_class = model_class
+		self.model_params = model_params if model_params else {}
+
+		self.model = self.model_class(**self.model_params)
+
 	def fit(self, x, y, increment=False):
+		# TODO: incremental
 		self.model.fit(x, y)
 		self.clean = False
 
@@ -67,6 +72,7 @@ class IcpClassifier(object):
 		self.last_p = None
 
 	def fit(self, x, y, increment=False):
+		self.__update_classes(y, increment)
 		self.nc_function.fit(x, y, increment)
 
 	def calibrate(self, x, y, condition=None, increment=False):
@@ -81,17 +87,20 @@ class IcpClassifier(object):
 
 		self.cal_scores = self.nc_function.calc_nc(self.cal_x, self.cal_y)
 
-	def __update_classes(self, classes, increment):
+	def __update_classes(self, y, increment):
 		if self.classes is None or not increment:
-			self.classes = np.unique(classes)
+			self.classes = np.unique(y)
 		else:
-			self.classes = np.unique(np.hstack([self.classes, classes]))
+			self.classes = np.unique(np.hstack([self.classes, y]))
 
 	def predict(self, x, significance=None):
 		p = np.zeros((x.shape[0], self.classes.size))
 		for i, c in enumerate(self.classes):
 			test_class = np.zeros((x.shape[0]))
 			test_class.fill(c)
+
+			# TODO: maybe calculate p-values using cython or similar
+			# TODO: smoothed, modified, interpolated p-values
 
 			test_nc_scores = self.nc_function.calc_nc(x, test_class)
 			for j, nc in enumerate(test_nc_scores):
