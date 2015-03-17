@@ -11,8 +11,8 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import load_iris
 
-from cppy.classification import IcpClassifier, PetClassifierNc
-from cppy.classification import margin
+from nonconformist.classification import IcpClassifier, PetClassifierNc
+from nonconformist.classification import margin
 
 data = load_iris()
 
