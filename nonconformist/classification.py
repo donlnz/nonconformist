@@ -14,13 +14,13 @@ import numpy as np
 # Error functions
 # -----------------------------------------------------------------------------
 def inverse_probability(prediction, y):
-	prob = np.zeros((y.size,), dtype=np.float32)
+	prob = np.zeros(y.size, dtype=np.float32)
 	for i, y_ in enumerate(y):
 		prob[i] = prediction[i, y[i]]
 	return 1 - prob
 
 def margin(prediction, y):
-	prob = np.zeros((y.size,), dtype=np.float32)
+	prob = np.zeros(y.size, dtype=np.float32)
 	for i, y_ in enumerate(y):
 		prob[i] = prediction[i, y[i]]
 		prediction[i, y[i]] = -np.inf
@@ -65,14 +65,14 @@ class PetClassifierNc(object):
 # Conformal predictors
 # -----------------------------------------------------------------------------
 class IcpClassifier(object):
-	def __init__(self, nc_function):
+	def __init__(self, nc_function, smoothing=True):
 		self.cal_x, self.cal_y = None, None
 		self.classes = None
 		self.nc_function = nc_function
 		self.last_p = None
+		self.smoothing = smoothing
 
 	def fit(self, x, y, increment=False):
-		self.__update_classes(y, increment)
 		self.nc_function.fit(x, y, increment)
 
 	def calibrate(self, x, y, condition=None, increment=False):
@@ -94,19 +94,25 @@ class IcpClassifier(object):
 			self.classes = np.unique(np.hstack([self.classes, y]))
 
 	def predict(self, x, significance=None):
-		p = np.zeros((x.shape[0], self.classes.size))
+		n_test_objects = x.shape[0]
+		p = np.zeros((n_test_objects, self.classes.size))
 		for i, c in enumerate(self.classes):
-			test_class = np.zeros((x.shape[0]))
+			test_class = np.zeros(x.shape[0])
 			test_class.fill(c)
 
 			# TODO: maybe calculate p-values using cython or similar
-			# TODO: smoothed, modified, interpolated p-values
+			# TODO: modified, interpolated p-values
 
 			test_nc_scores = self.nc_function.calc_nc(x, test_class)
+			n_cal = self.cal_scores.size
 			for j, nc in enumerate(test_nc_scores):
-				n_cal = self.cal_scores.size
-				n_greater_equal = np.sum(self.cal_scores >= nc)
-				p[j, i] = (n_greater_equal + 1) / (n_cal + 1)
+				n_ge = np.sum(self.cal_scores >= nc)
+				p[j, i] = n_ge / (n_cal + 1)
+
+			if self.smoothing:
+				p[:, i] += np.random.uniform(0, 1, n_test_objects) / (n_cal + 1)
+			else:
+				p[:, i] += 1 / (n_cal + 1)
 
 		if significance:
 			return p > significance

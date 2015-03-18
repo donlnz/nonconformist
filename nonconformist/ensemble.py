@@ -97,7 +97,7 @@ class SubSamplingCp(AggregatedCp):
 	def __init__(self,
 	             cp_class,
 	             nc_class,
-	             calibration_portion=0.3,
+	             calibration_portion=0.25,
 	             aggregation_func=lambda x: np.mean(x, axis=2),
 	             nc_class_params=None,
 	             n_models=10):

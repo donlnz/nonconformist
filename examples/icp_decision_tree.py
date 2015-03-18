@@ -27,7 +27,7 @@ test = idx[int(2 * idx.size / 3):]
 # -----------------------------------------------------------------------------
 # Train and calibrate
 # -----------------------------------------------------------------------------
-icp = IcpClassifier(PetClassifierNc(DecisionTreeClassifier(), margin))
+icp = IcpClassifier(PetClassifierNc(DecisionTreeClassifier, margin))
 icp.fit(data.data[train, :], data.target[train])
 icp.calibrate(data.data[calibrate, :], data.target[calibrate])
 
