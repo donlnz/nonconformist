@@ -5,10 +5,9 @@ Python implementation of the conformal prediction framework [1].
 Primarily to be used as an extension to the scikit-learn library.
 
 # Dependencies
+Tested under Python 2.7.
 
-core: numpy; tested under Python 2.7
-
-examples: sklearn
+Requires numpy and sklearn.
 
 # Known issues
 
