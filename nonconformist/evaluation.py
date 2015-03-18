@@ -13,8 +13,9 @@ from __future__ import division
 import numpy as np
 
 from sklearn.cross_validation import StratifiedShuffleSplit
+from sklearn.cross_validation import train_test_split
 
-class IcpCrossValidationHelper(object):
+class IcpClassCrossValHelper(object):
 	def __init__(self, icp, calibration_portion=0.25, significance=0.1):
 		self.icp = icp
 		self.cal_port = calibration_portion
@@ -25,6 +26,29 @@ class IcpCrossValidationHelper(object):
 		for train, cal in split:
 			self.icp.fit(x[train, :], y[train])
 			self.icp.calibrate(x[cal, :], y[cal])
+
+	def predict(self, x, significance=True):
+		if significance:
+			return self.icp.predict(x, significance=self.significance)
+		else:
+			return self.icp.predict(x, significance=None)
+
+	def get_params(self, deep=False):
+		return {'icp': self.icp,
+		        'calibration_portion': self.cal_port,
+		        'significance': self.significance}
+
+class IcpRegCrossValHelper(object):
+	def __init__(self, icp, calibration_portion=0.25, significance=0.1):
+		self.icp = icp
+		self.cal_port = calibration_portion
+		self.significance = significance
+
+	def fit(self, x, y):
+		split = train_test_split(x, y, test_size=self.cal_port)
+		x_tr, x_cal, y_tr, y_cal = split[0], split[1], split[2], split[3]
+		self.icp.fit(x_tr, y_tr)
+		self.icp.calibrate(x_cal, y_cal)
 
 	def predict(self, x, significance=True):
 		if significance:
@@ -64,7 +88,7 @@ def class_mean_errors(model, x, y):
 # -----------------------------------------------------------------------------
 # Efficiency measures
 # -----------------------------------------------------------------------------
-def reg_mean_size(x, y, model):
+def reg_mean_size(model, x, y):
 	prediction = model.predict(x)
 	interval_size = 0
 	for j in range(y.size):
