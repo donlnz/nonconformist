@@ -39,8 +39,7 @@ icp.calibrate(data.data[calibrate, :], data.target[calibrate])
 import pandas
 
 prediction = icp.predict(data.data[test, :], significance=0.1)
-#header = np.array(['c0','c1','c2','Truth'])
+header = np.array(['min','max','Truth'])
 table = np.vstack([prediction.T, data.target[test]]).T
-#df = pandas.DataFrame(np.vstack([header, table]))
-print(table)
-#print(df)
+df = pandas.DataFrame(np.vstack([header, table]))
+print(df)

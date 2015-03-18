@@ -71,6 +71,8 @@ class IcpClassifier(object):
 	'''
 	Inductive conformal classifier.
 	'''
+	problem_type = 'classification'
+
 	def __init__(self, nc_function, smoothing=True):
 		self.cal_x, self.cal_y = None, None
 		self.classes = None

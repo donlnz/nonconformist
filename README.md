@@ -16,6 +16,7 @@ Requires numpy and sklearn.
 # TODO
 
 * Useful documentation.
+* Normalized nonconformity scores for regression [6].
 * Conditional (Mondrian) conformal predictors [1].
 * Exchangeability testing [2].
 * Transductive conformal prediction [1].
@@ -31,3 +32,5 @@ Requires numpy and sklearn.
 [4] Johansson, U., Ahlberg, E., Boström, H., Carlsson, L., Linusson, H., Sönströd, C. (2015). Handling Small Calibration Sets in Mondrian Inductive Conformal Regressors. In Proceedings of the 3rd International Symposium on Statistical Learning and Data Sciences (SLDS 2015). (In press).
 
 [5] Johansson, U., Sönströd, C., Linusson, H., & Boström, H. (2014, October). Regression trees for streaming data with local performance guarantees. In Big Data (Big Data), 2014 IEEE International Conference on (pp. 461-470). IEEE.
+
+[6] Papadopoulos, H., & Haralambous, H. (2011). Reliable prediction intervals with regression neural networks. Neural Networks, 24(8), 842-851.

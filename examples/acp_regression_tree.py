@@ -1,21 +1,19 @@
 #!/usr/bin/env python
 
 """
-Example: combining multiple inductive conformal classifiers
+Example: combining multiple inductive conformal regressors
 """
 
 # Authors: Henrik Linusson
 
-import numpy as np
-
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.datasets import load_iris
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.datasets import load_diabetes
 
 from nonconformist.ensemble import *
-from nonconformist.classification import IcpClassifier, PetClassifierNc
-from nonconformist.classification import margin
+from nonconformist.regression import IcpRegressor, RegressorNc
+from nonconformist.regression import absolute_error, absolute_error_inverse
 
-data = load_iris()
+data = load_diabetes()
 
 # -----------------------------------------------------------------------------
 # Setup training, calibration and test indices
@@ -27,22 +25,25 @@ test = idx[int(2 * idx.size / 3):]
 # -----------------------------------------------------------------------------
 # Train and calibrate
 # -----------------------------------------------------------------------------
-rscp = SubSamplingCp(IcpClassifier,
-                     PetClassifierNc,
-                     nc_class_params={'model_class': DecisionTreeClassifier,
-                                      'err_func': margin})
+rscp = SubSamplingCp(IcpRegressor,
+                     RegressorNc,
+                     nc_class_params={'model_class': DecisionTreeRegressor,
+                                      'err_func': absolute_error,
+                                      'inverse_err_func': absolute_error_inverse})
 rscp.fit(data.data[train, :], data.target[train])
 
-ccp = CrossCp(IcpClassifier,
-              PetClassifierNc,
-              nc_class_params={'model_class': DecisionTreeClassifier,
-                               'err_func': margin})
+ccp = CrossCp(IcpRegressor,
+              RegressorNc,
+              nc_class_params={'model_class': DecisionTreeRegressor,
+                               'err_func': absolute_error,
+                               'inverse_err_func': absolute_error_inverse})
 ccp.fit(data.data[train, :], data.target[train])
 
-bcp = BootstrapCp(IcpClassifier,
-                  PetClassifierNc,
-                  nc_class_params={'model_class': DecisionTreeClassifier,
-                                   'err_func': margin})
+bcp = BootstrapCp(IcpRegressor,
+                  RegressorNc,
+                  nc_class_params={'model_class': DecisionTreeRegressor,
+                                   'err_func': absolute_error,
+                                   'inverse_err_func': absolute_error_inverse})
 bcp.fit(data.data[train, :], data.target[train])
 
 # -----------------------------------------------------------------------------
@@ -51,21 +52,21 @@ bcp.fit(data.data[train, :], data.target[train])
 import pandas
 
 prediction = rscp.predict(data.data[test, :], significance=0.1)
-header = np.array(['c0','c1','c2','Truth'])
+header = np.array(['min', 'max','Truth'])
 table = np.vstack([prediction.T, data.target[test]]).T
 df = pandas.DataFrame(np.vstack([header, table]))
 print('RSCP')
 print(df)
 
 prediction = ccp.predict(data.data[test, :], significance=0.1)
-header = np.array(['c0','c1','c2','Truth'])
+header = np.array(['min', 'max','Truth'])
 table = np.vstack([prediction.T, data.target[test]]).T
 df = pandas.DataFrame(np.vstack([header, table]))
 print('CCP')
 print(df)
 
 prediction = bcp.predict(data.data[test, :], significance=0.1)
-header = np.array(['c0','c1','c2','Truth'])
+header = np.array(['min', 'max','Truth'])
 table = np.vstack([prediction.T, data.target[test]]).T
 df = pandas.DataFrame(np.vstack([header, table]))
 print('BCP')

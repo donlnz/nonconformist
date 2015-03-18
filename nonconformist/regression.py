@@ -93,6 +93,8 @@ class IcpRegressor(object):
 	'''
 	Inductive conformal regressor.
 	'''
+	problem_type = 'regression'
+
 	def __init__(self, nc_function):
 		self.cal_x, self.cal_y = None, None
 		self.nc_function = nc_function

@@ -8,7 +8,8 @@ or regression.
 # Authors: Henrik Linusson
 
 import numpy as np
-from sklearn.cross_validation import StratifiedKFold, ShuffleSplit
+from sklearn.cross_validation import KFold, StratifiedKFold
+from sklearn.cross_validation import ShuffleSplit, StratifiedShuffleSplit
 
 class AggregatedCp(object):
 	def __init__(self,
@@ -38,19 +39,32 @@ class AggregatedCp(object):
 			self.predictors.append(predictor)
 
 	def predict(self, x, significance=None):
-		p_values = None
+		if self.cp_class.problem_type == 'classification':
+			p_values = None
+			for predictor in self.predictors:
+				if p_values is None:
+					p_values = predictor.predict(x)
+				else:
+					p_values = np.dstack([p_values, predictor.predict(x)])
 
-		for predictor in self.predictors:
-			if p_values is None:
-				p_values = predictor.predict(x)
+			p_values = self.p_agg_func(p_values)
+
+			if significance:
+				return p_values >= significance
 			else:
-				p_values = np.dstack([p_values, predictor.predict(x)])
+				return p_values
 
-		p_values = self.p_agg_func(p_values)
+		if self.cp_class.problem_type == 'regression':
+			intervals = None
+			for predictor in self.predictors:
+				if intervals is None:
+					intervals = predictor.predict(x, significance)
+				else:
+					intervals = np.dstack([intervals,
+					                       predictor.predict(x, significance)])
 
-		if significance:
-			return p_values >= significance
-		else:
+			p_values = self.p_agg_func(intervals)
+
 			return p_values
 
 class BootstrapCp(AggregatedCp):
@@ -90,7 +104,10 @@ class CrossCp(AggregatedCp):
                                       n_models)
 
 	def _generate_samples(self, x, y):
-		folds = StratifiedKFold(y, n_folds=self.n_models)
+		if self.cp_class.problem_type == 'classification':
+			folds = StratifiedKFold(y, n_folds=self.n_models)
+		else:
+			folds = KFold(y.size, n_folds=self.n_models)
 		for train, cal in folds:
 			yield train, cal
 
@@ -111,9 +128,14 @@ class SubSamplingCp(AggregatedCp):
 		self.cal_portion = calibration_portion
 
 	def _generate_samples(self, x, y):
-		splits = ShuffleSplit(y.size,
-		                      n_iter=self.n_models,
-		                      test_size=self.cal_portion)
+		if self.cp_class.problem_type == 'classification':
+			splits = StratifiedShuffleSplit(y,
+			                                n_iter=self.n_models,
+			                                test_size=self.cal_portion)
+		else:
+			splits = ShuffleSplit(y.size,
+			                      n_iter=self.n_models,
+			                      test_size=self.cal_portion)
 
 		for train, cal in splits:
 			yield train, cal
