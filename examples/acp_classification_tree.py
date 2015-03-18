@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-docstring
+Example: combining multiple inductive conformal classifiers
 """
 
 # Authors: Henrik Linusson

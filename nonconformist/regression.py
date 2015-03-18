@@ -43,6 +43,9 @@ def signed_error_inverse(prediction, nc, significance):
 # Nonconformity functions
 # -----------------------------------------------------------------------------
 class RegressorNc(object):
+	'''
+	Nonconformity function based on a simple regression model.
+	'''
 	def __init__(self,
 	             model_class,
 	             err_func,
@@ -87,6 +90,9 @@ class RegressorNc(object):
 # Conformal predictors
 # -----------------------------------------------------------------------------
 class IcpRegressor(object):
+	'''
+	Inductive conformal regressor.
+	'''
 	def __init__(self, nc_function):
 		self.cal_x, self.cal_y = None, None
 		self.nc_function = nc_function

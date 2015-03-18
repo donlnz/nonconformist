@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-docstring
+Example: inductive conformal regression using DecisionTreeRegressor
 """
 
 # Authors: Henrik Linusson

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 """
-docstring
+Example: cross-validation evaluation of inductive conformal classification
+and regression models.
 """
 
 # Authors: Henrik Linusson

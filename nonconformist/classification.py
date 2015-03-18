@@ -30,6 +30,9 @@ def margin(prediction, y):
 # Nonconformity functions
 # -----------------------------------------------------------------------------
 class PetClassifierNc(object):
+	'''
+	Nonconformity function based on a probability estimating model.
+	'''
 	def __init__(self, model_class, err_func, model_params=None):
 		self.last_x, self.last_y = None, None
 		self.last_prediction = None
@@ -65,6 +68,9 @@ class PetClassifierNc(object):
 # Conformal predictors
 # -----------------------------------------------------------------------------
 class IcpClassifier(object):
+	'''
+	Inductive conformal classifier.
+	'''
 	def __init__(self, nc_function, smoothing=True):
 		self.cal_x, self.cal_y = None, None
 		self.classes = None
