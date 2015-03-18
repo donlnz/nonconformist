@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-docstring
+Evaluation of conformal predictors.
 """
 
 # Authors: Henrik Linusson

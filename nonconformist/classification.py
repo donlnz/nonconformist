@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-docstring
+Conformal classification.
 """
 
 # Authors: Henrik Linusson

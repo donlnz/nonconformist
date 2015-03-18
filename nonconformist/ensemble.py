@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 """
-docstring
+Classes for constructing combined conformal predictors for classification
+or regression.
 """
 
 # Authors: Henrik Linusson

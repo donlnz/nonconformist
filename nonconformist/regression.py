@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-docstring
+Conformal regression.
 """
 
 # Authors: Henrik Linusson
