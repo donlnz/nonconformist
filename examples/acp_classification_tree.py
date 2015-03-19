@@ -27,20 +27,23 @@ test = idx[int(2 * idx.size / 3):]
 # -----------------------------------------------------------------------------
 # Train and calibrate
 # -----------------------------------------------------------------------------
-rscp = SubSamplingCp(IcpClassifier,
+rscp = AggregatedCp(IcpClassifier,
                      PetClassifierNc,
+                     sampler=RandomSubSampler(),
                      nc_class_params={'model_class': DecisionTreeClassifier,
                                       'err_func': margin})
 rscp.fit(data.data[train, :], data.target[train])
 
-ccp = CrossCp(IcpClassifier,
+ccp = AggregatedCp(IcpClassifier,
               PetClassifierNc,
+              sampler=BootstrapSampler(),
               nc_class_params={'model_class': DecisionTreeClassifier,
                                'err_func': margin})
 ccp.fit(data.data[train, :], data.target[train])
 
-bcp = BootstrapCp(IcpClassifier,
+bcp = AggregatedCp(IcpClassifier,
                   PetClassifierNc,
+                  sampler=BootstrapSampler(),
                   nc_class_params={'model_class': DecisionTreeClassifier,
                                    'err_func': margin})
 bcp.fit(data.data[train, :], data.target[train])

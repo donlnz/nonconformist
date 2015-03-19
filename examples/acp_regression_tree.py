@@ -25,25 +25,26 @@ test = idx[int(2 * idx.size / 3):]
 # -----------------------------------------------------------------------------
 # Train and calibrate
 # -----------------------------------------------------------------------------
-rscp = SubSamplingCp(IcpRegressor,
-                     RegressorNc,
-                     nc_class_params={'model_class': DecisionTreeRegressor,
-                                      'err_func': absolute_error,
-                                      'inverse_err_func': absolute_error_inverse})
+nc_class_params = {'model_class': DecisionTreeRegressor,
+                   'err_func': absolute_error,
+                   'inverse_err_func': absolute_error_inverse}
+
+rscp = AggregatedCp(IcpRegressor,
+                    RegressorNc,
+                    sampler=RandomSubSampler(),
+                    nc_class_params=nc_class_params)
 rscp.fit(data.data[train, :], data.target[train])
 
-ccp = CrossCp(IcpRegressor,
-              RegressorNc,
-              nc_class_params={'model_class': DecisionTreeRegressor,
-                               'err_func': absolute_error,
-                               'inverse_err_func': absolute_error_inverse})
+ccp = AggregatedCp(IcpRegressor,
+                   RegressorNc,
+                   sampler=CrossSampler(),
+                   nc_class_params=nc_class_params)
 ccp.fit(data.data[train, :], data.target[train])
 
-bcp = BootstrapCp(IcpRegressor,
-                  RegressorNc,
-                  nc_class_params={'model_class': DecisionTreeRegressor,
-                                   'err_func': absolute_error,
-                                   'inverse_err_func': absolute_error_inverse})
+bcp = AggregatedCp(IcpRegressor,
+                   RegressorNc,
+                   sampler=BootstrapSampler(),
+                   nc_class_params=nc_class_params)
 bcp.fit(data.data[train, :], data.target[train])
 
 # -----------------------------------------------------------------------------
