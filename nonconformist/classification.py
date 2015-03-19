@@ -87,7 +87,7 @@ class IcpClassifier(object):
 		# TODO: conditional
 		if increment and self.cal_x is not None and self.cal_y is not None:
 			self.cal_x = np.vstack([self.cal_x, x])
-			self.cal_x = np.hstack([self.cal_y, y])
+			self.cal_y = np.hstack([self.cal_y, y])
 		else:
 			self.cal_x, self.cal_y = x, y
 
