@@ -72,7 +72,7 @@ size = cross_val_score(icp_cv,
                        scoring=reg_mean_size,
                        cv=folds)
 
-print('Absolute error regression: boston')
+print('Absolute error regression: diabetes')
 print('Mean errors: {}'.format(np.mean(errors)))
 print('Mean interval size: {}\n'.format(np.mean(size)))
 
@@ -99,6 +99,6 @@ size = cross_val_score(icp_cv,
                        scoring=reg_mean_size,
                        cv=folds)
 
-print('Signed error regression: boston')
+print('Signed error regression: diabetes')
 print('Mean errors: {}'.format(np.mean(errors)))
 print('Mean interval size: {}\n'.format(np.mean(size)))
