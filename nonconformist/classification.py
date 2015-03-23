@@ -30,9 +30,23 @@ def margin(prediction, y):
 # Nonconformity functions
 # -----------------------------------------------------------------------------
 class PetClassifierNc(object):
-	'''
-	Nonconformity function based on a probability estimating model.
-	'''
+	"""
+	Nonconformity function based on a class probability estimating model.
+
+	Parameters
+	----------
+	model_class : class
+		The model_class should be implement the fit(x, y) and predict_proba(x)
+		functions, as used by the classification models present in the
+		scikit-learn library.
+
+	err_func : callable
+		Scorer callable object with signature ``score(estimator, x, y)''.
+
+	model_params : dict, optional
+		Dict containing parameters to pass to model_class upon
+		initialization.
+	"""
 	def __init__(self, model_class, err_func, model_params=None):
 		self.last_x, self.last_y = None, None
 		self.last_prediction = None
@@ -68,9 +82,9 @@ class PetClassifierNc(object):
 # Conformal predictors
 # -----------------------------------------------------------------------------
 class IcpClassifier(object):
-	'''
+	"""
 	Inductive conformal classifier.
-	'''
+	"""
 	problem_type = 'classification'
 
 	def __init__(self, nc_function, smoothing=True):
@@ -109,7 +123,7 @@ class IcpClassifier(object):
 			test_class.fill(c)
 
 			# TODO: maybe calculate p-values using cython or similar
-			# TODO: modified, interpolated p-values
+			# TODO: interpolated p-values
 
 			test_nc_scores = self.nc_function.calc_nc(x, test_class)
 			n_cal = self.cal_scores.size

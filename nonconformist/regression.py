@@ -15,7 +15,6 @@ import numpy as np
 # -----------------------------------------------------------------------------
 # Error functions
 # -----------------------------------------------------------------------------
-
 def absolute_error(prediction, y):
 	return np.abs(prediction - y)
 
@@ -43,9 +42,9 @@ def signed_error_inverse(prediction, nc, significance):
 # Nonconformity functions
 # -----------------------------------------------------------------------------
 class RegressorNc(object):
-	'''
+	"""
 	Nonconformity function based on a simple regression model.
-	'''
+	"""
 	def __init__(self,
 	             model_class,
 	             err_func,
@@ -90,9 +89,9 @@ class RegressorNc(object):
 # Conformal predictors
 # -----------------------------------------------------------------------------
 class IcpRegressor(object):
-	'''
+	"""
 	Inductive conformal regressor.
-	'''
+	"""
 	problem_type = 'regression'
 
 	def __init__(self, nc_function):
@@ -113,4 +112,5 @@ class IcpRegressor(object):
 		self.cal_scores = self.nc_function.calc_nc(self.cal_x, self.cal_y)
 
 	def predict(self, x, significance):
+		# TODO: interpolated p-values
 		return self.nc_function.predict(x, self.cal_scores, significance)
