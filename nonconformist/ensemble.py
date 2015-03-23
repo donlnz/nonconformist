@@ -88,13 +88,8 @@ class AggregatedCp(object):
 	def predict(self, x, significance=None):
 		is_regression = self.cp_class.problem_type == 'regression'
 
-		if is_regression:
-			predictions = np.dstack([predictor.predict(x, significance) for
-			                         predictor in self.predictors])
-		else:
-			predictions = np.dstack([predictor.predict(x) for
-			                         predictor in self.predictors])
-
+		f = lambda p, x: p.predict(x, significance if is_regression else None)
+		predictions = np.dstack([f(p, x) for p in self.predictors])
 		predictions = self.p_agg_func(predictions)
 
 		if significance and not is_regression:
