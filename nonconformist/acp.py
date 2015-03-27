@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 """
-Classes for constructing combined conformal predictors for classification
-or regression.
+Aggregated conformal predictors
 """
 
 # Authors: Henrik Linusson
@@ -15,7 +14,7 @@ from sklearn.cross_validation import ShuffleSplit, StratifiedShuffleSplit
 # Sampling strategies
 # -----------------------------------------------------------------------------
 class BootstrapSampler(object):
-	def generate_samples(self, x, y, n_samples, problem_type):
+	def gen_samples(self, x, y, n_samples, problem_type):
 		for i in range(n_samples):
 			idx = np.array(range(y.size))
 			train = np.random.choice(y.size, y.size, replace=True)
@@ -27,7 +26,7 @@ class BootstrapSampler(object):
 			yield train, cal
 
 class CrossSampler(object):
-	def generate_samples(self, x, y, n_samples, problem_type):
+	def gen_samples(self, x, y, n_samples, problem_type):
 		if problem_type == 'classification':
 			folds = StratifiedKFold(y, n_folds=n_samples)
 		else:
@@ -39,7 +38,7 @@ class RandomSubSampler(object):
 	def __init__(self, calibration_portion=0.3):
 		self.cal_portion = calibration_portion
 
-	def generate_samples(self, x, y, n_samples, problem_type):
+	def gen_samples(self, x, y, n_samples, problem_type):
 		if problem_type == 'classification':
 			splits = StratifiedShuffleSplit(y,
 			                                n_iter=n_samples,
@@ -75,10 +74,10 @@ class AggregatedCp(object):
 		self.predictors = []
 		idx = np.random.permutation(y.size)
 		x, y = x[idx, :], y[idx]
-		samples = self.sampler.generate_samples(x,
-		                                        y,
-		                                        self.n_models,
-		                                        self.cp_class.problem_type)
+		samples = self.sampler.gen_samples(x,
+		                                   y,
+		                                   self.n_models,
+		                                   self.cp_class.get_problem_type())
 		for train, cal in samples:
 			predictor = self.cp_class(self.nc_class(**self.nc_class_params))
 			predictor.fit(x[train, :], y[train])
@@ -86,7 +85,7 @@ class AggregatedCp(object):
 			self.predictors.append(predictor)
 
 	def predict(self, x, significance=None):
-		is_regression = self.cp_class.problem_type == 'regression'
+		is_regression = self.cp_class.get_problem_type() == 'regression'
 
 		f = lambda p, x: p.predict(x, significance if is_regression else None)
 		predictions = np.dstack([f(p, x) for p in self.predictors])

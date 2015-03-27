@@ -11,8 +11,8 @@ import numpy as np
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.datasets import load_boston
 
-from nonconformist.regression import IcpRegressor, RegressorNc
-from nonconformist.regression import absolute_error, absolute_error_inverse
+from nonconformist.icp import IcpRegressor
+from nonconformist.nc import RegressorNc, absolute_error, absolute_error_inverse
 
 data = load_boston()
 

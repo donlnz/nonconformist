@@ -13,10 +13,11 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.datasets import load_iris, load_diabetes
 from sklearn.cross_validation import cross_val_score, KFold
 
-from nonconformist.classification import IcpClassifier, PetClassifierNc, margin
-from nonconformist.regression import IcpRegressor, RegressorNc
-from nonconformist.regression import signed_error, signed_error_inverse
-from nonconformist.regression import absolute_error, absolute_error_inverse
+from nonconformist.icp import IcpClassifier, IcpRegressor
+from nonconformist.nc import margin
+from nonconformist.nc import ProbEstClassifierNc, RegressorNc
+from nonconformist.nc import signed_error, signed_error_inverse
+from nonconformist.nc import absolute_error, absolute_error_inverse
 
 from nonconformist.evaluation import IcpClassCrossValHelper, IcpRegCrossValHelper
 from nonconformist.evaluation import class_avg_c, class_mean_errors
@@ -28,7 +29,7 @@ from nonconformist.evaluation import reg_mean_size, reg_mean_errors
 # -----------------------------------------------------------------------------
 data = load_iris()
 
-icp = IcpClassifier(PetClassifierNc(RandomForestClassifier, margin))
+icp = IcpClassifier(ProbEstClassifierNc(RandomForestClassifier, margin))
 icp_cv = IcpClassCrossValHelper(icp, significance=0.05)
 
 errors = cross_val_score(icp_cv,

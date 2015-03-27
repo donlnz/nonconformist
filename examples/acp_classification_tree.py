@@ -11,9 +11,9 @@ import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import load_iris
 
-from nonconformist.ensemble import *
-from nonconformist.classification import IcpClassifier, PetClassifierNc
-from nonconformist.classification import margin
+from nonconformist.nc import margin, ProbEstClassifierNc
+from nonconformist.icp import IcpClassifier
+from nonconformist.acp import AggregatedCp, BootstrapSampler, RandomSubSampler
 
 data = load_iris()
 
@@ -28,21 +28,21 @@ test = idx[int(2 * idx.size / 3):]
 # Train and calibrate
 # -----------------------------------------------------------------------------
 rscp = AggregatedCp(IcpClassifier,
-                     PetClassifierNc,
+                     ProbEstClassifierNc,
                      sampler=RandomSubSampler(),
                      nc_class_params={'model_class': DecisionTreeClassifier,
                                       'err_func': margin})
 rscp.fit(data.data[train, :], data.target[train])
 
 ccp = AggregatedCp(IcpClassifier,
-              PetClassifierNc,
+              ProbEstClassifierNc,
               sampler=BootstrapSampler(),
               nc_class_params={'model_class': DecisionTreeClassifier,
                                'err_func': margin})
 ccp.fit(data.data[train, :], data.target[train])
 
 bcp = AggregatedCp(IcpClassifier,
-                  PetClassifierNc,
+                  ProbEstClassifierNc,
                   sampler=BootstrapSampler(),
                   nc_class_params={'model_class': DecisionTreeClassifier,
                                    'err_func': margin})

@@ -6,12 +6,16 @@ Example: combining multiple inductive conformal regressors
 
 # Authors: Henrik Linusson
 
+import numpy as np
+
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.datasets import load_diabetes
 
-from nonconformist.ensemble import *
-from nonconformist.regression import IcpRegressor, RegressorNc
-from nonconformist.regression import absolute_error, absolute_error_inverse
+from nonconformist.icp import IcpRegressor
+from nonconformist.nc import RegressorNc, absolute_error, absolute_error_inverse
+from nonconformist.acp import AggregatedCp
+from nonconformist.acp import RandomSubSampler, BootstrapSampler, CrossSampler
+
 
 data = load_diabetes()
 

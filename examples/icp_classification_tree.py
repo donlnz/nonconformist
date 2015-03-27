@@ -11,8 +11,8 @@ import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import load_iris
 
-from nonconformist.classification import IcpClassifier, PetClassifierNc
-from nonconformist.classification import margin
+from nonconformist.icp import IcpClassifier
+from nonconformist.nc import ProbEstClassifierNc, margin
 
 data = load_iris()
 
@@ -27,7 +27,7 @@ test = idx[int(2 * idx.size / 3):]
 # -----------------------------------------------------------------------------
 # Train and calibrate
 # -----------------------------------------------------------------------------
-icp = IcpClassifier(PetClassifierNc(DecisionTreeClassifier, margin))
+icp = IcpClassifier(ProbEstClassifierNc(DecisionTreeClassifier, margin))
 icp.fit(data.data[train, :], data.target[train])
 icp.calibrate(data.data[calibrate, :], data.target[calibrate])
 
