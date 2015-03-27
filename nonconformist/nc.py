@@ -14,12 +14,52 @@ import numpy as np
 # Classification error functions
 # -----------------------------------------------------------------------------
 def inverse_probability(prediction, y):
+	"""Calculates the probability of not predicting the correct class.
+
+	For each correct output in ``y``, nonconformity is defined as
+
+	.. math::
+		1 - \hat{P}(y_i | x) \, .
+
+	Parameters
+	----------
+	prediction: numpy array of shape [n_samples, n_classes]
+		Class probability estimates for each sample.
+
+	y: numpy array of shape [n_samples]
+		True output labels of each sample.
+
+	Returns
+	-------
+	p : numpy array of shape [n_samples]
+		Nonconformity scores of the samples.
+	"""
 	prob = np.zeros(y.size, dtype=np.float32)
 	for i, y_ in enumerate(y):
 		prob[i] = prediction[i, y[i]]
 	return 1 - prob
 
 def margin(prediction, y):
+	"""Calculates the margin error.
+
+	For each correct output in ``y``, nonconformity is defined as
+
+	.. math::
+		0.5 - \hat{P}(y_i | x) - max_{y \, != \, y_i} \hat{P}(y | x) \, .
+
+	Parameters
+	----------
+	prediction : numpy array of shape [n_samples, n_classes]
+		Class probability estimates for each sample.
+
+	y : numpy array of shape [n_samples]
+		True output labels of each sample.
+
+	Returns
+	-------
+	p : numpy array of shape [n_samples, n_classes]
+		Nonconformity scores for each sample and each class.
+	"""
 	prob = np.zeros(y.size, dtype=np.float32)
 	for i, y_ in enumerate(y):
 		prob[i] = prediction[i, y[i]]
@@ -52,24 +92,89 @@ def signed_error_inverse(prediction, nc, significance):
 	return np.vstack([prediction + nc[lower], prediction + nc[upper]]).T
 
 # -----------------------------------------------------------------------------
-# Classification nonconformity functions
+# Base nonconformity scorer
 # -----------------------------------------------------------------------------
-class ProbEstClassifierNc(object):
-	"""Nonconformity function using an underlying class probability estimating
+class BaseNc(object):
+	"""Base class for nonconformity scorers based on an underlying model.
+	"""
+	def __init__(self, model_class, err_func, model_params=None):
+		self.err_func = err_func
+		self.model_class = model_class
+		self.model_params = model_params if model_params else {}
+		self.model = self.model_class(**self.model_params)
+
+		self.last_x, self.last_y = None, None
+		self.last_prediction = None
+		self.clean = False
+
+	def fit(self, x, y):
+		"""Fits the underlying model of the nonconformity scorer.
+
+		Parameters
+		----------
+		x : numpy array of shape [n_samples, n_features]
+			Inputs of examples for fitting the underlying model.
+
+		y : numpy array of shape [n_samples]
+			Outputs of examples for fitting the underlying model.
+
+		Returns
+		-------
+		None
+		"""
+		self.model.fit(x, y)
+		self.clean = False
+
+	def __get_prediction(self, x):
+		if (not self.clean or
+			self.last_x is None or
+		    not np.array_equal(self.last_x, x)):
+
+			self.last_x = x
+			self.last_prediction = self._underlying_predict(x)
+			self.clean = True
+
+		return self.last_prediction.copy()
+
+	def calc_nc(self, x, y):
+		"""Calculates the nonconformity score of a set of samples.
+
+		Parameters
+		----------
+		x: numpy array of shape [n_samples, n_features]
+			Inputs of examples for which to calculate a nonconformity score.
+
+		y: numpy array of shape [n_samples, n_features]
+			Outputs of examples for which to calculate a nonconformity score.
+
+		Returns
+		-------
+		nc : numpy array of shape [n_samples]
+			Nonconformity scores of samples.
+		"""
+		prediction = self.__get_prediction(x)
+		print(prediction)
+		return self.err_func(prediction, y)
+
+# -----------------------------------------------------------------------------
+# Classification nonconformity scorers
+# -----------------------------------------------------------------------------
+class ProbEstClassifierNc(BaseNc):
+	"""Nonconformity scorer using an underlying class probability estimating
 	model.
 
 	Parameters
 	----------
 	model_class : class
-		The model_class should be implement the fit(x, y) and predict_proba(x)
-		functions, as used by the classification models present in the
-		scikit-learn library.
+		The model_class should be implement the ``fit(x, y)`` and
+		``predict_proba(x)`` methods, as used by the classification models
+		present in the scikit-learn library.
 
 	err_func : callable
 		Scorer callable object with signature ``score(estimator, x, y)``.
 
 	model_params : dict, optional
-		Dict containing parameters to pass to model_class upon
+		Dict containing keyword parameters to pass to model_class upon
 		initialization.
 
 	Attributes
@@ -84,78 +189,66 @@ class ProbEstClassifierNc(object):
 	Examples
 	--------
 	"""
-	def __init__(self, model_class, err_func, model_params=None):
-		self.last_x, self.last_y = None, None
-		self.last_prediction = None
-		self.clean = False
-		self.err_func = err_func
+	def __init__(self,
+	             model_class,
+	             err_func,
+	             model_params=None):
+		super(ProbEstClassifierNc, self).__init__(model_class,
+		                                          err_func,
+		                                          model_params)
 
-		self.model_class = model_class
-		self.model_params = model_params if model_params else {}
-
-		self.model = self.model_class(**self.model_params)
-
-	def fit(self, x, y):
-		self.model.fit(x, y)
-		self.clean = False
-
-	def underlying_predict(self, x):
-		if (not self.clean or
-			self.last_x is None or
-		    not np.array_equal(self.last_x, x)):
-
-			self.last_x = x
-			self.last_prediction = self.model.predict_proba(x)
-			self.clean = True
-
-		return self.last_prediction.copy()
-
-	def calc_nc(self, x, y):
-		prediction = self.underlying_predict(x)
-		return self.err_func(prediction, y)
+	def _underlying_predict(self, x):
+		return self.model.predict_proba(x)
 
 # -----------------------------------------------------------------------------
-# Regression nonconformity functions
+# Regression nonconformity scorers
 # -----------------------------------------------------------------------------
-class RegressorNc(object):
-	"""
-	Nonconformity function based on a simple regression model.
+class RegressorNc(BaseNc):
+	"""Nonconformity scorer using an underlying regression model.
+
+	Parameters
+	----------
+	model_class : class
+		The model_class should be implement the ``fit(x, y)`` and
+		``predict(x)`` methods, as used by the regression models
+		present in the scikit-learn library.
+
+	err_func : callable
+		Scorer callable object with signature ``score(estimator, x, y)``.
+
+	inverse_error_func : callable
+		Inverse (or partial inverse) of err_func.
+
+	model_params : dict, optional
+		Dict containing keyword parameters to pass to model_class upon
+		initialization.
+
+	Attributes
+	----------
+
+	See also
+	--------
+
+	References
+	----------
+
+	Examples
+	--------
 	"""
 	def __init__(self,
 	             model_class,
 	             err_func,
 	             inverse_err_func,
 	             model_params=None):
-		self.last_x, self.last_y = None, None
-		self.last_prediction = None
-		self.clean = False
-		self.err_func = err_func
+		super(RegressorNc, self).__init__(model_class,
+		                                  err_func,
+		                                  model_params)
+
 		self.inverse_err_func = inverse_err_func
 
-		self.model_class = model_class
-		self.model_params = model_params if model_params else {}
-
-		self.model = self.model_class(**self.model_params)
-
-	def fit(self, x, y):
-		self.model.fit(x, y)
-		self.clean = False
-
-	def underlying_predict(self, x):
-		if (not self.clean or
-			self.last_x is None or
-		    not np.array_equal(self.last_x, x)):
-
-			self.last_x = x
-			self.last_prediction = self.model.predict(x)
-			self.clean = True
-
-		return self.last_prediction.copy()
-
-	def calc_nc(self, x, y):
-		prediction = self.underlying_predict(x)
-		return self.err_func(prediction, y)
+	def _underlying_predict(self, x):
+		return self.model.predict(x)
 
 	def predict(self, x, nc, significance):
-		prediction = self.underlying_predict(x)
+		prediction = self._underlying_predict(x)
 		return self.inverse_err_func(prediction, nc, significance)

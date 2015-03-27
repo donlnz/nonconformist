@@ -14,6 +14,23 @@ from sklearn.cross_validation import ShuffleSplit, StratifiedShuffleSplit
 # Sampling strategies
 # -----------------------------------------------------------------------------
 class BootstrapSampler(object):
+	"""Bootstrap sampler.
+
+	Parameters
+	----------
+
+	Attributes
+	----------
+
+	See also
+	--------
+
+	References
+	----------
+
+	Examples
+	--------
+	"""
 	def gen_samples(self, x, y, n_samples, problem_type):
 		for i in range(n_samples):
 			idx = np.array(range(y.size))
@@ -26,6 +43,23 @@ class BootstrapSampler(object):
 			yield train, cal
 
 class CrossSampler(object):
+	"""Cross-fold sampler.
+
+	Parameters
+	----------
+
+	Attributes
+	----------
+
+	See also
+	--------
+
+	References
+	----------
+
+	Examples
+	--------
+	"""
 	def gen_samples(self, x, y, n_samples, problem_type):
 		if problem_type == 'classification':
 			folds = StratifiedKFold(y, n_folds=n_samples)
@@ -35,6 +69,23 @@ class CrossSampler(object):
 			yield train, cal
 
 class RandomSubSampler(object):
+	"""Random subsample sampler.
+
+	Parameters
+	----------
+
+	Attributes
+	----------
+
+	See also
+	--------
+
+	References
+	----------
+
+	Examples
+	--------
+	"""
 	def __init__(self, calibration_portion=0.3):
 		self.cal_portion = calibration_portion
 
@@ -55,20 +106,41 @@ class RandomSubSampler(object):
 # Conformal ensemble
 # -----------------------------------------------------------------------------
 class AggregatedCp(object):
+	"""Aggregated conformal predictor.
+
+	Parameters
+	----------
+
+	Attributes
+	----------
+
+	See also
+	--------
+
+	References
+	----------
+
+	Examples
+	--------
+	"""
 	def __init__(self,
 	             cp_class,
 	             nc_class,
-	             sampler=BootstrapSampler(),
-	             aggregation_func=lambda x: np.mean(x, axis=2),
+	             sampler=BootstrapSampler,
+	             aggregation_func=None,
 	             nc_class_params=None,
 	             n_models=10):
-		self.p_agg_func = aggregation_func
 		self.predictors = []
 		self.n_models = n_models
 		self.cp_class = cp_class
 		self.nc_class = nc_class
 		self.nc_class_params = nc_class_params if nc_class_params else {}
-		self.sampler = sampler
+		self.sampler = sampler()
+
+		if aggregation_func is not None:
+			self.p_agg_func = aggregation_func
+		else:
+			self.p_agg_func = lambda x: np.mean(x, axis=2)
 
 	def fit(self, x, y):
 		self.predictors = []
