@@ -23,15 +23,15 @@ def inverse_probability(prediction, y):
 
 	Parameters
 	----------
-	prediction: numpy array of shape [n_samples, n_classes]
+	prediction : numpy array of shape [n_samples, n_classes]
 		Class probability estimates for each sample.
 
-	y: numpy array of shape [n_samples]
+	y : numpy array of shape [n_samples]
 		True output labels of each sample.
 
 	Returns
 	-------
-	p : numpy array of shape [n_samples]
+	nc : numpy array of shape [n_samples]
 		Nonconformity scores of the samples.
 	"""
 	prob = np.zeros(y.size, dtype=np.float32)
@@ -57,7 +57,7 @@ def margin(prediction, y):
 
 	Returns
 	-------
-	p : numpy array of shape [n_samples, n_classes]
+	nc : numpy array of shape [n_samples, n_classes]
 		Nonconformity scores for each sample and each class.
 	"""
 	prob = np.zeros(y.size, dtype=np.float32)
@@ -69,20 +69,92 @@ def margin(prediction, y):
 # -----------------------------------------------------------------------------
 # Regression error functions
 # -----------------------------------------------------------------------------
-def absolute_error(prediction, y):
+def abs_error(prediction, y):
+	"""Calculates absolute error nonconformity for regression problems.
+
+	For each correct output in ``y``, nonconformity is defined as
+
+	.. math::
+		| y_i - \hat{y}_i |
+
+	Parameters
+	----------
+	prediction : numpy array of shape [n_samples]
+		Regression prediction for each sample.
+
+	y : numpy array of shape [n_samples]
+		True output labels of each sample.
+
+	Returns
+	-------
+	nc : numpy array of shape [n_samples]
+		Nonconformity score of each sample.
+	"""
 	return np.abs(prediction - y)
 
-def absolute_error_inverse(prediction, nc, significance):
+def abs_error_inv(prediction, nc, significance):
+	"""Calculates a prediction from an absolute-error nonconformity function.
+
+	Calculates the partial inverse of the ``absolute_error`` nonconformity
+	function, i.e., the minimum and maximum boundaries of the prediction
+	interval for each point prediction, given a significance level.
+
+	Parameters
+	----------
+	prediction : numpy array of shape [n_samples]
+		Point (regression) predictions of a test examples.
+
+	Returns
+	-------
+	interval : numpy array of shape [n_samples, 2]
+		Minimum and maximum interval boundaries for each prediction.
+	"""
 	nc = np.sort(nc)[::-1]
 	border = int(np.floor(significance * (nc.size + 1))) - 1
 	# TODO: should probably warn against too few calibration examples
 	border = max(border, 0)
 	return np.vstack([prediction - nc[border], prediction + nc[border]]).T
 
-def signed_error(prediction, y):
+def sign_error(prediction, y):
+	"""Calculates signed error nonconformity for regression problems.
+
+	For each correct output in ``y``, nonconformity is defined as
+
+	.. math::
+		y_i - \hat{y}_i
+
+	Parameters
+	----------
+	prediction : numpy array of shape [n_samples]
+		Regression prediction for each sample.
+
+	y : numpy array of shape [n_samples]
+		True output labels of each sample.
+
+	Returns
+	-------
+	nc : numpy array of shape [n_samples]
+		Nonconformity score of each sample.
+	"""
 	return prediction - y
 
-def signed_error_inverse(prediction, nc, significance):
+def sign_error_inv(prediction, nc, significance):
+	"""Calculates a prediction from a signed-error nonconformity function.
+
+	Calculates the partial inverse of the ``signed_error`` nonconformity
+	function, i.e., the minimum and maximum boundaries of the prediction
+	interval for each point prediction, given a significance level.
+
+	Parameters
+	----------
+	prediction : numpy array of shape [n_samples]
+		Point (regression) predictions of a test examples.
+
+	Returns
+	-------
+	interval : numpy array of shape [n_samples, 2]
+		Minimum and maximum interval boundaries for each prediction.
+	"""
 	nc = np.sort(nc)[::-1]
 	upper = int(np.floor((significance / 2) * (nc.size + 1)))
 	lower = int(np.floor((1 - significance / 2) * (nc.size + 1)))
@@ -141,10 +213,10 @@ class BaseNc(object):
 
 		Parameters
 		----------
-		x: numpy array of shape [n_samples, n_features]
+		x : numpy array of shape [n_samples, n_features]
 			Inputs of examples for which to calculate a nonconformity score.
 
-		y: numpy array of shape [n_samples, n_features]
+		y : numpy array of shape [n_samples, n_features]
 			Outputs of examples for which to calculate a nonconformity score.
 
 		Returns
@@ -153,7 +225,6 @@ class BaseNc(object):
 			Nonconformity scores of samples.
 		"""
 		prediction = self.__get_prediction(x)
-		print(prediction)
 		return self.err_func(prediction, y)
 
 # -----------------------------------------------------------------------------
@@ -179,15 +250,21 @@ class ProbEstClassifierNc(BaseNc):
 
 	Attributes
 	----------
+	model_class : class
+		Class used to construct the underlying model.
+
+	err_func : callable
+		Scorer function used to calculate nonconformity scores.
+
+	model_params : dict
+		Parameters sent to underlying model.
+
+	model : object
+		Underlying model object.
 
 	See also
 	--------
-
-	References
-	----------
-
-	Examples
-	--------
+	RegressorNc
 	"""
 	def __init__(self,
 	             model_class,
@@ -225,15 +302,24 @@ class RegressorNc(BaseNc):
 
 	Attributes
 	----------
+	model_class : class
+		Class used to construct the underlying model.
+
+	err_func : callable
+		Scorer function used to calculate nonconformity scores.
+
+	inverse_err_func : callable
+		Inverse function (partial) of nonconformity function.
+
+	model_params : dict
+		Parameters sent to underlying model.
+
+	model : object
+		Underlying model object.
 
 	See also
 	--------
-
-	References
-	----------
-
-	Examples
-	--------
+	ProbEstClassifierNc
 	"""
 	def __init__(self,
 	             model_class,

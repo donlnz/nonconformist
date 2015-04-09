@@ -16,8 +16,8 @@ from sklearn.cross_validation import cross_val_score, KFold
 from nonconformist.icp import IcpClassifier, IcpRegressor
 from nonconformist.nc import margin
 from nonconformist.nc import ProbEstClassifierNc, RegressorNc
-from nonconformist.nc import signed_error, signed_error_inverse
-from nonconformist.nc import absolute_error, absolute_error_inverse
+from nonconformist.nc import sign_error, sign_error_inv
+from nonconformist.nc import abs_error, abs_error_inv
 
 from nonconformist.evaluation import IcpClassCrossValHelper, IcpRegCrossValHelper
 from nonconformist.evaluation import class_avg_c, class_mean_errors
@@ -56,8 +56,8 @@ print('Mean avgc: {}\n'.format(np.mean(size)))
 data = load_diabetes()
 
 icp = IcpRegressor(RegressorNc(RandomForestRegressor,
-                               absolute_error,
-                               absolute_error_inverse))
+                               abs_error,
+                               abs_error_inv))
 icp_cv = IcpRegCrossValHelper(icp, significance=0.01)
 
 folds = KFold(data.target.size, 10, shuffle=True)
@@ -83,9 +83,9 @@ print('Mean interval size: {}\n'.format(np.mean(size)))
 data = load_diabetes()
 
 icp = IcpRegressor(RegressorNc(RandomForestRegressor,
-                               signed_error,
-                               signed_error_inverse))
-icp_cv = IcpRegCrossValHelper(icp, significance=0.05)
+                               sign_error,
+                               sign_error_inv))
+icp_cv = IcpRegCrossValHelper(icp, significance=0.10)
 
 folds = KFold(data.target.size, 10, shuffle=True)
 errors = cross_val_score(icp_cv,

@@ -17,7 +17,7 @@ class BaseIcp(object):
 	"""Base class for inductive conformal predictors.
 	"""
 
-	__problem_type = None
+	_problem_type = None
 
 	@classmethod
 	def get_problem_type(cls):
@@ -28,7 +28,7 @@ class BaseIcp(object):
 			problem_type : string or None
 				None, 'classification' or 'regression'
 		"""
-		return cls.__problem_type
+		return cls._problem_type
 
 	def __init__(self, nc_function):
 		self.cal_x, self.cal_y = None, None
@@ -108,6 +108,14 @@ class IcpClassifier(BaseIcp):
 
 	Attributes
 	----------
+	cal_x : numpy array of shape [n_cal_examples, n_features]
+		Inputs of calibration set.
+
+	cal_y : numpy array of shape [n_cal_examples]
+		Outputs of calibration set.
+
+	nc_function : object
+		Nonconformity scorer object used to calculate nonconformity scores.
 
 	See also
 	--------
@@ -115,12 +123,36 @@ class IcpClassifier(BaseIcp):
 
 	References
 	----------
+	.. [1] Papadopoulos, H., & Haralambous, H. (2011). Reliable prediction
+		intervals with regression neural networks. Neural Networks, 24(8),
+		842-851.
 
 	Examples
 	--------
+	>>> import numpy as np
+	>>> from sklearn.datasets import load_iris
+	>>> from sklearn.tree import DecisionTreeClassifier
+	>>> from nonconformist.icp import IcpClassifier
+	>>> from nonconformist.nc import ProbEstClassifierNc, margin
+	>>> iris = load_iris()
+	>>> idx = np.random.permutation(iris.target.size)
+	>>> train = idx[:int(idx.size / 3)]
+	>>> cal = idx[int(idx.size / 3):int(2 * idx.size / 3)]
+	>>> test = idx[int(2 * idx.size / 3):]
+	>>> nc = ProbEstClassifierNc(DecisionTreeClassifier, margin)
+	>>> icp = IcpClassifier(nc)
+	>>> icp.fit(iris.data[train, :], iris.target[train])
+	>>> icp.calibrate(iris.data[cal, :], iris.target[cal])
+	>>> icp.predict(iris.data[test, :], significance=0.10)
+	...             # doctest: +SKIP
+	array([[ True, False, False],
+		[False,  True, False],
+		...,
+		[False,  True, False],
+		[False,  True, False]], dtype=bool)
 	"""
 
-	__problem_type = 'classification'
+	_problem_type = 'classification'
 
 	def __init__(self, nc_function, smoothing=True):
 		super(IcpClassifier, self).__init__(nc_function)
@@ -138,14 +170,14 @@ class IcpClassifier(BaseIcp):
 			self.classes = np.unique(np.hstack([self.classes, y]))
 
 	def predict(self, x, significance=None):
-		"""Predict the output values for a set of input patterns
+		"""Predict the output values for a set of input patterns.
 
 		Parameters
 		----------
 		x : numpy array of shape [n_samples, n_features]
 			Inputs of patters for which to predict output values.
 
-		significance: float or None
+		significance : float or None
 			Significance level (maximum allowed error rate) of predictions.
 			Should be a float between 0 and 1. If ``None``, then the p-values
 			are output rather than the predictions.
@@ -191,9 +223,21 @@ class IcpRegressor(BaseIcp):
 
 	Parameters
 	----------
+	nc_function : object
+		Nonconformity scorer object used to calculate nonconformity of
+		calibration examples and test patterns. Should implement ``fit(x, y)``,
+		``calc_nc(x, y)`` and ``predict(x, nc_scores, significance)``.
 
 	Attributes
 	----------
+	cal_x : numpy array of shape [n_cal_examples, n_features]
+		Inputs of calibration set.
+
+	cal_y : numpy array of shape [n_cal_examples]
+		Outputs of calibration set.
+
+	nc_function : object
+		Nonconformity scorer object used to calculate nonconformity scores.
 
 	See also
 	--------
@@ -201,16 +245,61 @@ class IcpRegressor(BaseIcp):
 
 	References
 	----------
+	.. [1] Papadopoulos, H., Proedrou, K., Vovk, V., & Gammerman, A. (2002).
+		Inductive confidence machines for regression. In Machine Learning: ECML
+		2002 (pp. 345-356). Springer Berlin Heidelberg.
+
+	.. [2] Papadopoulos, H., & Haralambous, H. (2011). Reliable prediction
+		intervals with regression neural networks. Neural Networks, 24(8),
+		842-851.
 
 	Examples
 	--------
+	>>> import numpy as np
+	>>> from sklearn.datasets import load_boston
+	>>> from sklearn.tree import DecisionTreeRegressor
+	>>> from nonconformist.icp import IcpRegressor
+	>>> from nonconformist.nc import RegressorNc, abs_error, abs_error_inv
+	>>> boston = load_boston()
+	>>> idx = np.random.permutation(boston.target.size)
+	>>> train = idx[:int(idx.size / 3)]
+	>>> cal = idx[int(idx.size / 3):int(2 * idx.size / 3)]
+	>>> test = idx[int(2 * idx.size / 3):]
+	>>> nc = RegressorNc(DecisionTreeRegressor, abs_error, abs_error_inv)
+	>>> icp = IcpRegressor(nc)
+	>>> icp.fit(boston.data[train, :], boston.target[train])
+	>>> icp.calibrate(boston.data[cal, :], boston.target[cal])
+	>>> icp.predict(boston.data[test, :], significance=0.10)
+	...     # doctest: +SKIP
+	array([[  5. ,  20.6],
+		[ 15.5,  31.1],
+		...,
+		[ 14.2,  29.8],
+		[ 11.6,  27.2]])
 	"""
 
-	__problem_type = 'regression'
+	_problem_type = 'regression'
 
 	def __init__(self, nc_function):
 		super(IcpRegressor, self).__init__(nc_function)
 
 	def predict(self, x, significance):
+		"""Predict the output values for a set of input patterns.
+
+		Parameters
+		----------
+		x : numpy array of shape [n_samples, n_features]
+			Inputs of patters for which to predict output values.
+
+		significance : float
+			Significance level (maximum allowed error rate) of predictions.
+			Should be a float between 0 and 1.
+
+		Returns
+		-------
+		p : numpy array of shape [n_samples, 2]
+			Prediction interval (minimum and maximum boundaries) for
+			the set of test patterns.
+		"""
 		# TODO: interpolated p-values
 		return self.nc_function.predict(x, self.cal_scores, significance)

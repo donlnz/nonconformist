@@ -12,7 +12,7 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.datasets import load_diabetes
 
 from nonconformist.icp import IcpRegressor
-from nonconformist.nc import RegressorNc, absolute_error, absolute_error_inverse
+from nonconformist.nc import RegressorNc, abs_error, abs_error_inv
 from nonconformist.acp import AggregatedCp
 from nonconformist.acp import RandomSubSampler, BootstrapSampler, CrossSampler
 
@@ -30,8 +30,8 @@ test = idx[int(2 * idx.size / 3):]
 # Train and calibrate
 # -----------------------------------------------------------------------------
 nc_class_params = {'model_class': DecisionTreeRegressor,
-                   'err_func': absolute_error,
-                   'inverse_err_func': absolute_error_inverse}
+                   'err_func': abs_error,
+                   'inverse_err_func': abs_error_inv}
 
 rscp = AggregatedCp(IcpRegressor,
                     RegressorNc,
