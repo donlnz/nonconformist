@@ -27,10 +27,10 @@ Functions
 .. autosummary::
 	:toctree: _autosummary/
 
-	nc.absolute_error
-	nc.absolute_error_inverse
-	nc.signed_error
-	nc.signed_error_inverse
+	nc.abs_error
+	nc.abs_error_inv
+	nc.sign_error
+	nc.sign_error_inv
 	nc.margin
 	nc.inverse_probability
 

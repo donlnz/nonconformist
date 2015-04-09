@@ -1,0 +1,6 @@
+nonconformist.nc.abs_error_inv
+==============================
+
+.. currentmodule:: nonconformist.nc
+
+.. autofunction:: abs_error_inv

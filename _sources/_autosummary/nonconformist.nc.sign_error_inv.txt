@@ -1,0 +1,6 @@
+nonconformist.nc.sign_error_inv
+===============================
+
+.. currentmodule:: nonconformist.nc
+
+.. autofunction:: sign_error_inv

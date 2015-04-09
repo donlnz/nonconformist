@@ -1,0 +1,16 @@
+:mod:`nonconformist.evaluation`.IcpRegCrossValHelper
+===========================================================
+
+.. currentmodule:: nonconformist.evaluation
+
+.. autoclass:: IcpRegCrossValHelper
+
+   
+   .. automethod:: __init__
+   
+
+.. include:: nonconformist.evaluation.IcpRegCrossValHelper.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

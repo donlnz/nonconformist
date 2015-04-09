@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>nonconformist.nc.signed_error_inverse &mdash; nonconformist 0.1 documentation</title>
+    <title>nonconformist.nc.sign_error &mdash; nonconformist 1.0.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.1',
+        VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,10 +25,10 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="../_static/js/copybutton.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="nonconformist 0.1 documentation" href="../index.html" />
+    <link rel="top" title="nonconformist 1.0.0 documentation" href="../index.html" />
     <link rel="up" title="nonconformist API" href="../api.html" />
-    <link rel="next" title="nonconformist.nc.margin" href="nonconformist.nc.margin.html" />
-    <link rel="prev" title="nonconformist.nc.signed_error" href="nonconformist.nc.signed_error.html" />
+    <link rel="next" title="nonconformist.nc.sign_error_inv" href="nonconformist.nc.sign_error_inv.html" />
+    <link rel="prev" title="nonconformist.nc.abs_error_inv" href="nonconformist.nc.abs_error_inv.html" />
    
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
@@ -45,12 +45,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="nonconformist.nc.margin.html" title="nonconformist.nc.margin"
+          <a href="nonconformist.nc.sign_error_inv.html" title="nonconformist.nc.sign_error_inv"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="nonconformist.nc.signed_error.html" title="nonconformist.nc.signed_error"
+          <a href="nonconformist.nc.abs_error_inv.html" title="nonconformist.nc.abs_error_inv"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">nonconformist 0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">nonconformist 1.0.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../api.html" accesskey="U">nonconformist API</a> &raquo;</li> 
       </ul>
     </div>  
@@ -60,12 +60,38 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="nonconformist-nc-signed-error-inverse">
-<h1>nonconformist.nc.signed_error_inverse<a class="headerlink" href="#nonconformist-nc-signed-error-inverse" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="nonconformist-nc-sign-error">
+<h1>nonconformist.nc.sign_error<a class="headerlink" href="#nonconformist-nc-sign-error" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="nonconformist.nc.signed_error_inverse">
-<code class="descclassname">nonconformist.nc.</code><code class="descname">signed_error_inverse</code><span class="sig-paren">(</span><em>prediction</em>, <em>nc</em>, <em>significance</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.signed_error_inverse" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="nonconformist.nc.sign_error">
+<code class="descclassname">nonconformist.nc.</code><code class="descname">sign_error</code><span class="sig-paren">(</span><em>prediction</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.sign_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates signed error nonconformity for regression problems.</p>
+<p>For each correct output in <code class="docutils literal"><span class="pre">y</span></code>, nonconformity is defined as</p>
+<div class="math">
+\[y_i - \hat{y}_i\]</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>prediction</strong> : numpy array of shape [n_samples]</p>
+<blockquote>
+<div><p>Regression prediction for each sample.</p>
+</div></blockquote>
+<p><strong>y</strong> : numpy array of shape [n_samples]</p>
+<blockquote>
+<div><p>True output labels of each sample.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>nc</strong> : numpy array of shape [n_samples]</p>
+<blockquote class="last">
+<div><p>Nonconformity score of each sample.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </div>
 
@@ -131,7 +157,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.2</a>
       
       |
-      <a href="../_sources/_autosummary/nonconformist.nc.signed_error_inverse.txt"
+      <a href="../_sources/_autosummary/nonconformist.nc.sign_error.txt"
           rel="nofollow">Page source</a></li>
     </div>
 
