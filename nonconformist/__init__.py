@@ -6,4 +6,4 @@ docstring
 
 # Authors: Henrik Linusson
 
-__all__ = ['classification', 'regression', 'ensemble']
+__all__ = ['icp', 'nc', 'acp']
