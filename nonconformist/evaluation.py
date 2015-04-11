@@ -269,7 +269,7 @@ def class_mean_p_val(model, x, y):
 	prediction = model.predict(x, significance=None)
 	return np.mean(prediction)
 
-def one_c(model, x, y, significance=None):
+def class_one_c(model, x, y, significance=None):
 	"""Calculates the rate of singleton predictions (prediction sets containing
 	only a single class label) of a conformal classification model.
 

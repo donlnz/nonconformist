@@ -105,3 +105,7 @@ Functions
 
 	evaluation.reg_mean_errors
 	evaluation.class_mean_errors
+	evaluation.reg_mean_size
+	evaluation.class_avg_c
+	evaluation.class_one_c
+	evaluation.class_mean_p_val
