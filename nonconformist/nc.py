@@ -112,7 +112,7 @@ def abs_error_inv(prediction, nc, significance):
 	nc = np.sort(nc)[::-1]
 	border = int(np.floor(significance * (nc.size + 1))) - 1
 	# TODO: should probably warn against too few calibration examples
-	border = max(border, 0)
+	border = min(max(border, 0), nc.size - 1)
 	return np.vstack([prediction - nc[border], prediction + nc[border]]).T
 
 def sign_error(prediction, y):
@@ -159,8 +159,8 @@ def sign_error_inv(prediction, nc, significance):
 	upper = int(np.floor((significance / 2) * (nc.size + 1)))
 	lower = int(np.floor((1 - significance / 2) * (nc.size + 1)))
 	# TODO: should probably warn against too few calibration examples
-	upper = max(upper, 0)
-	lower = min(lower, nc.size - 1)
+	upper = min(max(upper, 0), nc.size - 1)
+	lower = max(min(lower, nc.size - 1), 0)
 	return np.vstack([prediction + nc[lower], prediction + nc[upper]]).T
 
 # -----------------------------------------------------------------------------
