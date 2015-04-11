@@ -36,7 +36,7 @@ def inverse_probability(prediction, y):
 	"""
 	prob = np.zeros(y.size, dtype=np.float32)
 	for i, y_ in enumerate(y):
-		prob[i] = prediction[i, y[i]]
+		prob[i] = prediction[i, int(y[i])]
 	return 1 - prob
 
 def margin(prediction, y):
@@ -62,8 +62,8 @@ def margin(prediction, y):
 	"""
 	prob = np.zeros(y.size, dtype=np.float32)
 	for i, y_ in enumerate(y):
-		prob[i] = prediction[i, y[i]]
-		prediction[i, y[i]] = -np.inf
+		prob[i] = prediction[i, int(y[i])]
+		prediction[i, int(y[i])] = -np.inf
 	return 0.5 - ((prob - prediction.max(axis=1)) / 2)
 
 # -----------------------------------------------------------------------------

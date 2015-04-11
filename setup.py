@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
+import nonconformist
 
 setup(
 	name = 'nonconformist',
 	packages = ['nonconformist'],
-	version = '1.0.1',
+	version = nonconformist.__version__,
 	description = 'Python implementation of the conformal prediction framework.',
 	author = 'Henrik Linusson',
 	author_email = 'henrik.linusson@gmail.com',
 	url = 'https://github.com/donlnz/nonconformist',
-	download_url = 'https://github.com/donlnz/nonconformist/tarball/1.0.1',
+	download_url = 'https://github.com/donlnz/nonconformist/tarball/' + nonconformist.__version__,
 	install_requires = ['numpy', 'scikit-learn'],
 	keywords = ['conformal prediction',
 	            'machine learning',

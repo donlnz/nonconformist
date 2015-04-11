@@ -222,9 +222,10 @@ def reg_mean_size(model, x, y, significance=None):
 		Outputs of test objects.
 	"""
 	if significance:
-		prediction = model.predict(x)
-	else:
 		prediction = model.predict(x, significance)
+	else:
+		prediction = model.predict(x)
+
 	interval_size = 0
 	for j in range(y.size):
 		interval_size += np.abs(prediction[j, 1] - prediction[j, 0])
