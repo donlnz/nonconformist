@@ -122,7 +122,7 @@ class IcpRegCrossValHelper(object):
 # -----------------------------------------------------------------------------
 # Validity measures
 # -----------------------------------------------------------------------------
-def reg_n_correct(model, x, y):
+def reg_n_correct(model, x, y, significance=None):
 	"""Calculates the number of correct predictions made by a conformal
 	regression model.
 
@@ -137,14 +137,17 @@ def reg_n_correct(model, x, y):
 	y : numpy array of shape [n_samples]
 		Outputs of test objects.
 	"""
-	prediction = model.predict(x)
+	if significance:
+		prediction = model.predict(x, significance)
+	else:
+		prediction = model.predict(x)
 	low = y >= prediction[:,0]
 	high = y <= prediction[:,1]
 	correct = low * high
 
 	return y[correct].size
 
-def reg_mean_errors(model, x, y):
+def reg_mean_errors(model, x, y, significance=None):
 	"""Calculates the average error rate of a conformal regression model.
 
 	Parameters
@@ -158,9 +161,9 @@ def reg_mean_errors(model, x, y):
 	y : numpy array of shape [n_samples]
 		Outputs of test objects.
 	"""
-	return 1 - reg_n_correct(model, x, y) / y.size
+	return 1 - reg_n_correct(model, x, y, significance) / y.size
 
-def class_n_correct(model, x, y):
+def class_n_correct(model, x, y, significance=None):
 	"""Calculates the number of correct predictions made by a conformal
 	classification model.
 
@@ -175,13 +178,16 @@ def class_n_correct(model, x, y):
 	y : numpy array of shape [n_samples]
 		Outputs of test objects.
 	"""
-	prediction = model.predict(x)
+	if significance:
+		prediction = model.predict(x, significance)
+	else:
+		prediction = model.predict(x)
 	correct = np.zeros((y.size,), dtype=bool)
 	for i, y_ in enumerate(y):
 		correct[i] = prediction[i, y_]
 	return np.sum(correct)
 
-def class_mean_errors(model, x, y):
+def class_mean_errors(model, x, y, significance=None):
 	"""Calculates the average error rate of a conformal classification model.
 
 	Parameters
@@ -195,12 +201,12 @@ def class_mean_errors(model, x, y):
 	y : numpy array of shape [n_samples]
 		Outputs of test objects.
 	"""
-	return 1 - (class_n_correct(model, x, y) / y.size)
+	return 1 - (class_n_correct(model, x, y, significance) / y.size)
 
 # -----------------------------------------------------------------------------
 # Efficiency measures
 # -----------------------------------------------------------------------------
-def reg_mean_size(model, x, y):
+def reg_mean_size(model, x, y, significance=None):
 	"""Calculates the average prediction interval size of a conformal
 	regression model.
 
@@ -215,13 +221,16 @@ def reg_mean_size(model, x, y):
 	y : numpy array of shape [n_samples]
 		Outputs of test objects.
 	"""
-	prediction = model.predict(x)
+	if significance:
+		prediction = model.predict(x)
+	else:
+		prediction = model.predict(x, significance)
 	interval_size = 0
 	for j in range(y.size):
 		interval_size += np.abs(prediction[j, 1] - prediction[j, 0])
 	return interval_size / y.size
 
-def class_avg_c(model, x, y):
+def class_avg_c(model, x, y, significance=None):
 	"""Calculates the average number of classes per prediction of a conformal
 	classification model.
 
@@ -236,7 +245,10 @@ def class_avg_c(model, x, y):
 	y : numpy array of shape [n_samples]
 		Outputs of test objects.
 	"""
-	prediction = model.predict(x)
+	if significance:
+		prediction = model.predict(x, significance)
+	else:
+		prediction = model.predict(x)
 	return np.sum(prediction) / prediction.shape[0]
 
 def class_mean_p_val(model, x, y):
@@ -254,10 +266,10 @@ def class_mean_p_val(model, x, y):
 	y : numpy array of shape [n_samples]
 		Outputs of test objects.
 	"""
-	prediction = model.predict(x, significance=False)
+	prediction = model.predict(x, significance=None)
 	return np.mean(prediction)
 
-def one_c(model, x, y):
+def one_c(model, x, y, significance=None):
 	"""Calculates the rate of singleton predictions (prediction sets containing
 	only a single class label) of a conformal classification model.
 
@@ -272,5 +284,8 @@ def one_c(model, x, y):
 	y : numpy array of shape [n_samples]
 		Outputs of test objects.
 	"""
-	prediction = model.predict(x)
+	if significance:
+		prediction = model.predict(x, significance)
+	else:
+		prediction = model.predict(x)
 	return np.sum(1 for _ in filter(lambda x: np.sum(x) == 1, prediction))
