@@ -4,6 +4,8 @@ Python implementation of the conformal prediction framework [1].
 
 Primarily to be used as an extension to the scikit-learn library.
 
+API documentation: http://donlnz.github.io/nonconformist/
+
 # Dependencies
 Tested under Python 2.7.
 
