@@ -18,7 +18,6 @@ the pandas package.
 
 # TODO
 
-* Regression predictions independent of significance level (similar to p-values output by a conformal classifier).
 * Normalized nonconformity scores for regression [6].
 * Conditional (Mondrian) conformal predictors [1].
 * Exchangeability testing [2].
