@@ -75,7 +75,7 @@ class ClassIcpCvHelper(BaseIcpCvHelper):
 			self.icp.calibrate(x[cal, :], y[cal])
 
 class RegIcpCvHelper(BaseIcpCvHelper):
-	"""Helper class for running the``cross_val_score`` evaluation
+	"""Helper class for running the ``cross_val_score`` evaluation
 	method on IcpRegressors.
 
 	See also
