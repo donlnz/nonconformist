@@ -215,11 +215,24 @@ class AggregatedCp(object):
 		"""
 		is_regression = self.cp_class.get_problem_type() == 'regression'
 
-		f = lambda p, x: p.predict(x, significance if is_regression else None)
-		predictions = np.dstack([f(p, x) for p in self.predictors])
-		predictions = self.agg_func(predictions)
+		n_examples = x.shape[0]
 
-		if significance and not is_regression:
-			return predictions >= significance
+		if is_regression and significance is None:
+			signs = np.arange(0.01, 1.0, 0.01)
+			pred = np.zeros((n_examples, 2, signs.size))
+			for i, s in enumerate(signs):
+				predictions = np.dstack([p.predict(x, s)
+				                         for p in self.predictors])
+				predictions = self.agg_func(predictions)
+				pred[:, :, i] = predictions
+			return pred
 		else:
-			return predictions
+			f = lambda p, x: p.predict(x,
+			                           significance if is_regression else None)
+			predictions = np.dstack([f(p, x) for p in self.predictors])
+			predictions = self.agg_func(predictions)
+
+			if significance and not is_regression:
+				return predictions >= significance
+			else:
+				return predictions

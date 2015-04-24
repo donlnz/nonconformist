@@ -6,6 +6,6 @@ docstring
 
 # Authors: Henrik Linusson
 
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 
 __all__ = ['icp', 'nc', 'acp']
