@@ -93,8 +93,8 @@ Classes
 	:template: class.rst
 	:toctree: _autosummary/
 
-	evaluation.IcpClassCrossValHelper
-	evaluation.IcpRegCrossValHelper
+	evaluation.ClassIcpCvHelper
+	evaluation.RegIcpCvHelper
 
 Functions
 ~~~~~~~~~
@@ -103,6 +103,8 @@ Functions
 .. autosummary::
 	:toctree: _autosummary/
 
+	evaluation.cross_val_score
+	evaluation.run_experiment
 	evaluation.reg_mean_errors
 	evaluation.class_mean_errors
 	evaluation.reg_mean_size
