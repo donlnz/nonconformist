@@ -90,6 +90,9 @@ class BaseIcp(object):
 		else:
 			self.cal_x, self.cal_y = x, y
 
+	def get_params(self, deep=False):
+		return {'nc_function': self.nc_function}
+
 # -----------------------------------------------------------------------------
 # Inductive conformal classifier
 # -----------------------------------------------------------------------------
@@ -190,6 +193,7 @@ class IcpClassifier(BaseIcp):
 			p is a boolean array denoting which labels are included in the
 			prediction sets.
 		"""
+		# TODO: if x == self.last_x ...
 		n_test_objects = x.shape[0]
 		p = np.zeros((n_test_objects, self.classes.size))
 		for i, c in enumerate(self.classes):
@@ -283,7 +287,7 @@ class IcpRegressor(BaseIcp):
 	def __init__(self, nc_function):
 		super(IcpRegressor, self).__init__(nc_function)
 
-	def predict(self, x, significance):
+	def predict(self, x, significance=None):
 		"""Predict the output values for a set of input patterns.
 
 		Parameters
@@ -293,13 +297,19 @@ class IcpRegressor(BaseIcp):
 
 		significance : float
 			Significance level (maximum allowed error rate) of predictions.
-			Should be a float between 0 and 1.
+			Should be a float between 0 and 1. If ``None``, then intervals for
+			all significance levels (0.01, 0.02, ..., 0.99) are output in a
+			3d-matrix.
 
 		Returns
 		-------
-		p : numpy array of shape [n_samples, 2]
-			Prediction interval (minimum and maximum boundaries) for
-			the set of test patterns.
+		p : numpy array of shape [n_samples, 2] or [n_samples, 2, 99}
+			If significance is ``None``, then p contains the interval (minimum
+			and maximum boundaries) for each test pattern, and each significance
+			level (0.01, 0.02, ..., 0.99). If significance is a float between
+			0 and 1, then p contains the prediction intervals (minimum and
+			maximum	boundaries) for the set of test patterns at the chosen
+			significance level.
 		"""
 		# TODO: interpolated p-values
 		return self.nc_function.predict(x, self.cal_scores, significance)

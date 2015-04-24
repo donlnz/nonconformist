@@ -335,6 +335,38 @@ class RegressorNc(BaseNc):
 	def _underlying_predict(self, x):
 		return self.model.predict(x)
 
-	def predict(self, x, nc, significance):
+	def predict(self, x, nc, significance=None):
+		"""Constructs prediction intervals for a set of test examples.
+
+		Predicts the output of each test pattern using the underlying model,
+		and applies the (partial) inverse nonconformity function to each
+		prediction, resulting in a prediction interval for each test pattern.
+
+		Parameters
+		----------
+		x : numpy array of shape [n_samples, n_features]
+			Inputs of patters for which to predict output values.
+
+		significance : float
+			Significance level (maximum allowed error rate) of predictions.
+			Should be a float between 0 and 1. If ``None``, then intervals for
+			all significance levels (0.01, 0.02, ..., 0.99) are output in a
+			3d-matrix.
+
+		Returns
+		-------
+		p : numpy array of shape [n_samples, 2] or [n_samples, 2, 99}
+			If significance is ``None``, then p contains the interval (minimum
+			and maximum boundaries) for each test pattern, and each significance
+			level (0.01, 0.02, ..., 0.99). If significance is a float between
+			0 and 1, then p contains the prediction intervals (minimum and
+			maximum	boundaries) for the set of test patterns at the chosen
+			significance level.
+		"""
 		prediction = self._underlying_predict(x)
-		return self.inverse_err_func(prediction, nc, significance)
+		if significance:
+			return self.inverse_err_func(prediction, nc, significance)
+		else:
+			significance = np.arange(0.01, 1.0, 0.01)
+			return np.dstack([self.inverse_err_func(prediction, nc, s)
+			                  for s in significance])
