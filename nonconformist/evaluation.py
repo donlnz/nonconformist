@@ -128,6 +128,46 @@ import sys
 def cross_val_score(model, x, y, iterations=10, folds=10, fit_params=None,
 					scoring_funcs=None, significance_levels=None,
 					verbose=False):
+	"""Evaluates a conformal predictor using cross-validation.
+
+	Parameters
+	----------
+	model : object
+		Conformal predictor to evaluate.
+
+	x : numpy array of shape [n_samples, n_features]
+		Inputs of data to use for evaluation.
+
+	y : numpy array of shape [n_samples]
+		Outputs of data to use for evaluation.
+
+	iterations : int
+		Number of iterations to use for evaluation. The data set is randomly
+		shuffled before each iteration.
+
+	folds : int
+		Number of folds to use for evaluation.
+
+	fit_params : dictionary
+		Parameters to supply to the conformal prediction object on training.
+
+	scoring_funcs : iterable
+		List of evaluation functions to apply to the conformal predictor in each
+		fold. Each evaluation function should have a signature
+		``scorer(prediction, y, significance)``.
+
+	significance_levels : iterable
+		List of significance levels at which to evaluate the conformal
+		predictor.
+
+	verbose : boolean
+		Indicates whether to output progress information during evaluation.
+
+	Returns
+	-------
+	scores : pandas DataFrame
+		Tabulated results for each iteration, fold and evaluation function.
+	"""
 
 	fit_params = fit_params if fit_params else {}
 	significance_levels = (significance_levels if significance_levels else
@@ -165,7 +205,46 @@ def cross_val_score(model, x, y, iterations=10, folds=10, fit_params=None,
 
 def run_experiment(model, csv_files, iterations=10, folds=10, fit_params=None,
 				   scoring_funcs=None, significance_levels=None, verbose=False):
+	"""Performs a cross-validation evaluation of a conformal predictor on a
+	collection of data sets in csv format.
 
+	Parameters
+	----------
+	model : object
+		Conformal predictor to evaluate.
+
+	csv_files : iterable
+		List of file names (with absolute paths) containing csv-data, used to
+		evaluate the conformal predictor.
+
+	iterations : int
+		Number of iterations to use for evaluation. The data set is randomly
+		shuffled before each iteration.
+
+	folds : int
+		Number of folds to use for evaluation.
+
+	fit_params : dictionary
+		Parameters to supply to the conformal prediction object on training.
+
+	scoring_funcs : iterable
+		List of evaluation functions to apply to the conformal predictor in each
+		fold. Each evaluation function should have a signature
+		``scorer(prediction, y, significance)``.
+
+	significance_levels : iterable
+		List of significance levels at which to evaluate the conformal
+		predictor.
+
+	verbose : boolean
+		Indicates whether to output progress information during evaluation.
+
+	Returns
+	-------
+	scores : pandas DataFrame
+		Tabulated results for each data set, iteration, fold and
+		evaluation function.
+	"""
 	df = pandas.DataFrame()
 
 	n_data_sets = len(csv_files)
@@ -186,16 +265,6 @@ def run_experiment(model, csv_files, iterations=10, folds=10, fit_params=None,
 		df = df.append(ds_df)
 
 	return df
-
-#def per_significance_level(func):
-#	def score_func(model, x, y):
-#		sign = np.arange(0.01, 1.0, 0.01)
-#		score = np.zeros((sign.size,), dtype=float)
-#		for i, s in enumerate(sign):
-#			score[i] = func(model, x, y, significance=s)
-#		return score
-
-#	return score_func
 
 # -----------------------------------------------------------------------------
 # Validity measures
