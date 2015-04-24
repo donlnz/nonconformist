@@ -13,10 +13,25 @@ from __future__ import division
 import numpy as np
 
 from sklearn.cross_validation import StratifiedShuffleSplit
+from sklearn.cross_validation import KFold
 from sklearn.cross_validation import train_test_split
 
-class IcpClassCrossValHelper(object):
-	"""Helper class for running sklearn's ``cross_val_score`` evaluation
+class BaseIcpCvHelper(object):
+	"""Base class for cross validation helpers.
+	"""
+	def __init__(self, icp, calibration_portion):
+		self.icp = icp
+		self.cal_port = calibration_portion
+
+	def predict(self, x, significance=None):
+			return self.icp.predict(x, significance)
+
+	def get_params(self, deep=False):
+		return {'icp': self.icp,
+		        'calibration_portion': self.cal_port}
+
+class ClassIcpCvHelper(BaseIcpCvHelper):
+	"""Helper class for running the ``cross_val_score`` evaluation
 	method on IcpClassifiers.
 
 	See also
@@ -27,28 +42,31 @@ class IcpClassCrossValHelper(object):
 	--------
 	>>> from sklearn.datasets import load_iris
 	>>> from sklearn.ensemble import RandomForestClassifier
-	>>> from sklearn.cross_validation import cross_val_score
 	>>> from nonconformist.icp import IcpClassifier
 	>>> from nonconformist.nc import ProbEstClassifierNc, margin
-	>>> from nonconformist.evaluation import IcpClassCrossValHelper
+	>>> from nonconformist.evaluation import ClassIcpCvHelper
 	>>> from nonconformist.evaluation import class_mean_errors
+	>>> from nonconformist.evaluation import cross_val_score
 	>>> data = load_iris()
 	>>> nc = ProbEstClassifierNc(RandomForestClassifier, margin)
 	>>> icp = IcpClassifier(nc)
-	>>> icp_cv = IcpClassCrossValHelper(icp, significance=0.1)
+	>>> icp_cv = ClassIcpCvHelper(icp)
 	>>> cross_val_score(icp_cv,
 	...                 data.data,
 	...                 data.target,
-	...                 scoring=class_mean_errors,
-	...                 cv=10)
+	...                 iterations=2,
+	...                 folds=2,
+	...                 scoring_funcs=[class_mean_errors],
+	...                 significance_levels=[0.1])
 	...     # doctest: +SKIP
-	array([ 0.        ,  0.        ,  0.        ,  0.06666667,  0.33333333,
-	0.2       ,  0.        ,  0.13333333,  0.53333333,  0.06666667])
+	   class_mean_errors  fold  iter  significance
+	0           0.013333     0     0           0.1
+	1           0.080000     1     0           0.1
+	2           0.053333     0     1           0.1
+	3           0.080000     1     1           0.1
 	"""
-	def __init__(self, icp, calibration_portion=0.25, significance=0.1):
-		self.icp = icp
-		self.cal_port = calibration_portion
-		self.significance = significance
+	def __init__(self, icp, calibration_portion=0.25):
+		super(ClassIcpCvHelper, self).__init__(icp, calibration_portion)
 
 	def fit(self, x, y):
 		split = StratifiedShuffleSplit(y, n_iter=1, test_size=self.cal_port)
@@ -56,19 +74,8 @@ class IcpClassCrossValHelper(object):
 			self.icp.fit(x[train, :], y[train])
 			self.icp.calibrate(x[cal, :], y[cal])
 
-	def predict(self, x, significance=True):
-		if significance:
-			return self.icp.predict(x, significance=self.significance)
-		else:
-			return self.icp.predict(x, significance=None)
-
-	def get_params(self, deep=False):
-		return {'icp': self.icp,
-		        'calibration_portion': self.cal_port,
-		        'significance': self.significance}
-
-class IcpRegCrossValHelper(object):
-	"""Helper class for running sklearn's ``cross_val_score`` evaluation
+class RegIcpCvHelper(BaseIcpCvHelper):
+	"""Helper class for running the``cross_val_score`` evaluation
 	method on IcpRegressors.
 
 	See also
@@ -79,28 +86,31 @@ class IcpRegCrossValHelper(object):
 	--------
 	>>> from sklearn.datasets import load_boston
 	>>> from sklearn.ensemble import RandomForestRegressor
-	>>> from sklearn.cross_validation import cross_val_score
 	>>> from nonconformist.icp import IcpRegressor
 	>>> from nonconformist.nc import RegressorNc, abs_error, abs_error_inv
-	>>> from nonconformist.evaluation import IcpRegCrossValHelper
+	>>> from nonconformist.evaluation import RegIcpCvHelper
 	>>> from nonconformist.evaluation import reg_mean_errors
+	>>> from nonconformist.evaluation import cross_val_score
 	>>> data = load_boston()
 	>>> nc = RegressorNc(RandomForestRegressor, abs_error, abs_error_inv)
 	>>> icp = IcpRegressor(nc)
-	>>> icp_cv = IcpRegCrossValHelper(icp, significance=0.1)
+	>>> icp_cv = RegIcpCvHelper(icp)
 	>>> cross_val_score(icp_cv,
 	...                 data.data,
 	...                 data.target,
-	...                 scoring=reg_mean_errors,
-	...                 cv=10)
+	...                 iterations=2,
+	...                 folds=2,
+	...                 scoring_funcs=[reg_mean_errors],
+	...                 significance_levels=[0.1])
 	...     # doctest: +SKIP
-	array([ 0.17647059,  0.03921569,  0.        ,  0.23529412,  0.11764706,
-	0.17647059,  0.2       ,  0.36      ,  0.2       ,  0.16      ])
+	   fold  iter  reg_mean_errors  significance
+	0     0     0         0.185771           0.1
+	1     1     0         0.138340           0.1
+	2     0     1         0.071146           0.1
+	3     1     1         0.043478           0.1
 	"""
-	def __init__(self, icp, calibration_portion=0.25, significance=0.1):
-		self.icp = icp
-		self.cal_port = calibration_portion
-		self.significance = significance
+	def __init__(self, icp, calibration_portion=0.25):
+		super(RegIcpCvHelper, self).__init__(icp, calibration_portion)
 
 	def fit(self, x, y):
 		split = train_test_split(x, y, test_size=self.cal_port)
@@ -108,185 +118,166 @@ class IcpRegCrossValHelper(object):
 		self.icp.fit(x_tr, y_tr)
 		self.icp.calibrate(x_cal, y_cal)
 
-	def predict(self, x, significance=True):
-		if significance:
-			return self.icp.predict(x, significance=self.significance)
-		else:
-			return self.icp.predict(x, significance=None)
+# -----------------------------------------------------------------------------
+#
+# -----------------------------------------------------------------------------
+from sklearn.base import clone
+import pandas
+import sys
 
-	def get_params(self, deep=False):
-		return {'icp': self.icp,
-		        'calibration_portion': self.cal_port,
-		        'significance': self.significance}
+def cross_val_score(model, x, y, iterations=10, folds=10, fit_params=None,
+					scoring_funcs=None, significance_levels=None,
+					verbose=False):
+
+	fit_params = fit_params if fit_params else {}
+	significance_levels = (significance_levels if significance_levels else
+						   np.arange(0.01, 1.0, 0.01))
+
+	df = pandas.DataFrame()
+
+	columns = ['iter',
+			   'fold',
+			   'significance',
+			   ] + [f.__name__ for f in scoring_funcs]
+	for i in range(iterations):
+		idx = np.random.permutation(y.size)
+		x, y = x[idx, :], y[idx]
+		cv = KFold(y.size, folds)
+		for j, (train, test) in enumerate(cv):
+			if verbose:
+				sys.stdout.write('\riter {}/{} fold {}/{}'.format(
+					i + 1,
+					iterations,
+					j + 1,
+					folds
+				))
+			m = clone(model)
+			m.fit(x[train, :], y[train], **fit_params)
+			prediction = m.predict(x[test, :], significance=None)
+			for k, s in enumerate(significance_levels):
+				scores = [scoring_func(prediction, y[test], s)
+						  for scoring_func in scoring_funcs]
+				df_score = pandas.DataFrame([[i, j, s] + scores],
+											columns=columns)
+				df = df.append(df_score, ignore_index=True)
+
+	return df
+
+def run_experiment(model, csv_files, iterations=10, folds=10, fit_params=None,
+				   scoring_funcs=None, significance_levels=None, verbose=False):
+
+	df = pandas.DataFrame()
+
+	n_data_sets = len(csv_files)
+	for i, csv_file in enumerate(csv_files):
+		if verbose:
+			print('\n{} ({} / {})'.format(csv_file, i + 1, n_data_sets))
+		data = pandas.read_csv(csv_file)
+		x, y = data.values[:, :-1], data.values[:, -1]
+		scores = cross_val_score(model, x, y, iterations, folds, fit_params,
+								 scoring_funcs, significance_levels, verbose)
+
+		ds_df = pandas.DataFrame(scores)
+		try:
+			ds_df['data_set'] = csv_file.split('/')[-1]
+		except:
+			ds_df['data_set'] = csv_file
+
+		df = df.append(ds_df)
+
+	return df
+
+#def per_significance_level(func):
+#	def score_func(model, x, y):
+#		sign = np.arange(0.01, 1.0, 0.01)
+#		score = np.zeros((sign.size,), dtype=float)
+#		for i, s in enumerate(sign):
+#			score[i] = func(model, x, y, significance=s)
+#		return score
+
+#	return score_func
 
 # -----------------------------------------------------------------------------
 # Validity measures
 # -----------------------------------------------------------------------------
-def reg_n_correct(model, x, y, significance=None):
+def reg_n_correct(prediction, y, significance):
 	"""Calculates the number of correct predictions made by a conformal
 	regression model.
-
-	Parameters
-	----------
-	model : object
-		Conformal regressor object.
-
-	x : numpy array of shape [n_samples, n_features]
-		Inputs of test objects.
-
-	y : numpy array of shape [n_samples]
-		Outputs of test objects.
 	"""
-	if significance:
-		prediction = model.predict(x, significance)
-	else:
-		prediction = model.predict(x)
+	idx = int(significance * 100 - 1)
+	prediction = prediction[:, :, idx]
 	low = y >= prediction[:,0]
 	high = y <= prediction[:,1]
 	correct = low * high
 
 	return y[correct].size
 
-def reg_mean_errors(model, x, y, significance=None):
+def reg_mean_errors(prediction, y, significance):
 	"""Calculates the average error rate of a conformal regression model.
-
-	Parameters
-	----------
-	model : object
-		Conformal regressor object.
-
-	x : numpy array of shape [n_samples, n_features]
-		Inputs of test objects.
-
-	y : numpy array of shape [n_samples]
-		Outputs of test objects.
 	"""
-	return 1 - reg_n_correct(model, x, y, significance) / y.size
+	return 1 - reg_n_correct(prediction, y, significance) / y.size
 
-def class_n_correct(model, x, y, significance=None):
+def class_n_correct(prediction, y, significance):
 	"""Calculates the number of correct predictions made by a conformal
 	classification model.
-
-	Parameters
-	----------
-	model : object
-		Conformal classifier object.
-
-	x : numpy array of shape [n_samples, n_features]
-		Inputs of test objects.
-
-	y : numpy array of shape [n_samples]
-		Outputs of test objects.
 	"""
-	if significance:
-		prediction = model.predict(x, significance)
-	else:
-		prediction = model.predict(x)
+	prediction = prediction > significance
 	correct = np.zeros((y.size,), dtype=bool)
 	for i, y_ in enumerate(y):
 		correct[i] = prediction[i, y_]
 	return np.sum(correct)
 
-def class_mean_errors(model, x, y, significance=None):
+def class_mean_errors(prediction, y, significance=None):
 	"""Calculates the average error rate of a conformal classification model.
-
-	Parameters
-	----------
-	model : object
-		Conformal classifier object.
-
-	x : numpy array of shape [n_samples, n_features]
-		Inputs of test objects.
-
-	y : numpy array of shape [n_samples]
-		Outputs of test objects.
 	"""
-	return 1 - (class_n_correct(model, x, y, significance) / y.size)
+	return 1 - (class_n_correct(prediction, y, significance) / y.size)
 
 # -----------------------------------------------------------------------------
 # Efficiency measures
 # -----------------------------------------------------------------------------
-def reg_mean_size(model, x, y, significance=None):
+def _reg_interval_size(prediction, y, significance):
+	idx = int(significance * 100 - 1)
+	prediction = prediction[:, :, idx]
+
+	return prediction[:, 1] - prediction[:, 0]
+
+def reg_min_size(prediction, y, significance):
+	return np.min(_reg_interval_size(prediction, y, significance))
+
+def reg_q1_size(prediction, y, significance):
+	return np.percentile(_reg_interval_size(prediction, y, significance), 25)
+
+def reg_median_size(prediction, y, significance):
+	return np.median(_reg_interval_size(prediction, y, significance))
+
+def reg_q3_size(prediction, y, significance):
+	return np.percentile(_reg_interval_size(prediction, y, significance), 75)
+
+def reg_max_size(prediction, y, significance):
+	return np.max(_reg_interval_size(prediction, y, significance))
+
+def reg_mean_size(prediction, y, significance):
 	"""Calculates the average prediction interval size of a conformal
 	regression model.
-
-	Parameters
-	----------
-	model : object
-		Conformal regressor object.
-
-	x : numpy array of shape [n_samples, n_features]
-		Inputs of test objects.
-
-	y : numpy array of shape [n_samples]
-		Outputs of test objects.
 	"""
-	if significance:
-		prediction = model.predict(x, significance)
-	else:
-		prediction = model.predict(x)
+	return np.mean(_reg_interval_size(prediction, y, significance))
 
-	interval_size = 0
-	for j in range(y.size):
-		interval_size += np.abs(prediction[j, 1] - prediction[j, 0])
-	return interval_size / y.size
-
-def class_avg_c(model, x, y, significance=None):
+def class_avg_c(prediction, y, significance):
 	"""Calculates the average number of classes per prediction of a conformal
 	classification model.
-
-	Parameters
-	----------
-	model : object
-		Conformal classifier object.
-
-	x : numpy array of shape [n_samples, n_features]
-		Inputs of test objects.
-
-	y : numpy array of shape [n_samples]
-		Outputs of test objects.
 	"""
-	if significance:
-		prediction = model.predict(x, significance)
-	else:
-		prediction = model.predict(x)
+	prediction = prediction > significance
 	return np.sum(prediction) / prediction.shape[0]
 
-def class_mean_p_val(model, x, y):
+def class_mean_p_val(prediction, y, significance):
 	"""Calculates the mean of the p-values output by a conformal classification
 	model.
-
-	Parameters
-	----------
-	model : object
-		Conformal classifier object.
-
-	x : numpy array of shape [n_samples, n_features]
-		Inputs of test objects.
-
-	y : numpy array of shape [n_samples]
-		Outputs of test objects.
 	"""
-	prediction = model.predict(x, significance=None)
 	return np.mean(prediction)
 
-def class_one_c(model, x, y, significance=None):
+def class_one_c(prediction, y, significance):
 	"""Calculates the rate of singleton predictions (prediction sets containing
 	only a single class label) of a conformal classification model.
-
-	Parameters
-	----------
-	model : object
-		Conformal classifier object.
-
-	x : numpy array of shape [n_samples, n_features]
-		Inputs of test objects.
-
-	y : numpy array of shape [n_samples]
-		Outputs of test objects.
 	"""
-	if significance:
-		prediction = model.predict(x, significance)
-	else:
-		prediction = model.predict(x)
+	prediction = prediction > significance
 	return np.sum(1 for _ in filter(lambda x: np.sum(x) == 1, prediction))
