@@ -11,7 +11,6 @@ import numpy as np
 
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.datasets import load_iris, load_diabetes
-from sklearn.cross_validation import cross_val_score, KFold
 
 from nonconformist.icp import IcpClassifier, IcpRegressor
 from nonconformist.nc import margin
@@ -19,7 +18,8 @@ from nonconformist.nc import ProbEstClassifierNc, RegressorNc
 from nonconformist.nc import sign_error, sign_error_inv
 from nonconformist.nc import abs_error, abs_error_inv
 
-from nonconformist.evaluation import IcpClassCrossValHelper, IcpRegCrossValHelper
+from nonconformist.evaluation import cross_val_score
+from nonconformist.evaluation import ClassIcpCvHelper, RegIcpCvHelper
 from nonconformist.evaluation import class_avg_c, class_mean_errors
 from nonconformist.evaluation import reg_mean_size, reg_mean_errors
 
@@ -30,25 +30,19 @@ from nonconformist.evaluation import reg_mean_size, reg_mean_errors
 data = load_iris()
 
 icp = IcpClassifier(ProbEstClassifierNc(RandomForestClassifier, margin))
-icp_cv = IcpClassCrossValHelper(icp, significance=0.05)
+icp_cv = ClassIcpCvHelper(icp)
 
-errors = cross_val_score(icp_cv,
+scores = cross_val_score(icp_cv,
                          data.data,
                          data.target,
-                         scoring=class_mean_errors,
-                         cv=10)
-
-
-
-size = cross_val_score(icp_cv,
-                       data.data,
-                       data.target,
-                       scoring=class_avg_c,
-                       cv=10)
+                         iterations=5,
+                         folds=2,
+                         scoring_funcs=[class_mean_errors, class_avg_c],
+                         significance_levels=[0.05, 0.1, 0.2])
 
 print('Classification: iris')
-print('Mean errors: {}'.format(np.mean(errors)))
-print('Mean avgc: {}\n'.format(np.mean(size)))
+scores = scores.drop(['fold', 'iter'], axis=1)
+print(scores.groupby(['significance']).mean())
 
 # -----------------------------------------------------------------------------
 # Regression, absolute error
@@ -58,24 +52,20 @@ data = load_diabetes()
 icp = IcpRegressor(RegressorNc(RandomForestRegressor,
                                abs_error,
                                abs_error_inv))
-icp_cv = IcpRegCrossValHelper(icp, significance=0.01)
+icp_cv = RegIcpCvHelper(icp)
 
-folds = KFold(data.target.size, 10, shuffle=True)
-errors = cross_val_score(icp_cv,
+scores = cross_val_score(icp_cv,
                          data.data,
                          data.target,
-                         scoring=reg_mean_errors,
-                         cv=folds)
+                         iterations=5,
+                         folds=2,
+                         scoring_funcs=[reg_mean_errors, reg_mean_size],
+                         significance_levels=[0.05, 0.1, 0.2])
 
-size = cross_val_score(icp_cv,
-                       data.data,
-                       data.target,
-                       scoring=reg_mean_size,
-                       cv=folds)
 
 print('Absolute error regression: diabetes')
-print('Mean errors: {}'.format(np.mean(errors)))
-print('Mean interval size: {}\n'.format(np.mean(size)))
+scores = scores.drop(['fold', 'iter'], axis=1)
+print(scores.groupby(['significance']).mean())
 
 # -----------------------------------------------------------------------------
 # Regression, signed error
@@ -85,21 +75,16 @@ data = load_diabetes()
 icp = IcpRegressor(RegressorNc(RandomForestRegressor,
                                sign_error,
                                sign_error_inv))
-icp_cv = IcpRegCrossValHelper(icp, significance=0.10)
+icp_cv = RegIcpCvHelper(icp)
 
-folds = KFold(data.target.size, 10, shuffle=True)
-errors = cross_val_score(icp_cv,
+scores = cross_val_score(icp_cv,
                          data.data,
                          data.target,
-                         scoring=reg_mean_errors,
-                         cv=folds)
-
-size = cross_val_score(icp_cv,
-                       data.data,
-                       data.target,
-                       scoring=reg_mean_size,
-                       cv=folds)
+                         iterations=5,
+                         folds=2,
+                         scoring_funcs=[reg_mean_errors, reg_mean_size],
+                         significance_levels=[0.05, 0.1, 0.2])
 
 print('Signed error regression: diabetes')
-print('Mean errors: {}'.format(np.mean(errors)))
-print('Mean interval size: {}\n'.format(np.mean(size)))
+scores = scores.drop(['fold', 'iter'], axis=1)
+print(scores.groupby(['significance']).mean())
