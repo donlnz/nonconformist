@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>nonconformist.icp.IcpRegressor &mdash; nonconformist 1.0.1 documentation</title>
+    <title>nonconformist.icp.IcpRegressor &mdash; nonconformist 1.1.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.0.1',
+        VERSION:     '1.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="../_static/js/copybutton.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="nonconformist 1.0.1 documentation" href="../index.html" />
+    <link rel="top" title="nonconformist 1.1.0 documentation" href="../index.html" />
     <link rel="up" title="nonconformist API" href="../api.html" />
     <link rel="next" title="nonconformist.acp.AggregatedCp" href="nonconformist.acp.AggregatedCp.html" />
     <link rel="prev" title="nonconformist.icp.IcpClassifier" href="nonconformist.icp.IcpClassifier.html" />
@@ -50,7 +50,7 @@
         <li class="right" >
           <a href="nonconformist.icp.IcpClassifier.html" title="nonconformist.icp.IcpClassifier"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">nonconformist 1.0.1 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">nonconformist 1.1.0 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../api.html" accesskey="U">nonconformist API</a> &raquo;</li> 
       </ul>
     </div>  
@@ -227,7 +227,7 @@ examples.</p>
 
 <dl class="method">
 <dt id="nonconformist.icp.IcpRegressor.predict">
-<code class="descname">predict</code><span class="sig-paren">(</span><em>x</em>, <em>significance</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.icp.IcpRegressor.predict" title="Permalink to this definition">¶</a></dt>
+<code class="descname">predict</code><span class="sig-paren">(</span><em>x</em>, <em>significance=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.icp.IcpRegressor.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict the output values for a set of input patterns.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -240,14 +240,20 @@ examples.</p>
 <p><strong>significance</strong> : float</p>
 <blockquote>
 <div><p>Significance level (maximum allowed error rate) of predictions.
-Should be a float between 0 and 1.</p>
+Should be a float between 0 and 1. If <code class="docutils literal"><span class="pre">None</span></code>, then intervals for
+all significance levels (0.01, 0.02, ..., 0.99) are output in a
+3d-matrix.</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>p</strong> : numpy array of shape [n_samples, 2]</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>p</strong> : numpy array of shape [n_samples, 2] or [n_samples, 2, 99}</p>
 <blockquote class="last">
-<div><p>Prediction interval (minimum and maximum boundaries) for
-the set of test patterns.</p>
+<div><p>If significance is <code class="docutils literal"><span class="pre">None</span></code>, then p contains the interval (minimum
+and maximum boundaries) for each test pattern, and each significance
+level (0.01, 0.02, ..., 0.99). If significance is a float between
+0 and 1, then p contains the prediction intervals (minimum and
+maximum boundaries) for the set of test patterns at the chosen
+significance level.</p>
 </div></blockquote>
 </td>
 </tr>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>nonconformist.evaluation.IcpRegCrossValHelper &mdash; nonconformist 1.0.1 documentation</title>
+    <title>nonconformist.evaluation.IcpRegCrossValHelper &mdash; nonconformist 1.0.3 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.0.1',
+        VERSION:     '1.0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,10 +25,7 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="../_static/js/copybutton.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="nonconformist 1.0.1 documentation" href="../index.html" />
-    <link rel="up" title="nonconformist API" href="../api.html" />
-    <link rel="next" title="nonconformist.evaluation.reg_mean_errors" href="nonconformist.evaluation.reg_mean_errors.html" />
-    <link rel="prev" title="nonconformist.evaluation.IcpClassCrossValHelper" href="nonconformist.evaluation.IcpClassCrossValHelper.html" />
+    <link rel="top" title="nonconformist 1.0.3 documentation" href="../index.html" />
    
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
@@ -44,14 +41,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="nonconformist.evaluation.reg_mean_errors.html" title="nonconformist.evaluation.reg_mean_errors"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="nonconformist.evaluation.IcpClassCrossValHelper.html" title="nonconformist.evaluation.IcpClassCrossValHelper"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">nonconformist 1.0.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../api.html" accesskey="U">nonconformist API</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">nonconformist 1.0.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -62,44 +52,6 @@
             
   <div class="section" id="nonconformist-evaluation-icpregcrossvalhelper">
 <h1><a class="reference internal" href="../api.html#module-nonconformist.evaluation" title="nonconformist.evaluation"><code class="xref py py-mod docutils literal"><span class="pre">nonconformist.evaluation</span></code></a>.IcpRegCrossValHelper<a class="headerlink" href="#nonconformist-evaluation-icpregcrossvalhelper" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="nonconformist.evaluation.IcpRegCrossValHelper">
-<em class="property">class </em><code class="descclassname">nonconformist.evaluation.</code><code class="descname">IcpRegCrossValHelper</code><span class="sig-paren">(</span><em>icp</em>, <em>calibration_portion=0.25</em>, <em>significance=0.1</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.evaluation.IcpRegCrossValHelper" title="Permalink to this definition">¶</a></dt>
-<dd><p>Helper class for running sklearn&#8217;s <code class="docutils literal"><span class="pre">cross_val_score</span></code> evaluation
-method on IcpRegressors.</p>
-<div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="nonconformist.evaluation.IcpClassCrossValHelper.html#nonconformist.evaluation.IcpClassCrossValHelper" title="nonconformist.evaluation.IcpClassCrossValHelper"><code class="xref py py-obj docutils literal"><span class="pre">IcpClassCrossValHelper</span></code></a></p>
-</div>
-<p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_boston</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.cross_validation</span> <span class="kn">import</span> <span class="n">cross_val_score</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nonconformist.icp</span> <span class="kn">import</span> <span class="n">IcpRegressor</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nonconformist.nc</span> <span class="kn">import</span> <span class="n">RegressorNc</span><span class="p">,</span> <span class="n">abs_error</span><span class="p">,</span> <span class="n">abs_error_inv</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nonconformist.evaluation</span> <span class="kn">import</span> <span class="n">IcpRegCrossValHelper</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nonconformist.evaluation</span> <span class="kn">import</span> <span class="n">reg_mean_errors</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">load_boston</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">nc</span> <span class="o">=</span> <span class="n">RegressorNc</span><span class="p">(</span><span class="n">RandomForestRegressor</span><span class="p">,</span> <span class="n">abs_error</span><span class="p">,</span> <span class="n">abs_error_inv</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">icp</span> <span class="o">=</span> <span class="n">IcpRegressor</span><span class="p">(</span><span class="n">nc</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">icp_cv</span> <span class="o">=</span> <span class="n">IcpRegCrossValHelper</span><span class="p">(</span><span class="n">icp</span><span class="p">,</span> <span class="n">significance</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">icp_cv</span><span class="p">,</span>
-<span class="gp">... </span>                <span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-<span class="gp">... </span>                <span class="n">data</span><span class="o">.</span><span class="n">target</span><span class="p">,</span>
-<span class="gp">... </span>                <span class="n">scoring</span><span class="o">=</span><span class="n">reg_mean_errors</span><span class="p">,</span>
-<span class="gp">... </span>                <span class="n">cv</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="gp">... </span>    
-<span class="go">array([ 0.17647059,  0.03921569,  0.        ,  0.23529412,  0.11764706,</span>
-<span class="go">0.17647059,  0.2       ,  0.36      ,  0.2       ,  0.16      ])</span>
-</pre></div>
-</div>
-<dl class="method">
-<dt id="nonconformist.evaluation.IcpRegCrossValHelper.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>icp</em>, <em>calibration_portion=0.25</em>, <em>significance=0.1</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.evaluation.IcpRegCrossValHelper.__init__" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <div class="clearer"></div></div>
 
 
@@ -128,14 +80,8 @@ method on IcpRegressors.</p>
 
 
 <h3>Navigation</h3>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../api.html">nonconformist API</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../api.html#module-nonconformist.nc"><code class="docutils literal"><span class="pre">nc</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api.html#module-nonconformist.icp"><code class="docutils literal"><span class="pre">icp</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api.html#module-nonconformist.acp"><code class="docutils literal"><span class="pre">acp</span></code></a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-nonconformist.evaluation"><code class="docutils literal"><span class="pre">evaluation</span></code></a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">nonconformist API</a></li>
 </ul>
 
 
