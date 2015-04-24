@@ -22,7 +22,7 @@ the pandas package.
 * Conditional (Mondrian) conformal predictors [1].
 * Exchangeability testing [2].
 * Transductive conformal prediction [1].
-* Modified and interpolated p-values [3,4].
+* Interpolated p-values [3,4].
 * Conformal prediction trees [5].
 
 [1] Vovk, V., Gammerman, A., & Shafer, G. (2005). Algorithmic learning in a random world. Springer Science & Business Media.
