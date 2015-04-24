@@ -170,8 +170,8 @@ def cross_val_score(model, x, y, iterations=10, folds=10, fit_params=None,
 	"""
 
 	fit_params = fit_params if fit_params else {}
-	significance_levels = (significance_levels if significance_levels else
-						   np.arange(0.01, 1.0, 0.01))
+	significance_levels = (significance_levels if significance_levels
+	                       is not None else np.arange(0.01, 1.0, 0.01))
 
 	df = pandas.DataFrame()
 
