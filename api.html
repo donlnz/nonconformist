@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>nonconformist API &mdash; nonconformist 1.1.0 documentation</title>
+    <title>nonconformist API &mdash; nonconformist 1.1.1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.0',
+        VERSION:     '1.1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,9 +25,9 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="_static/js/copybutton.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="nonconformist 1.1.0 documentation" href="index.html" />
+    <link rel="top" title="nonconformist 1.1.1 documentation" href="index.html" />
     <link rel="next" title="nonconformist.nc.ProbEstClassifierNc" href="_autosummary/nonconformist.nc.ProbEstClassifierNc.html" />
-    <link rel="prev" title="nonconformist 1.0 documentation" href="index.html" />
+    <link rel="prev" title="nonconformist 1.1 documentation" href="index.html" />
    
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
@@ -47,9 +47,9 @@
           <a href="_autosummary/nonconformist.nc.ProbEstClassifierNc.html" title="nonconformist.nc.ProbEstClassifierNc"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="nonconformist 1.0 documentation"
+          <a href="index.html" title="nonconformist 1.1 documentation"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">nonconformist 1.1.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">nonconformist 1.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -71,11 +71,14 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.nc.ProbEstClassifierNc.html#nonconformist.nc.ProbEstClassifierNc" title="nonconformist.nc.ProbEstClassifierNc"><code class="xref py py-obj docutils literal"><span class="pre">nc.ProbEstClassifierNc</span></code></a>(model_class,&nbsp;err_func)</td>
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.nc.ProbEstClassifierNc.html#nonconformist.nc.ProbEstClassifierNc" title="nonconformist.nc.ProbEstClassifierNc"><code class="xref py py-obj docutils literal"><span class="pre">nc.ProbEstClassifierNc</span></code></a>(model_class[,&nbsp;...])</td>
 <td>Nonconformity scorer using an underlying class probability estimating model.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.nc.RegressorNc.html#nonconformist.nc.RegressorNc" title="nonconformist.nc.RegressorNc"><code class="xref py py-obj docutils literal"><span class="pre">nc.RegressorNc</span></code></a>(model_class,&nbsp;err_func,&nbsp;...[,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.nc.RegressorNc.html#nonconformist.nc.RegressorNc" title="nonconformist.nc.RegressorNc"><code class="xref py py-obj docutils literal"><span class="pre">nc.RegressorNc</span></code></a>(model_class[,&nbsp;err_func,&nbsp;...])</td>
 <td>Nonconformity scorer using an underlying regression model.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.nc.NormalizedRegressorNc.html#nonconformist.nc.NormalizedRegressorNc" title="nonconformist.nc.NormalizedRegressorNc"><code class="xref py py-obj docutils literal"><span class="pre">nc.NormalizedRegressorNc</span></code></a>(model_class,&nbsp;...[,&nbsp;...])</td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -88,13 +91,13 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.nc.abs_error.html#nonconformist.nc.abs_error" title="nonconformist.nc.abs_error"><code class="xref py py-obj docutils literal"><span class="pre">nc.abs_error</span></code></a>(prediction,&nbsp;y)</td>
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.nc.abs_error.html#nonconformist.nc.abs_error" title="nonconformist.nc.abs_error"><code class="xref py py-obj docutils literal"><span class="pre">nc.abs_error</span></code></a>(prediction,&nbsp;y[,&nbsp;norm,&nbsp;beta])</td>
 <td>Calculates absolute error nonconformity for regression problems.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.nc.abs_error_inv.html#nonconformist.nc.abs_error_inv" title="nonconformist.nc.abs_error_inv"><code class="xref py py-obj docutils literal"><span class="pre">nc.abs_error_inv</span></code></a>(prediction,&nbsp;nc,&nbsp;significance)</td>
 <td>Calculates a prediction from an absolute-error nonconformity function.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.nc.sign_error.html#nonconformist.nc.sign_error" title="nonconformist.nc.sign_error"><code class="xref py py-obj docutils literal"><span class="pre">nc.sign_error</span></code></a>(prediction,&nbsp;y)</td>
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.nc.sign_error.html#nonconformist.nc.sign_error" title="nonconformist.nc.sign_error"><code class="xref py py-obj docutils literal"><span class="pre">nc.sign_error</span></code></a>(prediction,&nbsp;y[,&nbsp;norm,&nbsp;beta])</td>
 <td>Calculates signed error nonconformity for regression problems.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.nc.sign_error_inv.html#nonconformist.nc.sign_error_inv" title="nonconformist.nc.sign_error_inv"><code class="xref py py-obj docutils literal"><span class="pre">nc.sign_error_inv</span></code></a>(prediction,&nbsp;nc,&nbsp;significance)</td>

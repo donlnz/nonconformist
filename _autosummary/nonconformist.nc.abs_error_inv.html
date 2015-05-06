@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>nonconformist.nc.abs_error_inv &mdash; nonconformist 1.1.0 documentation</title>
+    <title>nonconformist.nc.abs_error_inv &mdash; nonconformist 1.1.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.1.0',
+        VERSION:     '1.1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="../_static/js/copybutton.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="nonconformist 1.1.0 documentation" href="../index.html" />
+    <link rel="top" title="nonconformist 1.1.1 documentation" href="../index.html" />
     <link rel="up" title="nonconformist API" href="../api.html" />
     <link rel="next" title="nonconformist.nc.sign_error" href="nonconformist.nc.sign_error.html" />
     <link rel="prev" title="nonconformist.nc.abs_error" href="nonconformist.nc.abs_error.html" />
@@ -50,7 +50,7 @@
         <li class="right" >
           <a href="nonconformist.nc.abs_error.html" title="nonconformist.nc.abs_error"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">nonconformist 1.1.0 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">nonconformist 1.1.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../api.html" accesskey="U">nonconformist API</a> &raquo;</li> 
       </ul>
     </div>  
@@ -64,7 +64,7 @@
 <h1>nonconformist.nc.abs_error_inv<a class="headerlink" href="#nonconformist-nc-abs-error-inv" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="nonconformist.nc.abs_error_inv">
-<code class="descclassname">nonconformist.nc.</code><code class="descname">abs_error_inv</code><span class="sig-paren">(</span><em>prediction</em>, <em>nc</em>, <em>significance</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.abs_error_inv" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">nonconformist.nc.</code><code class="descname">abs_error_inv</code><span class="sig-paren">(</span><em>prediction</em>, <em>nc</em>, <em>significance</em>, <em>norm=None</em>, <em>beta=0</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.abs_error_inv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates a prediction from an absolute-error nonconformity function.</p>
 <p>Calculates the partial inverse of the <code class="docutils literal"><span class="pre">absolute_error</span></code> nonconformity
 function, i.e., the minimum and maximum boundaries of the prediction
@@ -76,6 +76,23 @@ interval for each point prediction, given a significance level.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>prediction</strong> : numpy array of shape [n_samples]</p>
 <blockquote>
 <div><p>Point (regression) predictions of a test examples.</p>
+</div></blockquote>
+<p><strong>nc</strong> : numpy array of shape [n_calibration_samples]</p>
+<blockquote>
+<div><p>Nonconformity scores obtained for conformal predictor.</p>
+</div></blockquote>
+<p><strong>significance</strong> : float</p>
+<blockquote>
+<div><p>Significance level (0, 1).</p>
+</div></blockquote>
+<p><strong>norm</strong> : numpy array of shape [n_samples]</p>
+<blockquote>
+<div><p>Normalization values for normalized nonconformity.</p>
+</div></blockquote>
+<p><strong>beta</strong> : float</p>
+<blockquote>
+<div><p>Beta parameter for normalized nonconformity. Larger beta reduces
+influence of normalization model.</p>
 </div></blockquote>
 </td>
 </tr>
