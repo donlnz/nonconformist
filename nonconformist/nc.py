@@ -446,7 +446,9 @@ class NormalizedRegressorNc(RegressorNc):
 
 	def fit(self, x, y):
 		super(NormalizedRegressorNc, self).fit(x, y)
-		log_err = np.log(np.abs(self._underlying_predict(x) - y))
+		err = np.abs(self._underlying_predict(x) - y)
+		err += 0.00001 # Add a small error to each sample to avoid log(0)
+		log_err = np.log(err)
 		self.normalizer.fit(x, log_err)
 
 	def calc_nc(self, x, y):
@@ -463,6 +465,8 @@ class NormalizedRegressorNc(RegressorNc):
 				self.beta_ = 10
 		else:
 			self.beta_ = self.beta
+
+		print(norm)
 
 		return self.err_func(prediction, y, norm, self.beta_)
 
