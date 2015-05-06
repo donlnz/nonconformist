@@ -6,7 +6,7 @@ Evaluation of conformal predictors.
 
 # Authors: Henrik Linusson
 
-# TODO: should possibly (re)implement a cross-validator suited for CP
+# TODO: cross_val_score/run_experiment should possibly allow multiple to be evaluated on identical folding
 
 from __future__ import division
 
@@ -15,6 +15,8 @@ import numpy as np
 from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.cross_validation import KFold
 from sklearn.cross_validation import train_test_split
+
+from nonconformist.base import RegressorMixin, ClassifierMixin
 
 class BaseIcpCvHelper(object):
 	"""Base class for cross validation helpers.
@@ -30,7 +32,7 @@ class BaseIcpCvHelper(object):
 		return {'icp': self.icp,
 		        'calibration_portion': self.cal_port}
 
-class ClassIcpCvHelper(BaseIcpCvHelper):
+class ClassIcpCvHelper(BaseIcpCvHelper, ClassifierMixin):
 	"""Helper class for running the ``cross_val_score`` evaluation
 	method on IcpClassifiers.
 
@@ -74,7 +76,7 @@ class ClassIcpCvHelper(BaseIcpCvHelper):
 			self.icp.fit(x[train, :], y[train])
 			self.icp.calibrate(x[cal, :], y[cal])
 
-class RegIcpCvHelper(BaseIcpCvHelper):
+class RegIcpCvHelper(BaseIcpCvHelper, RegressorMixin):
 	"""Helper class for running the ``cross_val_score`` evaluation
 	method on IcpRegressors.
 
@@ -204,7 +206,8 @@ def cross_val_score(model, x, y, iterations=10, folds=10, fit_params=None,
 	return df
 
 def run_experiment(model, csv_files, iterations=10, folds=10, fit_params=None,
-				   scoring_funcs=None, significance_levels=None, verbose=False):
+				   scoring_funcs=None, significance_levels=None,
+				   normalize=False, verbose=False):
 	"""Performs a cross-validation evaluation of a conformal predictor on a
 	collection of data sets in csv format.
 
@@ -246,6 +249,7 @@ def run_experiment(model, csv_files, iterations=10, folds=10, fit_params=None,
 		evaluation function.
 	"""
 	df = pandas.DataFrame()
+	is_regression = model.get_problem_type() == 'regression'
 
 	n_data_sets = len(csv_files)
 	for i, csv_file in enumerate(csv_files):
@@ -253,6 +257,13 @@ def run_experiment(model, csv_files, iterations=10, folds=10, fit_params=None,
 			print('\n{} ({} / {})'.format(csv_file, i + 1, n_data_sets))
 		data = pandas.read_csv(csv_file)
 		x, y = data.values[:, :-1], data.values[:, -1]
+		if normalize:
+			if is_regression:
+				y = y - y.min() / (y.max() - y.min())
+			else:
+				for i, y_ in enumerate(np.unique(y)):
+					y[y == y_] = i
+
 		scores = cross_val_score(model, x, y, iterations, folds, fit_params,
 								 scoring_funcs, significance_levels, verbose)
 

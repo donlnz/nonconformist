@@ -10,26 +10,14 @@ from __future__ import division
 
 import numpy as np
 
+from nonconformist.base import RegressorMixin, ClassifierMixin
+
 # -----------------------------------------------------------------------------
 # Base inductive conformal predictor
 # -----------------------------------------------------------------------------
 class BaseIcp(object):
 	"""Base class for inductive conformal predictors.
 	"""
-
-	_problem_type = None
-
-	@classmethod
-	def get_problem_type(cls):
-		"""Problem type of conformal predictor.
-
-		Returns
-		-------
-			problem_type : string or None
-				None, 'classification' or 'regression'
-		"""
-		return cls._problem_type
-
 	def __init__(self, nc_function):
 		self.cal_x, self.cal_y = None, None
 		self.nc_function = nc_function
@@ -96,7 +84,7 @@ class BaseIcp(object):
 # -----------------------------------------------------------------------------
 # Inductive conformal classifier
 # -----------------------------------------------------------------------------
-class IcpClassifier(BaseIcp):
+class IcpClassifier(BaseIcp, ClassifierMixin):
 	"""Inductive conformal classifier.
 
 	Parameters
@@ -154,9 +142,6 @@ class IcpClassifier(BaseIcp):
 		[False,  True, False],
 		[False,  True, False]], dtype=bool)
 	"""
-
-	_problem_type = 'classification'
-
 	def __init__(self, nc_function, smoothing=True):
 		super(IcpClassifier, self).__init__(nc_function)
 		self.classes = None
@@ -222,7 +207,7 @@ class IcpClassifier(BaseIcp):
 # -----------------------------------------------------------------------------
 # Inductive conformal regressor
 # -----------------------------------------------------------------------------
-class IcpRegressor(BaseIcp):
+class IcpRegressor(BaseIcp, RegressorMixin):
 	"""Inductive conformal regressor.
 
 	Parameters
@@ -281,9 +266,6 @@ class IcpRegressor(BaseIcp):
 		[ 14.2,  29.8],
 		[ 11.6,  27.2]])
 	"""
-
-	_problem_type = 'regression'
-
 	def __init__(self, nc_function):
 		super(IcpRegressor, self).__init__(nc_function)
 
