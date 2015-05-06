@@ -19,6 +19,7 @@ Classes
 
 	nc.ProbEstClassifierNc
 	nc.RegressorNc
+	nc.NormalizedRegressorNc
 
 Functions
 ~~~~~~~~~

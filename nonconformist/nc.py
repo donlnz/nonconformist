@@ -9,6 +9,7 @@ Nonconformity functions.
 from __future__ import division
 
 import numpy as np
+from scipy.stats import pearsonr
 
 # -----------------------------------------------------------------------------
 # Classification error functions
@@ -69,7 +70,7 @@ def margin(prediction, y):
 # -----------------------------------------------------------------------------
 # Regression error functions
 # -----------------------------------------------------------------------------
-def abs_error(prediction, y):
+def abs_error(prediction, y, norm=None, beta=0):
 	"""Calculates absolute error nonconformity for regression problems.
 
 	For each correct output in ``y``, nonconformity is defined as
@@ -85,14 +86,23 @@ def abs_error(prediction, y):
 	y : numpy array of shape [n_samples]
 		True output labels of each sample.
 
+	norm : numpy array of shape [n_samples]
+		Normalization values for normalized nonconformity.
+
+	beta : float
+		Beta parameter for normalized nonconformity. Larger beta reduces
+		influence of normalization model.
+
 	Returns
 	-------
 	nc : numpy array of shape [n_samples]
 		Nonconformity score of each sample.
 	"""
-	return np.abs(prediction - y)
+	norm = np.array([1] * prediction.shape[0]) if norm is None else norm
+	beta = 0 if beta is None else beta
+	return np.abs(prediction - y) / (norm + beta)
 
-def abs_error_inv(prediction, nc, significance):
+def abs_error_inv(prediction, nc, significance, norm=None, beta=0):
 	"""Calculates a prediction from an absolute-error nonconformity function.
 
 	Calculates the partial inverse of the ``absolute_error`` nonconformity
@@ -104,18 +114,35 @@ def abs_error_inv(prediction, nc, significance):
 	prediction : numpy array of shape [n_samples]
 		Point (regression) predictions of a test examples.
 
+	nc : numpy array of shape [n_calibration_samples]
+		Nonconformity scores obtained for conformal predictor.
+
+	significance : float
+		Significance level (0, 1).
+
+	norm : numpy array of shape [n_samples]
+		Normalization values for normalized nonconformity.
+
+	beta : float
+		Beta parameter for normalized nonconformity. Larger beta reduces
+		influence of normalization model.
+
 	Returns
 	-------
 	interval : numpy array of shape [n_samples, 2]
 		Minimum and maximum interval boundaries for each prediction.
 	"""
+	norm = np.array([1] * prediction.shape[0]) if norm is None else norm
+	beta = 0 if beta is None else beta
+
 	nc = np.sort(nc)[::-1]
 	border = int(np.floor(significance * (nc.size + 1))) - 1
 	# TODO: should probably warn against too few calibration examples
 	border = min(max(border, 0), nc.size - 1)
-	return np.vstack([prediction - nc[border], prediction + nc[border]]).T
+	return np.vstack([prediction - (nc[border] * (norm + beta)),
+	                  prediction + (nc[border] * (norm + beta))]).T
 
-def sign_error(prediction, y):
+def sign_error(prediction, y, norm=None, beta=None):
 	"""Calculates signed error nonconformity for regression problems.
 
 	For each correct output in ``y``, nonconformity is defined as
@@ -131,14 +158,24 @@ def sign_error(prediction, y):
 	y : numpy array of shape [n_samples]
 		True output labels of each sample.
 
+	norm : numpy array of shape [n_samples]
+		Normalization values for normalized nonconformity.
+
+	beta : float
+		Beta parameter for normalized nonconformity. Larger beta reduces
+		influence of normalization model.
+
 	Returns
 	-------
 	nc : numpy array of shape [n_samples]
 		Nonconformity score of each sample.
 	"""
-	return prediction - y
+	norm = np.array([1] * prediction.shape[0]) if norm is None else norm
+	beta = 0 if beta is None else beta
 
-def sign_error_inv(prediction, nc, significance):
+	return (prediction - y) / (norm + beta)
+
+def sign_error_inv(prediction, nc, significance, norm=None, beta=None):
 	"""Calculates a prediction from a signed-error nonconformity function.
 
 	Calculates the partial inverse of the ``signed_error`` nonconformity
@@ -150,18 +187,35 @@ def sign_error_inv(prediction, nc, significance):
 	prediction : numpy array of shape [n_samples]
 		Point (regression) predictions of a test examples.
 
+	nc : numpy array of shape [n_calibration_samples]
+		Nonconformity scores obtained for conformal predictor.
+
+	significance : float
+		Significance level (0, 1).
+
+	norm : numpy array of shape [n_samples]
+		Normalization values for normalized nonconformity.
+
+	beta : float
+		Beta parameter for normalized nonconformity. Larger beta reduces
+		influence of normalization model.
+
 	Returns
 	-------
 	interval : numpy array of shape [n_samples, 2]
 		Minimum and maximum interval boundaries for each prediction.
 	"""
+	norm = np.array([1] * prediction.shape[0]) if norm is None else norm
+	beta = 0 if beta is None else beta
+
 	nc = np.sort(nc)[::-1]
 	upper = int(np.floor((significance / 2) * (nc.size + 1)))
 	lower = int(np.floor((1 - significance / 2) * (nc.size + 1)))
 	# TODO: should probably warn against too few calibration examples
 	upper = min(max(upper, 0), nc.size - 1)
 	lower = max(min(lower, nc.size - 1), 0)
-	return np.vstack([prediction + nc[lower], prediction + nc[upper]]).T
+	return np.vstack([prediction + (nc[lower] * (norm + beta)),
+	                  prediction + (nc[upper] * (norm + beta))]).T
 
 # -----------------------------------------------------------------------------
 # Base nonconformity scorer
@@ -268,7 +322,7 @@ class ProbEstClassifierNc(BaseNc):
 	"""
 	def __init__(self,
 	             model_class,
-	             err_func,
+	             err_func=margin,
 	             model_params=None):
 		super(ProbEstClassifierNc, self).__init__(model_class,
 		                                          err_func,
@@ -323,8 +377,8 @@ class RegressorNc(BaseNc):
 	"""
 	def __init__(self,
 	             model_class,
-	             err_func,
-	             inverse_err_func,
+	             err_func=abs_error,
+	             inverse_err_func=abs_error_inv,
 	             model_params=None):
 		super(RegressorNc, self).__init__(model_class,
 		                                  err_func,
@@ -369,4 +423,63 @@ class RegressorNc(BaseNc):
 		else:
 			significance = np.arange(0.01, 1.0, 0.01)
 			return np.dstack([self.inverse_err_func(prediction, nc, s)
+			                  for s in significance])
+
+class NormalizedRegressorNc(RegressorNc):
+	def __init__(self,
+	             model_class,
+	             normalizer_class,
+	             err_func=abs_error,
+	             inverse_err_func=abs_error_inv,
+	             model_params=None,
+	             normalizer_params=None,
+	             beta='auto'):
+		super(NormalizedRegressorNc, self).__init__(model_class,
+		                                            err_func,
+		                                            inverse_err_func,
+		                                            model_params)
+		self.normalizer_params = normalizer_params if normalizer_params else {}
+		self.normalizer_class = normalizer_class
+		self.normalizer = self.normalizer_class(**self.normalizer_params)
+		self.beta = beta
+		self.beta_ = None
+
+	def fit(self, x, y):
+		super(NormalizedRegressorNc, self).fit(x, y)
+		log_err = np.log(np.abs(self._underlying_predict(x) - y))
+		self.normalizer.fit(x, log_err)
+
+	def calc_nc(self, x, y):
+		norm = np.exp(self.normalizer.predict(x))
+		prediction = self._underlying_predict(x)
+
+		if self.beta == 'auto':
+			r = pearsonr(norm, prediction)[0]
+			if r < 0:
+				self.beta_ = 0
+			elif r < 0.3:
+				self.beta_ = 1
+			else:
+				self.beta_ = 10
+		else:
+			self.beta_ = self.beta
+
+		return self.err_func(prediction, y, norm, self.beta_)
+
+	def predict(self, x, nc, significance=None):
+		prediction = self._underlying_predict(x)
+		norm = np.exp(self.normalizer.predict(x))
+		if significance:
+			return self.inverse_err_func(prediction,
+			                             nc,
+			                             significance,
+			                             norm,
+			                             self.beta_)
+		else:
+			significance = np.arange(0.01, 1.0, 0.01)
+			return np.dstack([self.inverse_err_func(prediction,
+			                                        nc,
+			                                        s,
+			                                        norm,
+			                                        self.beta_)
 			                  for s in significance])
