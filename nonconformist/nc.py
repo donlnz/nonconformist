@@ -466,8 +466,6 @@ class NormalizedRegressorNc(RegressorNc):
 		else:
 			self.beta_ = self.beta
 
-		print(norm)
-
 		return self.err_func(prediction, y, norm, self.beta_)
 
 	def predict(self, x, nc, significance=None):
