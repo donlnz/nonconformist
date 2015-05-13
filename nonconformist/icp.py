@@ -191,13 +191,14 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 			test_nc_scores = self.nc_function.calc_nc(x, test_class)
 			n_cal = self.cal_scores.size
 			for j, nc in enumerate(test_nc_scores):
-				n_ge = np.sum(self.cal_scores >= nc)
-				p[j, i] = n_ge / (n_cal + 1)
+				n_gt = np.sum(self.cal_scores > nc)
+				n_eq = np.sum(self.cal_scores == nc)
+				p[j, i] = n_gt / (n_cal + 1)
 
-			if self.smoothing:
-				p[:, i] += np.random.uniform(0, 1, n_test_objects) / (n_cal + 1)
-			else:
-				p[:, i] += 1 / (n_cal + 1)
+				if self.smoothing:
+					p[:, i] += (n_eq * np.random.uniform(0, 1, 1)) / (n_cal + 1)
+				else:
+					p[:, i] += 1 / (n_cal + 1)
 
 		if significance:
 			return p > significance
