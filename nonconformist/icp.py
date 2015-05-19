@@ -311,7 +311,10 @@ class IcpRegressor(BaseIcp, RegressorMixin):
 		n_significance = (99 if significance is None
 		                  else np.array(significance).size)
 
-		prediction = np.zeros((x.shape[0], 2, n_significance))
+		if n_significance > 1:
+			prediction = np.zeros((x.shape[0], 2, n_significance))
+		else:
+			prediction = np.zeros((x.shape[0], 2))
 
 		condition_map = np.array([self.condition((x[i, :], None))
 		                          for i in range(x.shape[0])])
@@ -322,6 +325,9 @@ class IcpRegressor(BaseIcp, RegressorMixin):
 				p = self.nc_function.predict(x[idx, :],
 				                             self.cal_scores[condition],
 				                             significance)
-				prediction[idx, :, :] = p
+				if n_significance > 1:
+					prediction[idx, :, :] = p
+				else:
+					prediction[idx, :] = p
 
 		return prediction
