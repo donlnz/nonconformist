@@ -7,6 +7,8 @@ Inductive conformal predictors.
 # Authors: Henrik Linusson
 
 from __future__ import division
+from collections import defaultdict
+from functools import partial
 
 import numpy as np
 
@@ -18,9 +20,10 @@ from nonconformist.base import RegressorMixin, ClassifierMixin
 class BaseIcp(object):
 	"""Base class for inductive conformal predictors.
 	"""
-	def __init__(self, nc_function):
+	def __init__(self, nc_function, condition=None):
 		self.cal_x, self.cal_y = None, None
 		self.nc_function = nc_function
+		self.condition = condition if condition else lambda x: 0
 
 	def fit(self, x, y):
 		"""Fit underlying nonconformity scorer.
@@ -66,7 +69,14 @@ class BaseIcp(object):
 		# TODO: conditional
 		self._calibrate_hook(x, y, increment)
 		self._update_calibration_set(x, y, increment)
-		self.cal_scores = self.nc_function.calc_nc(self.cal_x, self.cal_y)
+		condition_map = np.array([self.condition((x[i, :], y[i]))
+		                          for i in range(y.size)])
+		self.conditions = np.unique(condition_map)
+		self.cal_scores = defaultdict(partial(np.ndarray, 0))
+		for cond in self.conditions:
+			idx = condition_map == cond
+			self.cal_scores[cond] = self.nc_function.calc_nc(self.cal_x[idx, :],
+			                                                 self.cal_y[idx])
 
 	def _calibrate_hook(self, x, y, increment):
 		pass
@@ -79,7 +89,8 @@ class BaseIcp(object):
 			self.cal_x, self.cal_y = x, y
 
 	def get_params(self, deep=False):
-		return {'nc_function': self.nc_function}
+		return {'nc_function': self.nc_function,
+		        'condition': self.condition}
 
 # -----------------------------------------------------------------------------
 # Inductive conformal classifier
@@ -142,8 +153,8 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 		[False,  True, False],
 		[False,  True, False]], dtype=bool)
 	"""
-	def __init__(self, nc_function, smoothing=True):
-		super(IcpClassifier, self).__init__(nc_function)
+	def __init__(self, nc_function, condition=None, smoothing=True):
+		super(IcpClassifier, self).__init__(nc_function, condition)
 		self.classes = None
 		self.last_p = None
 		self.smoothing = smoothing
@@ -189,16 +200,17 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 			# TODO: interpolated p-values
 
 			test_nc_scores = self.nc_function.calc_nc(x, test_class)
-			n_cal = self.cal_scores.size
 			for j, nc in enumerate(test_nc_scores):
-				n_gt = np.sum(self.cal_scores > nc)
-				n_eq = np.sum(self.cal_scores == nc)
+				cal_scores = self.cal_scores[self.condition((x[j, :], c))]
+				n_cal = cal_scores.size
+				n_gt = np.sum(cal_scores > nc)
+				n_eq = np.sum(cal_scores == nc) + 1
 				p[j, i] = n_gt / (n_cal + 1)
 
 				if self.smoothing:
-					p[:, i] += (n_eq * np.random.uniform(0, 1, 1)) / (n_cal + 1)
+					p[j, i] += (n_eq * np.random.uniform(0, 1, 1)) / (n_cal + 1)
 				else:
-					p[:, i] += 1 / (n_cal + 1)
+					p[j, i] += n_eq / (n_cal + 1)
 
 		if significance:
 			return p > significance
@@ -267,8 +279,8 @@ class IcpRegressor(BaseIcp, RegressorMixin):
 		[ 14.2,  29.8],
 		[ 11.6,  27.2]])
 	"""
-	def __init__(self, nc_function):
-		super(IcpRegressor, self).__init__(nc_function)
+	def __init__(self, nc_function, condition=None):
+		super(IcpRegressor, self).__init__(nc_function, condition)
 
 	def predict(self, x, significance=None):
 		"""Predict the output values for a set of input patterns.
@@ -295,4 +307,21 @@ class IcpRegressor(BaseIcp, RegressorMixin):
 			significance level.
 		"""
 		# TODO: interpolated p-values
-		return self.nc_function.predict(x, self.cal_scores, significance)
+
+		n_significance = (99 if significance is None
+		                  else np.array(significance).size)
+
+		prediction = np.zeros((x.shape[0], 2, n_significance))
+
+		condition_map = np.array([self.condition((x[i, :], None))
+		                          for i in range(x.shape[0])])
+
+		for condition in self.conditions:
+			idx = condition_map == condition
+			if np.sum(idx) > 0:
+				p = self.nc_function.predict(x[idx, :],
+				                             self.cal_scores[condition],
+				                             significance)
+				prediction[idx, :, :] = p
+
+		return prediction
