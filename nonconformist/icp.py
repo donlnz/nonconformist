@@ -212,7 +212,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 				else:
 					p[j, i] += n_eq / (n_cal + 1)
 
-		if significance:
+		if significance is not None:
 			return p > significance
 		else:
 			return p
