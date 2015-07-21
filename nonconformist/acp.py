@@ -86,6 +86,7 @@ class RandomSubSampler(object):
 # -----------------------------------------------------------------------------
 # Conformal ensemble
 # -----------------------------------------------------------------------------
+# TODO: should utilize sklearn copy()
 class AggregatedCp(object):
 	"""Aggregated conformal predictor.
 
@@ -144,7 +145,7 @@ class AggregatedCp(object):
 	def __init__(self,
 	             cp_class,
 	             nc_class,
-	             sampler=BootstrapSampler,
+	             sampler=BootstrapSampler(),
 	             aggregation_func=None,
 	             nc_class_params=None,
 	             n_models=10):
@@ -236,3 +237,95 @@ class AggregatedCp(object):
 				return predictions >= significance
 			else:
 				return predictions
+
+
+class CrossConformalClassifier(object):
+	def __init__(self,
+	             cp_class,
+	             nc_class,
+	             sampler=CrossSampler(),
+	             nc_class_params=None,
+	             n_models=10):
+		self.predictors = []
+		self.n_models = n_models
+		self.cp_class = cp_class
+		self.nc_class = nc_class
+		self.nc_class_params = nc_class_params if nc_class_params else {}
+		self.sampler = sampler
+
+	def fit(self, x, y):
+		self.predictors = []
+		idx = np.random.permutation(y.size)
+		x, y = x[idx, :], y[idx]
+		samples = self.sampler.gen_samples(x,
+		                                   y,
+		                                   self.n_models,
+		                                   self.cp_class.get_problem_type())
+		for train, cal in samples:
+			predictor = self.cp_class(self.nc_class(**self.nc_class_params))
+			predictor.fit(x[train, :], y[train])
+			predictor.calibrate(x[cal, :], y[cal])
+			self.predictors.append(predictor)
+
+	def predict(self, x, significance=None):
+		predictions = np.dstack([p.predict(x, significance=None)
+		                         for p in self.predictors])
+		n_cal_tot = 0
+		for i, predictor in enumerate(self.predictors):
+			n_cal = predictor.cal_scores[0].size
+			n_cal_tot += n_cal
+			predictions[:, :, i] = predictions[:, :, i] * (n_cal + 1) - 1
+
+		predictions = np.sum(predictions, axis = 2) + 1
+		predictions /= (n_cal_tot + 1)
+
+		if significance:
+			return predictions >= significance
+		else:
+			return predictions
+
+class BootstrapConformalClassifier(object):
+	def __init__(self,
+	             cp_class,
+	             nc_class,
+	             sampler=BootstrapSampler(),
+	             nc_class_params=None,
+	             n_models=10):
+		self.predictors = []
+		self.n_models = n_models
+		self.cp_class = cp_class
+		self.nc_class = nc_class
+		self.nc_class_params = nc_class_params if nc_class_params else {}
+		self.sampler = sampler
+
+	def fit(self, x, y):
+		self.n_train = y.size
+		self.predictors = []
+		idx = np.random.permutation(y.size)
+		x, y = x[idx, :], y[idx]
+		samples = self.sampler.gen_samples(x,
+		                                   y,
+		                                   self.n_models,
+		                                   self.cp_class.get_problem_type())
+		for train, cal in samples:
+			predictor = self.cp_class(self.nc_class(**self.nc_class_params))
+			predictor.fit(x[train, :], y[train])
+			predictor.calibrate(x[cal, :], y[cal])
+			self.predictors.append(predictor)
+
+	def predict(self, x, significance=None):
+		predictions = np.dstack([p.predict(x, significance=None)
+		                         for p in self.predictors])
+		n_cal_tot = 0
+		for i, predictor in enumerate(self.predictors):
+			n_cal = predictor.cal_scores[0].size
+			n_cal_tot += n_cal
+			predictions[:, :, i] = predictions[:, :, i] * (n_cal + 1) - 1
+
+		predictions = np.sum(predictions, axis = 2) + (n_cal_tot / self.n_train)
+		predictions /= (n_cal_tot + (n_cal_tot / self.n_train))
+
+		if significance:
+			return predictions >= significance
+		else:
+			return predictions
