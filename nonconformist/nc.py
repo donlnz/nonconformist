@@ -104,7 +104,7 @@ def abs_error(prediction, y, norm=None, beta=0):
 	nc : numpy array of shape [n_samples]
 		Nonconformity score of each sample.
 	"""
-	norm = np.array([1] * prediction.shape[0]) if norm is None else norm
+	norm = np.ones((prediction.shape[0])) if norm is None else norm
 	beta = 0 if beta is None else beta
 	return np.abs(prediction - y) / (norm + beta)
 
