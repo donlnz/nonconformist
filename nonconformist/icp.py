@@ -23,7 +23,12 @@ class BaseIcp(object):
 	def __init__(self, nc_function, condition=None):
 		self.cal_x, self.cal_y = None, None
 		self.nc_function = nc_function
-		self.condition = condition if condition else lambda x: 0
+		if condition is not None:
+			self.condition = condition
+			self.conditional = True
+		else:
+			self.condition = lambda x: 0
+			self.conditional = False
 
 	def fit(self, x, y):
 		"""Fit underlying nonconformity scorer.
@@ -66,17 +71,24 @@ class BaseIcp(object):
 		-------
 		None
 		"""
-		# TODO: conditional
 		self._calibrate_hook(x, y, increment)
 		self._update_calibration_set(x, y, increment)
-		condition_map = np.array([self.condition((x[i, :], y[i]))
-		                          for i in range(y.size)])
-		self.conditions = np.unique(condition_map)
-		self.cal_scores = defaultdict(partial(np.ndarray, 0))
-		for cond in self.conditions:
-			idx = condition_map == cond
-			self.cal_scores[cond] = self.nc_function.calc_nc(self.cal_x[idx, :],
-			                                                 self.cal_y[idx])
+
+		if self.conditional:
+			category_map = np.array([self.condition((x[i, :], y[i]))
+			                          for i in range(y.size)])
+			self.categories = np.unique(category_map)
+			self.cal_scores = defaultdict(partial(np.ndarray, 0))
+
+			for cond in self.categories:
+				idx = category_map == cond
+				cal_scores = self.nc_function.calc_nc(self.cal_x[idx, :],
+				                                      self.cal_y[idx])
+				self.cal_scores[cond] = np.sort(cal_scores)[::-1]
+		else:
+			self.categories = np.array([0])
+			cal_scores = self.nc_function.calc_nc(self.cal_x, self.cal_y)
+			self.cal_scores = {0: np.sort(cal_scores)[::-1]}
 
 	def _calibrate_hook(self, x, y, increment):
 		pass
@@ -199,12 +211,16 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 			# TODO: maybe calculate p-values using cython or similar
 			# TODO: interpolated p-values
 
+
+			# TODO: nc_function.calc_nc should take X * {y1, y2, ... ,yn}
 			test_nc_scores = self.nc_function.calc_nc(x, test_class)
 			for j, nc in enumerate(test_nc_scores):
 				cal_scores = self.cal_scores[self.condition((x[j, :], c))]
 				n_cal = cal_scores.size
-				n_gt = np.sum(cal_scores > nc)
-				n_eq = np.sum(cal_scores == nc) + 1
+				idx_left = np.searchsorted(cal_scores, nc, 'left')
+				idx_right = np.searchsorted(cal_scores, nc, 'right')
+				n_gt = n_cal - idx_right
+				n_eq = idx_right - idx_left + 1
 				p[j, i] = n_gt / (n_cal + 1)
 
 				if self.smoothing:
@@ -319,7 +335,7 @@ class IcpRegressor(BaseIcp, RegressorMixin):
 		condition_map = np.array([self.condition((x[i, :], None))
 		                          for i in range(x.shape[0])])
 
-		for condition in self.conditions:
+		for condition in self.categories:
 			idx = condition_map == condition
 			if np.sum(idx) > 0:
 				p = self.nc_function.predict(x[idx, :],
