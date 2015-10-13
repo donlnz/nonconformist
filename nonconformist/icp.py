@@ -211,16 +211,17 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 			# TODO: maybe calculate p-values using cython or similar
 			# TODO: interpolated p-values
 
-
 			# TODO: nc_function.calc_nc should take X * {y1, y2, ... ,yn}
 			test_nc_scores = self.nc_function.calc_nc(x, test_class)
 			for j, nc in enumerate(test_nc_scores):
-				cal_scores = self.cal_scores[self.condition((x[j, :], c))]
+				cal_scores = self.cal_scores[self.condition((x[j, :], c))][::-1]
 				n_cal = cal_scores.size
+
 				idx_left = np.searchsorted(cal_scores, nc, 'left')
 				idx_right = np.searchsorted(cal_scores, nc, 'right')
 				n_gt = n_cal - idx_right
 				n_eq = idx_right - idx_left + 1
+
 				p[j, i] = n_gt / (n_cal + 1)
 
 				if self.smoothing:
