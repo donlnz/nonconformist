@@ -230,6 +230,7 @@ class BaseNc(object):
 	"""Base class for nonconformity scorers based on an underlying model.
 	"""
 	def __init__(self, model_class, err_func, model_params=None):
+		# TODO: Should maybe take model object instead of class?
 		self.err_func = err_func
 		self.model_class = model_class
 		self.model_params = model_params if model_params else {}
@@ -238,6 +239,8 @@ class BaseNc(object):
 		self.last_x, self.last_y = None, None
 		self.last_prediction = None
 		self.clean = False
+
+	# TODO: get_params
 
 	def fit(self, x, y):
 		"""Fits the underlying model of the nonconformity scorer.
