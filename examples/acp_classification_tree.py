@@ -7,13 +7,14 @@ Example: combining multiple inductive conformal classifiers
 # Authors: Henrik Linusson
 
 import numpy as np
+import pandas as pd
 
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import load_iris
 
 from nonconformist.nc import margin, ProbEstClassifierNc
 from nonconformist.icp import IcpClassifier
-from nonconformist.acp import AggregatedCp, BootstrapSampler, RandomSubSampler
+from nonconformist.acp import AggregatedCp, BootstrapSampler, CrossSampler, RandomSubSampler
 
 data = load_iris()
 
@@ -35,10 +36,10 @@ rscp = AggregatedCp(IcpClassifier,
 rscp.fit(data.data[train, :], data.target[train])
 
 ccp = AggregatedCp(IcpClassifier,
-              ProbEstClassifierNc,
-              sampler=BootstrapSampler(),
-              nc_class_params={'model_class': DecisionTreeClassifier,
-                               'err_func': margin})
+                  ProbEstClassifierNc,
+                  sampler=CrossSampler(),
+                  nc_class_params={'model_class': DecisionTreeClassifier,
+                                   'err_func': margin})
 ccp.fit(data.data[train, :], data.target[train])
 
 bcp = AggregatedCp(IcpClassifier,
@@ -51,25 +52,25 @@ bcp.fit(data.data[train, :], data.target[train])
 # -----------------------------------------------------------------------------
 # Predict
 # -----------------------------------------------------------------------------
-import pandas
 
-prediction = rscp.predict(data.data[test, :], significance=0.1)
-header = np.array(['c0','c1','c2','Truth'])
-table = np.vstack([prediction.T, data.target[test]]).T
-df = pandas.DataFrame(np.vstack([header, table]))
+truth = data.target[test].reshape(-1, 1)
+columns = ['c0','c1','c2','truth']
+significance = 0.1
+
+prediction = rscp.predict(data.data[test, :], significance=significance)
+table = np.hstack((prediction, truth))
+df = pd.DataFrame(table, columns=columns)
 print('RSCP')
 print(df)
 
-prediction = ccp.predict(data.data[test, :], significance=0.1)
-header = np.array(['c0','c1','c2','Truth'])
-table = np.vstack([prediction.T, data.target[test]]).T
-df = pandas.DataFrame(np.vstack([header, table]))
+prediction = ccp.predict(data.data[test, :], significance=significance)
+table = np.hstack((prediction, truth))
+df = pd.DataFrame(table, columns=columns)
 print('CCP')
 print(df)
 
-prediction = bcp.predict(data.data[test, :], significance=0.1)
-header = np.array(['c0','c1','c2','Truth'])
-table = np.vstack([prediction.T, data.target[test]]).T
-df = pandas.DataFrame(np.vstack([header, table]))
+prediction = bcp.predict(data.data[test, :], significance=significance)
+table = np.hstack((prediction, truth))
+df = pd.DataFrame(table, columns=columns)
 print('BCP')
 print(df)
