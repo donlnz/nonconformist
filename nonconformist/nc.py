@@ -49,7 +49,7 @@ def margin(prediction, y):
 	For each correct output in ``y``, nonconformity is defined as
 
 	.. math::
-		0.5 - \hat{P}(y_i | x) - max_{y \, != \, y_i} \hat{P}(y | x) \, .
+		0.5 - \dfrac{\hat{P}(y_i | x) - max_{y \, != \, y_i} \hat{P}(y | x)}{2}
 
 	Parameters
 	----------
@@ -61,7 +61,7 @@ def margin(prediction, y):
 
 	Returns
 	-------
-	nc : numpy array of shape [n_samples, n_classes]
+	nc : numpy array of shape [n_samples]
 		Nonconformity scores for each sample and each class.
 	"""
 	prob = np.zeros(y.size, dtype=np.float32)
@@ -279,7 +279,7 @@ class BaseNc(object):
 		x : numpy array of shape [n_samples, n_features]
 			Inputs of examples for which to calculate a nonconformity score.
 
-		y : numpy array of shape [n_samples, n_features]
+		y : numpy array of shape [n_samples]
 			Outputs of examples for which to calculate a nonconformity score.
 
 		Returns
