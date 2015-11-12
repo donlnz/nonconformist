@@ -282,7 +282,7 @@ class BaseNc(object):
 		x : numpy array of shape [n_samples, n_features]
 			Inputs of examples for which to calculate a nonconformity score.
 
-		y : numpy array of shape [n_samples, n_features]
+		y : numpy array of shape [n_samples]
 			Outputs of examples for which to calculate a nonconformity score.
 
 		Returns
@@ -315,35 +315,26 @@ class ProbEstClassifierNc(BaseNc):
 
 	Parameters
 	----------
-	model_class : class
-		The model_class should be implement the ``fit(x, y)`` and
-		``predict_proba(x)`` methods, as used by the classification models
-		present in the scikit-learn library.
+	model : object
+		Underlying classification model used for calculating nonconformity
+		scores. Should implement the ``fit(x, y)`` and ``predict_proba(x)``
+		methods, as used by the classification models present in the
+		scikit-learn library.
 
 	err_func : callable
 		Scorer callable object with signature ``score(estimator, x, y)``.
 
-	model_params : dict, optional
-		Dict containing keyword parameters to pass to model_class upon
-		initialization.
-
 	Attributes
 	----------
-	model_class : class
-		Class used to construct the underlying model.
+	model : object
+		Underlying model object.
 
 	err_func : callable
 		Scorer function used to calculate nonconformity scores.
 
-	model_params : dict
-		Parameters sent to underlying model.
-
-	model : object
-		Underlying model object.
-
 	See also
 	--------
-	RegressorNc
+	RegressorNc, NormalizedRegressorNc
 	"""
 	def __init__(self,
 	             model,
@@ -363,10 +354,10 @@ class RegressorNc(BaseNc):
 
 	Parameters
 	----------
-	model_class : class
-		The model_class should be implement the ``fit(x, y)`` and
-		``predict(x)`` methods, as used by the regression models
-		present in the scikit-learn library.
+	model : object
+		Underlying regression model used for calculating nonconformity scores.
+		Should implement the ``fit(x, y)`` and ``predict(x)`` methods, as used
+		by the regression models present in the scikit-learn library.
 
 	err_func : callable
 		Scorer callable object with signature ``score(estimator, x, y)``.
@@ -374,14 +365,10 @@ class RegressorNc(BaseNc):
 	inverse_error_func : callable
 		Inverse (or partial inverse) of err_func.
 
-	model_params : dict, optional
-		Dict containing keyword parameters to pass to model_class upon
-		initialization.
-
 	Attributes
 	----------
-	model_class : class
-		Class used to construct the underlying model.
+	model : object
+		Underlying model object.
 
 	err_func : callable
 		Scorer function used to calculate nonconformity scores.
@@ -389,15 +376,9 @@ class RegressorNc(BaseNc):
 	inverse_err_func : callable
 		Inverse function (partial) of nonconformity function.
 
-	model_params : dict
-		Parameters sent to underlying model.
-
-	model : object
-		Underlying model object.
-
 	See also
 	--------
-	ProbEstClassifierNc
+	ProbEstClassifierNc, NormalizedRegressorNc
 	"""
 	def __init__(self,
 	             model,
@@ -454,6 +435,53 @@ class RegressorNc(BaseNc):
 
 
 class NormalizedRegressorNc(RegressorNc):
+	"""Nonconformity scorer using an underlying regression model together
+	with a normalization model.
+
+	Parameters
+	----------
+	model : object
+		Underlying regression model used for calculating nonconformity scores.
+		Should implement the ``fit(x, y)`` and ``predict(x)`` methods, as used
+		by the regression models present in the scikit-learn library.
+
+	normalizer_model : object
+		Normalizer regression model used for calculating nonconformity scores.
+		Should implement the ``fit(x, y)`` and ``predict(x)`` methods, as used
+		by the regression models present in the scikit-learn library.
+
+	err_func : callable
+		Scorer callable object with signature ``score(estimator, x, y)``.
+
+	inverse_error_func : callable
+		Inverse (or partial inverse) of err_func.
+
+	beta : float
+		Parameter for normalization weighting. A larger beta results in the
+		normalization model having a smaller impact on the final prediction
+		interval size.
+
+	Attributes
+	----------
+	model : object
+		Underlying model object.
+
+	normalizer_model : object
+		Underlying normalizer object.
+
+	err_func : callable
+		Scorer function used to calculate nonconformity scores.
+
+	inverse_err_func : callable
+		Inverse function (partial) of nonconformity function.
+
+	beta : float
+		Normalization weight.
+
+	See also
+	--------
+	RegressorNc, ProbEstClassifierNc
+	"""
 	def __init__(self,
 	             model,
 	             normalizer_model,
