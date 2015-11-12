@@ -10,6 +10,8 @@ from __future__ import division
 
 import numpy as np
 from scipy.stats import pearsonr
+from sklearn.base import clone
+
 
 # -----------------------------------------------------------------------------
 # Classification error functions
@@ -43,6 +45,7 @@ def inverse_probability(prediction, y):
 			prob[i] = prediction[i, int(y_)]
 	return 1 - prob
 
+
 def margin(prediction, y):
 	"""Calculates the margin error.
 
@@ -72,6 +75,7 @@ def margin(prediction, y):
 			prob[i] = prediction[i, int(y_)]
 			prediction[i, int(y_)] = -np.inf
 	return 0.5 - ((prob - prediction.max(axis=1)) / 2)
+
 
 # -----------------------------------------------------------------------------
 # Regression error functions
@@ -107,6 +111,7 @@ def abs_error(prediction, y, norm=None, beta=0):
 	norm = np.ones((prediction.shape[0])) if norm is None else norm
 	beta = 0 if beta is None else beta
 	return np.abs(prediction - y) / (norm + beta)
+
 
 def abs_error_inv(prediction, nc, significance, norm=None, beta=0):
 	"""Calculates a prediction from an absolute-error nonconformity function.
@@ -148,6 +153,7 @@ def abs_error_inv(prediction, nc, significance, norm=None, beta=0):
 	return np.vstack([prediction - (nc[border] * (norm + beta)),
 	                  prediction + (nc[border] * (norm + beta))]).T
 
+
 def sign_error(prediction, y, norm=None, beta=None):
 	"""Calculates signed error nonconformity for regression problems.
 
@@ -180,6 +186,7 @@ def sign_error(prediction, y, norm=None, beta=None):
 	beta = 0 if beta is None else beta
 
 	return (prediction - y) / (norm + beta)
+
 
 def sign_error_inv(prediction, nc, significance, norm=None, beta=None):
 	"""Calculates a prediction from a signed-error nonconformity function.
@@ -223,24 +230,20 @@ def sign_error_inv(prediction, nc, significance, norm=None, beta=None):
 	return np.vstack([prediction + (nc[lower] * (norm + beta)),
 	                  prediction + (nc[upper] * (norm + beta))]).T
 
+
 # -----------------------------------------------------------------------------
 # Base nonconformity scorer
 # -----------------------------------------------------------------------------
 class BaseNc(object):
 	"""Base class for nonconformity scorers based on an underlying model.
 	"""
-	def __init__(self, model_class, err_func, model_params=None):
-		# TODO: Should maybe take model object instead of class?
+	def __init__(self, model, err_func):
 		self.err_func = err_func
-		self.model_class = model_class
-		self.model_params = model_params if model_params else {}
-		self.model = self.model_class(**self.model_params)
+		self.model = model
 
 		self.last_x, self.last_y = None, None
 		self.last_prediction = None
 		self.clean = False
-
-	# TODO: get_params
 
 	def fit(self, x, y):
 		"""Fits the underlying model of the nonconformity scorer.
@@ -290,6 +293,19 @@ class BaseNc(object):
 		prediction = self.__get_prediction(x)
 		return self.err_func(prediction, y)
 
+	def get_params(self, deep=False):
+		if deep:
+			return {
+				'model': clone(self.model),
+				'err_func': self.err_func
+			}
+		else:
+			return {
+				'model': self.model,
+				'err_func': self.err_func
+			}
+
+
 # -----------------------------------------------------------------------------
 # Classification nonconformity scorers
 # -----------------------------------------------------------------------------
@@ -330,15 +346,14 @@ class ProbEstClassifierNc(BaseNc):
 	RegressorNc
 	"""
 	def __init__(self,
-	             model_class,
-	             err_func=margin,
-	             model_params=None):
-		super(ProbEstClassifierNc, self).__init__(model_class,
-		                                          err_func,
-		                                          model_params)
+	             model,
+	             err_func=margin):
+		super(ProbEstClassifierNc, self).__init__(model,
+		                                          err_func)
 
 	def _underlying_predict(self, x):
 		return self.model.predict_proba(x)
+
 
 # -----------------------------------------------------------------------------
 # Regression nonconformity scorers
@@ -385,13 +400,11 @@ class RegressorNc(BaseNc):
 	ProbEstClassifierNc
 	"""
 	def __init__(self,
-	             model_class,
+	             model,
 	             err_func=abs_error,
-	             inverse_err_func=abs_error_inv,
-	             model_params=None):
-		super(RegressorNc, self).__init__(model_class,
-		                                  err_func,
-		                                  model_params)
+	             inverse_err_func=abs_error_inv):
+		super(RegressorNc, self).__init__(model,
+		                                  err_func)
 
 		self.inverse_err_func = inverse_err_func
 
@@ -434,34 +447,35 @@ class RegressorNc(BaseNc):
 			return np.dstack([self.inverse_err_func(prediction, nc, s)
 			                  for s in significance])
 
+	def get_params(self, deep=False):
+		params = super(RegressorNc, self).get_params()
+		params['inverse_err_func'] = self.inverse_err_func
+		return params
+
+
 class NormalizedRegressorNc(RegressorNc):
 	def __init__(self,
-	             model_class,
-	             normalizer_class,
+	             model,
+	             normalizer_model,
 	             err_func=abs_error,
 	             inverse_err_func=abs_error_inv,
-	             model_params=None,
-	             normalizer_params=None,
 	             beta='auto'):
-		super(NormalizedRegressorNc, self).__init__(model_class,
+		super(NormalizedRegressorNc, self).__init__(model,
 		                                            err_func,
-		                                            inverse_err_func,
-		                                            model_params)
-		self.normalizer_params = normalizer_params if normalizer_params else {}
-		self.normalizer_class = normalizer_class
-		self.normalizer = self.normalizer_class(**self.normalizer_params)
+		                                            inverse_err_func)
+		self.normalizer_model = normalizer_model
 		self.beta = beta
 		self.beta_ = None
 
 	def fit(self, x, y):
 		super(NormalizedRegressorNc, self).fit(x, y)
 		err = np.abs(self._underlying_predict(x) - y)
-		err += 0.00001 # Add a small error to each sample to avoid log(0)
+		err += 0.00001  # Add a small error to each sample to avoid log(0)
 		log_err = np.log(err)
-		self.normalizer.fit(x, log_err)
+		self.normalizer_model.fit(x, log_err)
 
 	def calc_nc(self, x, y):
-		norm = np.exp(self.normalizer.predict(x))
+		norm = np.exp(self.normalizer_model.predict(x))
 		prediction = self._underlying_predict(x)
 
 		if self.beta == 'auto':
@@ -479,7 +493,7 @@ class NormalizedRegressorNc(RegressorNc):
 
 	def predict(self, x, nc, significance=None):
 		prediction = self._underlying_predict(x)
-		norm = np.exp(self.normalizer.predict(x))
+		norm = np.exp(self.normalizer_model.predict(x))
 		if significance:
 			return self.inverse_err_func(prediction,
 			                             nc,
@@ -494,3 +508,12 @@ class NormalizedRegressorNc(RegressorNc):
 			                                        norm,
 			                                        self.beta_)
 			                  for s in significance])
+
+	def get_params(self, deep=False):
+		params = super(RegressorNc, self).get_params()
+		params['beta'] = self.beta
+		if deep:
+			params['normalizer_model'] = clone(self.normalizer_model)
+		else:
+			params['normalizer_model'] = self.normalizer_model
+		return params
