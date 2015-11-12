@@ -11,8 +11,10 @@ from collections import defaultdict
 from functools import partial
 
 import numpy as np
+from sklearn.base import clone
 
 from nonconformist.base import RegressorMixin, ClassifierMixin
+
 
 # -----------------------------------------------------------------------------
 # Base inductive conformal predictor
@@ -45,7 +47,7 @@ class BaseIcp(object):
 		-------
 		None
 		"""
-		#TODO: incremental?
+		# TODO: incremental?
 		self.nc_function.fit(x, y)
 
 	def calibrate(self, x, y, increment=False):
@@ -76,7 +78,7 @@ class BaseIcp(object):
 
 		if self.conditional:
 			category_map = np.array([self.condition((x[i, :], y[i]))
-			                          for i in range(y.size)])
+									 for i in range(y.size)])
 			self.categories = np.unique(category_map)
 			self.cal_scores = defaultdict(partial(np.ndarray, 0))
 
@@ -101,8 +103,13 @@ class BaseIcp(object):
 			self.cal_x, self.cal_y = x, y
 
 	def get_params(self, deep=False):
-		return {'nc_function': self.nc_function,
-		        'condition': self.condition}
+		if deep:
+			return {'nc_function': clone(self.nc_function),
+					'condition': self.condition}
+		else:
+			return {'nc_function': self.nc_function,
+					'condition': self.condition}
+
 
 # -----------------------------------------------------------------------------
 # Inductive conformal classifier
@@ -233,6 +240,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 			return p > significance
 		else:
 			return p
+
 
 # -----------------------------------------------------------------------------
 # Inductive conformal regressor
