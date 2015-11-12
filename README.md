@@ -9,7 +9,7 @@ API documentation: http://donlnz.github.io/nonconformist/
 # Dependencies
 Tested under Python 2.7.
 
-Requires numpy and scikit-learn. The evaluation module additionally depends on
+Requires numpy, scipy and scikit-learn. The evaluation module additionally depends on
 the pandas package.
 
 # Known issues
@@ -18,6 +18,7 @@ the pandas package.
 
 # TODO
 
+* Confidence and credibility predictions [1].
 * Exchangeability testing [2].
 * Transductive conformal prediction [1].
 * Interpolated p-values [3,4].
