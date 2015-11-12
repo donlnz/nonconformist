@@ -9,6 +9,8 @@ Aggregated conformal predictors
 import numpy as np
 from sklearn.cross_validation import KFold, StratifiedKFold
 from sklearn.cross_validation import ShuffleSplit, StratifiedShuffleSplit
+from sklearn.base import clone
+
 
 # -----------------------------------------------------------------------------
 # Sampling strategies
@@ -23,7 +25,7 @@ class BootstrapSampler(object):
 	Examples
 	--------
 	"""
-	def gen_samples(self, x, y, n_samples, problem_type):
+	def gen_samples(self, y, n_samples, problem_type):
 		for i in range(n_samples):
 			idx = np.array(range(y.size))
 			train = np.random.choice(y.size, y.size, replace=True)
@@ -33,6 +35,7 @@ class BootstrapSampler(object):
 			cal = idx[cal_mask]
 
 			yield train, cal
+
 
 class CrossSampler(object):
 	"""Cross-fold sampler.
@@ -44,13 +47,14 @@ class CrossSampler(object):
 	Examples
 	--------
 	"""
-	def gen_samples(self, x, y, n_samples, problem_type):
+	def gen_samples(self, y, n_samples, problem_type):
 		if problem_type == 'classification':
 			folds = StratifiedKFold(y, n_folds=n_samples)
 		else:
 			folds = KFold(y.size, n_folds=n_samples)
 		for train, cal in folds:
 			yield train, cal
+
 
 class RandomSubSampler(object):
 	"""Random subsample sampler.
@@ -70,7 +74,7 @@ class RandomSubSampler(object):
 	def __init__(self, calibration_portion=0.3):
 		self.cal_portion = calibration_portion
 
-	def gen_samples(self, x, y, n_samples, problem_type):
+	def gen_samples(self, y, n_samples, problem_type):
 		if problem_type == 'classification':
 			splits = StratifiedShuffleSplit(y,
 			                                n_iter=n_samples,
@@ -83,26 +87,21 @@ class RandomSubSampler(object):
 		for train, cal in splits:
 			yield train, cal
 
+
 # -----------------------------------------------------------------------------
 # Conformal ensemble
 # -----------------------------------------------------------------------------
-# TODO: should utilize sklearn copy()
 class AggregatedCp(object):
 	"""Aggregated conformal predictor.
 
 	Combines multiple IcpClassifier or IcpRegressor predictors into an
 	aggregated model.
 
-
 	Parameters
 	----------
-	cp_class : class
-		Class of conformal predictor to use (e.g. IcpClassifier or IcpRegressor)
-
-	nc_class : 	Nonconformity scorer object used to calculate nonconformity of
-		calibration examples and test patterns. Should implement ``fit(x, y)``
-		and ``calc_nc(x, y)``. For regression problems, it should also
-		implement ``predict(x, nc_scores, significance)``.
+	predictor : object
+		Prototype conformal predictor (e.g. IcpClassifier or IcpRegressor)
+		used for defining conformal predictors included in the aggregate model.
 
 	sampler : object
 		Sampler object used to generate training and calibration examples
@@ -112,14 +111,14 @@ class AggregatedCp(object):
 		Function used to aggregate the predictions of the underlying
 		conformal predictors. Defaults to ``numpy.mean``.
 
-	nc_class_params : dict, optional
-		Parameters to pass to nc_class.
-
 	n_models : int
 		Number of models to aggregate.
 
 	Attributes
 	----------
+	predictor : object
+		Prototype conformal predictor.
+
 	predictors : list
 		List of underlying conformal predictors.
 
@@ -143,17 +142,13 @@ class AggregatedCp(object):
 	--------
 	"""
 	def __init__(self,
-	             cp_class,
-	             nc_class,
+	             predictor,
 	             sampler=BootstrapSampler(),
 	             aggregation_func=None,
-	             nc_class_params=None,
 	             n_models=10):
 		self.predictors = []
 		self.n_models = n_models
-		self.cp_class = cp_class
-		self.nc_class = nc_class
-		self.nc_class_params = nc_class_params if nc_class_params else {}
+		self.predictor = predictor
 		self.sampler = sampler
 
 		if aggregation_func is not None:
@@ -176,15 +171,16 @@ class AggregatedCp(object):
 		-------
 		None
 		"""
+		self.n_train = y.size
 		self.predictors = []
 		idx = np.random.permutation(y.size)
 		x, y = x[idx, :], y[idx]
-		samples = self.sampler.gen_samples(x,
-		                                   y,
+		problem_type = self.predictor.__class__.get_problem_type()
+		samples = self.sampler.gen_samples(y,
 		                                   self.n_models,
-		                                   self.cp_class.get_problem_type())
+		                                   problem_type)
 		for train, cal in samples:
-			predictor = self.cp_class(self.nc_class(**self.nc_class_params))
+			predictor = clone(self.predictor)
 			predictor.fit(x[train, :], y[train])
 			predictor.calibrate(x[cal, :], y[cal])
 			self.predictors.append(predictor)
@@ -214,7 +210,8 @@ class AggregatedCp(object):
 			For regression problems: Prediction interval (minimum and maximum
 			boundaries) for the set of test patterns.
 		"""
-		is_regression = self.cp_class.get_problem_type() == 'regression'
+		is_regression =\
+			self.predictor.__class__.get_problem_type() == 'regression'
 
 		n_examples = x.shape[0]
 
@@ -228,8 +225,8 @@ class AggregatedCp(object):
 				pred[:, :, i] = predictions
 			return pred
 		else:
-			f = lambda p, x: p.predict(x,
-			                           significance if is_regression else None)
+			def f(p, x):
+				return p.predict(x, significance if is_regression else None)
 			predictions = np.dstack([f(p, x) for p in self.predictors])
 			predictions = self.agg_func(predictions)
 
@@ -239,33 +236,53 @@ class AggregatedCp(object):
 				return predictions
 
 
-class CrossConformalClassifier(object):
-	def __init__(self,
-	             cp_class,
-	             nc_class,
-	             sampler=CrossSampler(),
-	             nc_class_params=None,
-	             n_models=10):
-		self.predictors = []
-		self.n_models = n_models
-		self.cp_class = cp_class
-		self.nc_class = nc_class
-		self.nc_class_params = nc_class_params if nc_class_params else {}
-		self.sampler = sampler
+class CrossConformalClassifier(AggregatedCp):
+	"""Cross-conformal classifier.
 
-	def fit(self, x, y):
-		self.predictors = []
-		idx = np.random.permutation(y.size)
-		x, y = x[idx, :], y[idx]
-		samples = self.sampler.gen_samples(x,
-		                                   y,
-		                                   self.n_models,
-		                                   self.cp_class.get_problem_type())
-		for train, cal in samples:
-			predictor = self.cp_class(self.nc_class(**self.nc_class_params))
-			predictor.fit(x[train, :], y[train])
-			predictor.calibrate(x[cal, :], y[cal])
-			self.predictors.append(predictor)
+	Combines multiple IcpClassifiers into a cross-conformal classifier.
+
+	Parameters
+	----------
+	predictor : object
+		Prototype conformal predictor (e.g. IcpClassifier or IcpRegressor)
+		used for defining conformal predictors included in the aggregate model.
+
+	aggregation_func : callable
+		Function used to aggregate the predictions of the underlying
+		conformal predictors. Defaults to ``numpy.mean``.
+
+	n_models : int
+		Number of models to aggregate.
+
+	Attributes
+	----------
+	predictor : object
+		Prototype conformal predictor.
+
+	predictors : list
+		List of underlying conformal predictors.
+
+	sampler : object
+		Sampler object used to generate training and calibration examples.
+
+	agg_func : callable
+		Function used to aggregate the predictions of the underlying
+		conformal predictors
+
+	References
+	----------
+	.. [1] Vovk, V. (2013). Cross-conformal predictors. Annals of Mathematics
+		and Artificial Intelligence, 1-20.
+
+	Examples
+	--------
+	"""
+	def __init__(self,
+				 predictor,
+				 n_models=10):
+		super(CrossConformalClassifier, self).__init__(predictor,
+													   CrossSampler(),
+													   n_models)
 
 	def predict(self, x, significance=None):
 		predictions = np.dstack([p.predict(x, significance=None)
@@ -276,42 +293,62 @@ class CrossConformalClassifier(object):
 			n_cal_tot += n_cal
 			predictions[:, :, i] = predictions[:, :, i] * (n_cal + 1) - 1
 
-		predictions = np.sum(predictions, axis = 2) + 1
+		predictions = np.sum(predictions, axis=2) + 1
 		predictions /= (n_cal_tot + 1)
 
 		if significance:
-			return predictions >= significance
+			return predictions > significance
 		else:
 			return predictions
 
-class BootstrapConformalClassifier(object):
-	def __init__(self,
-	             cp_class,
-	             nc_class,
-	             sampler=BootstrapSampler(),
-	             nc_class_params=None,
-	             n_models=10):
-		self.predictors = []
-		self.n_models = n_models
-		self.cp_class = cp_class
-		self.nc_class = nc_class
-		self.nc_class_params = nc_class_params if nc_class_params else {}
-		self.sampler = sampler
 
-	def fit(self, x, y):
-		self.n_train = y.size
-		self.predictors = []
-		idx = np.random.permutation(y.size)
-		x, y = x[idx, :], y[idx]
-		samples = self.sampler.gen_samples(x,
-		                                   y,
-		                                   self.n_models,
-		                                   self.cp_class.get_problem_type())
-		for train, cal in samples:
-			predictor = self.cp_class(self.nc_class(**self.nc_class_params))
-			predictor.fit(x[train, :], y[train])
-			predictor.calibrate(x[cal, :], y[cal])
-			self.predictors.append(predictor)
+class BootstrapConformalClassifier(AggregatedCp):
+	"""Bootstrap conformal classifier.
+
+	Combines multiple IcpClassifiers into a bootstrap conformal classifier.
+
+	Parameters
+	----------
+	predictor : object
+		Prototype conformal predictor (e.g. IcpClassifier or IcpRegressor)
+		used for defining conformal predictors included in the aggregate model.
+
+	aggregation_func : callable
+		Function used to aggregate the predictions of the underlying
+		conformal predictors. Defaults to ``numpy.mean``.
+
+	n_models : int
+		Number of models to aggregate.
+
+	Attributes
+	----------
+	predictor : object
+		Prototype conformal predictor.
+
+	predictors : list
+		List of underlying conformal predictors.
+
+	sampler : object
+		Sampler object used to generate training and calibration examples.
+
+	agg_func : callable
+		Function used to aggregate the predictions of the underlying
+		conformal predictors
+
+	References
+	----------
+	.. [1] Vovk, V. (2013). Cross-conformal predictors. Annals of Mathematics
+		and Artificial Intelligence, 1-20.
+
+	Examples
+	--------
+	"""
+	def __init__(self,
+				 predictor,
+	             n_models=10):
+		super(BootstrapConformalClassifier, self).__init__(predictor,
+														   BootstrapSampler(),
+														   n_models)
 
 	def predict(self, x, significance=None):
 		predictions = np.dstack([p.predict(x, significance=None)
@@ -322,10 +359,10 @@ class BootstrapConformalClassifier(object):
 			n_cal_tot += n_cal
 			predictions[:, :, i] = predictions[:, :, i] * (n_cal + 1) - 1
 
-		predictions = np.sum(predictions, axis = 2) + (n_cal_tot / self.n_train)
+		predictions = np.sum(predictions, axis=2) + (n_cal_tot / self.n_train)
 		predictions /= (n_cal_tot + (n_cal_tot / self.n_train))
 
 		if significance:
-			return predictions >= significance
+			return predictions > significance
 		else:
 			return predictions
