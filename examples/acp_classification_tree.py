@@ -12,65 +12,66 @@ import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import load_iris
 
-from nonconformist.nc import margin, ProbEstClassifierNc
+from nonconformist.nc import  ProbEstClassifierNc
 from nonconformist.icp import IcpClassifier
-from nonconformist.acp import AggregatedCp, BootstrapSampler, CrossSampler, RandomSubSampler
+from nonconformist.acp import AggregatedCp
+from nonconformist.acp import BootstrapSampler, CrossSampler, RandomSubSampler
+from nonconformist.acp import BootstrapConformalClassifier
+from nonconformist.acp import CrossConformalClassifier
+from nonconformist.evaluation import class_mean_errors
 
+# -----------------------------------------------------------------------------
+# Experiment setup
+# -----------------------------------------------------------------------------
 data = load_iris()
 
-# -----------------------------------------------------------------------------
-# Setup training, calibration and test indices
-# -----------------------------------------------------------------------------
 idx = np.random.permutation(data.target.size)
 train = idx[:int(2 * idx.size / 3)]
 test = idx[int(2 * idx.size / 3):]
 
-# -----------------------------------------------------------------------------
-# Train and calibrate
-# -----------------------------------------------------------------------------
-rscp = AggregatedCp(IcpClassifier,
-                     ProbEstClassifierNc,
-                     sampler=RandomSubSampler(),
-                     nc_class_params={'model_class': DecisionTreeClassifier,
-                                      'err_func': margin})
-rscp.fit(data.data[train, :], data.target[train])
-
-ccp = AggregatedCp(IcpClassifier,
-                  ProbEstClassifierNc,
-                  sampler=CrossSampler(),
-                  nc_class_params={'model_class': DecisionTreeClassifier,
-                                   'err_func': margin})
-ccp.fit(data.data[train, :], data.target[train])
-
-bcp = AggregatedCp(IcpClassifier,
-                  ProbEstClassifierNc,
-                  sampler=BootstrapSampler(),
-                  nc_class_params={'model_class': DecisionTreeClassifier,
-                                   'err_func': margin})
-bcp.fit(data.data[train, :], data.target[train])
-
-# -----------------------------------------------------------------------------
-# Predict
-# -----------------------------------------------------------------------------
-
 truth = data.target[test].reshape(-1, 1)
-columns = ['c0','c1','c2','truth']
+columns = ['C-{}'.format(i) for i in np.unique(data.target)] + ['truth']
 significance = 0.1
 
-prediction = rscp.predict(data.data[test, :], significance=significance)
-table = np.hstack((prediction, truth))
-df = pd.DataFrame(table, columns=columns)
-print('RSCP')
-print(df)
+# -----------------------------------------------------------------------------
+# Define models
+# -----------------------------------------------------------------------------
 
-prediction = ccp.predict(data.data[test, :], significance=significance)
-table = np.hstack((prediction, truth))
-df = pd.DataFrame(table, columns=columns)
-print('CCP')
-print(df)
+models = {  'ACP-RandomSubSampler'  : AggregatedCp(
+                                        IcpClassifier(
+                                            ProbEstClassifierNc(
+                                                DecisionTreeClassifier())),
+                                        RandomSubSampler()),
+            'ACP-CrossSampler'      : AggregatedCp(
+                                        IcpClassifier(
+                                            ProbEstClassifierNc(
+                                                DecisionTreeClassifier())),
+                                        CrossSampler()),
+            'ACP-BootstrapSampler'  : AggregatedCp(
+                                        IcpClassifier(
+                                            ProbEstClassifierNc(
+                                                DecisionTreeClassifier())),
+                                        BootstrapSampler()),
+            'CCP'                   : CrossConformalClassifier(
+                                        IcpClassifier(
+                                            ProbEstClassifierNc(
+                                                DecisionTreeClassifier()))),
+            'BCP'                   : BootstrapConformalClassifier(
+                                        IcpClassifier(
+                                            ProbEstClassifierNc(
+                                                DecisionTreeClassifier())))
+          }
 
-prediction = bcp.predict(data.data[test, :], significance=significance)
-table = np.hstack((prediction, truth))
-df = pd.DataFrame(table, columns=columns)
-print('BCP')
-print(df)
+# -----------------------------------------------------------------------------
+# Train, predict and evaluate
+# -----------------------------------------------------------------------------
+for name, model in models.iteritems():
+    model.fit(data.data[train, :], data.target[train])
+    prediction = model.predict(data.data[test, :], significance=significance)
+    table = np.hstack((prediction, truth))
+    df = pd.DataFrame(table, columns=columns)
+    print('\n{}'.format(name))
+    print('Error rate: {}'.format(class_mean_errors(prediction,
+                                                    truth,
+                                                    significance)))
+    print(df)

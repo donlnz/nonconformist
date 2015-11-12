@@ -30,11 +30,8 @@ from nonconformist.evaluation import reg_mean_errors, reg_median_size
 # -----------------------------------------------------------------------------
 data = load_iris()
 
-icp = IcpClassifier(ProbEstClassifierNc(RandomForestClassifier,
-                                        margin,
-                                        model_params={
-	                                        'n_estimators': 100
-                                        }))
+icp = IcpClassifier(ProbEstClassifierNc(RandomForestClassifier(n_estimators=100),
+                                        margin))
 icp_cv = ClassIcpCvHelper(icp)
 
 scores = cross_val_score(icp_cv,
@@ -54,12 +51,9 @@ print(scores.groupby(['significance']).mean())
 # -----------------------------------------------------------------------------
 data = load_diabetes()
 
-icp = IcpRegressor(RegressorNc(RandomForestRegressor,
+icp = IcpRegressor(RegressorNc(RandomForestRegressor(n_estimators=100),
                                abs_error,
-                               abs_error_inv,
-                               model_params={
-	                               'n_estimators': 100
-                               }))
+                               abs_error_inv))
 icp_cv = RegIcpCvHelper(icp)
 
 scores = cross_val_score(icp_cv,
@@ -80,16 +74,10 @@ print(scores.groupby(['significance']).mean())
 # -----------------------------------------------------------------------------
 data = load_diabetes()
 
-icp = IcpRegressor(NormalizedRegressorNc(RandomForestRegressor,
-                                         RandomForestRegressor,
+icp = IcpRegressor(NormalizedRegressorNc(RandomForestRegressor(n_estimators=100),
+                                         RandomForestRegressor(n_estimators=100),
                                          abs_error,
-                                         abs_error_inv,
-                                         model_params={
-	                                        'n_estimators': 100
-                                         },
-                                         normalizer_params={
-	                                         'n_estimators': 100
-                                         }))
+                                         abs_error_inv))
 icp_cv = RegIcpCvHelper(icp)
 
 scores = cross_val_score(icp_cv,
@@ -110,12 +98,9 @@ print(scores.groupby(['significance']).mean())
 # -----------------------------------------------------------------------------
 data = load_diabetes()
 
-icp = IcpRegressor(RegressorNc(RandomForestRegressor,
+icp = IcpRegressor(RegressorNc(RandomForestRegressor(n_estimators=100),
                                sign_error,
-                               sign_error_inv,
-                               model_params={
-	                               'n_estimators': 100
-                               }))
+                               sign_error_inv))
 icp_cv = RegIcpCvHelper(icp)
 
 scores = cross_val_score(icp_cv,
@@ -135,16 +120,10 @@ print(scores.groupby(['significance']).mean())
 # -----------------------------------------------------------------------------
 data = load_diabetes()
 
-icp = IcpRegressor(NormalizedRegressorNc(RandomForestRegressor,
-                                         RandomForestRegressor,
+icp = IcpRegressor(NormalizedRegressorNc(RandomForestRegressor(n_estimators=100),
+                                         RandomForestRegressor(n_estimators=100),
                                          sign_error,
-                                         sign_error_inv,
-                                         model_params={
-	                                        'n_estimators': 100
-                                         },
-                                         normalizer_params={
-	                                         'n_estimators': 100
-                                         }))
+                                         sign_error_inv))
 icp_cv = RegIcpCvHelper(icp)
 
 scores = cross_val_score(icp_cv,
