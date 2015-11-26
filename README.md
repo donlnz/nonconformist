@@ -9,8 +9,7 @@ API documentation: http://donlnz.github.io/nonconformist/
 # Dependencies
 Tested under Python 2.7.
 
-Requires numpy, scipy and scikit-learn. The evaluation module additionally depends on
-the pandas package.
+Requires numpy, scipy, pandas and scikit-learn.
 
 # Known issues
 
