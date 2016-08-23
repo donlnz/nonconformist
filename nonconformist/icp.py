@@ -242,6 +242,33 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 			return p
 
 
+	def predict_conf(self, x):
+		"""Predict the output values for a set of input patterns, using
+		the confidence-and-credibility output scheme.
+
+		Parameters
+		----------
+		x : numpy array of shape [n_samples, n_features]
+			Inputs of patters for which to predict output values.
+
+		Returns
+		-------
+		p : numpy array of shape [n_samples, 3]
+			p contains three columns: the first column contains the most
+			likely class for each test pattern; the second column contains
+			the confidence in the predicted class label, and the third column
+			contains the credibility of the prediction.
+		"""
+		p = self.predict(x, significance=None)
+		label = p.argmax(axis=1)
+		credibility = p.max(axis=1)
+		for i, idx in enumerate(label):
+			p[i, idx] = -np.inf
+		confidence = 1 - p.max(axis=1)
+
+		return np.array([label, confidence, credibility]).T
+
+
 # -----------------------------------------------------------------------------
 # Inductive conformal regressor
 # -----------------------------------------------------------------------------
