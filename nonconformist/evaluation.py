@@ -54,12 +54,12 @@ class ClassIcpCvHelper(BaseIcpCvHelper, ClassifierMixin):
 	>>> from sklearn.datasets import load_iris
 	>>> from sklearn.ensemble import RandomForestClassifier
 	>>> from nonconformist.icp import IcpClassifier
-	>>> from nonconformist.nc import ProbEstClassifierNc, margin
+	>>> from nonconformist.nc import ProbEstClassifierNc, MarginErrFunc
 	>>> from nonconformist.evaluation import ClassIcpCvHelper
 	>>> from nonconformist.evaluation import class_mean_errors
 	>>> from nonconformist.evaluation import cross_val_score
 	>>> data = load_iris()
-	>>> nc = ProbEstClassifierNc(RandomForestClassifier(), margin)
+	>>> nc = ProbEstClassifierNc(RandomForestClassifier(), MarginErrFunc())
 	>>> icp = IcpClassifier(nc)
 	>>> icp_cv = ClassIcpCvHelper(icp)
 	>>> cross_val_score(icp_cv,
@@ -99,12 +99,12 @@ class RegIcpCvHelper(BaseIcpCvHelper, RegressorMixin):
 	>>> from sklearn.datasets import load_boston
 	>>> from sklearn.ensemble import RandomForestRegressor
 	>>> from nonconformist.icp import IcpRegressor
-	>>> from nonconformist.nc import RegressorNc, abs_error, abs_error_inv
+	>>> from nonconformist.nc import RegressorNc, AbsErrorErrFunc
 	>>> from nonconformist.evaluation import RegIcpCvHelper
 	>>> from nonconformist.evaluation import reg_mean_errors
 	>>> from nonconformist.evaluation import cross_val_score
 	>>> data = load_boston()
-	>>> nc = RegressorNc(RandomForestRegressor(), abs_error, abs_error_inv)
+	>>> nc = RegressorNc(RandomForestRegressor(), AbsErrorErrFunc())
 	>>> icp = IcpRegressor(nc)
 	>>> icp_cv = RegIcpCvHelper(icp)
 	>>> cross_val_score(icp_cv,

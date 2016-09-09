@@ -13,7 +13,7 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.datasets import load_boston
 
 from nonconformist.icp import IcpRegressor
-from nonconformist.nc import RegressorNc, abs_error, abs_error_inv
+from nonconformist.nc import RegressorNc, AbsErrorErrFunc
 
 # -----------------------------------------------------------------------------
 # Setup training, calibration and test indices
@@ -28,7 +28,7 @@ test = idx[int(2 * idx.size / 3):]
 # -----------------------------------------------------------------------------
 # Train and calibrate
 # -----------------------------------------------------------------------------
-icp = IcpRegressor(RegressorNc(DecisionTreeRegressor(), abs_error, abs_error_inv))
+icp = IcpRegressor(RegressorNc(DecisionTreeRegressor(), AbsErrorErrFunc()))
 icp.fit(data.data[train, :], data.target[train])
 icp.calibrate(data.data[calibrate, :], data.target[calibrate])
 

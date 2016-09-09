@@ -154,13 +154,13 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 	>>> from sklearn.datasets import load_iris
 	>>> from sklearn.tree import DecisionTreeClassifier
 	>>> from nonconformist.icp import IcpClassifier
-	>>> from nonconformist.nc import ProbEstClassifierNc, margin
+	>>> from nonconformist.nc import ProbEstClassifierNc, MarginErrFunc
 	>>> iris = load_iris()
 	>>> idx = np.random.permutation(iris.target.size)
 	>>> train = idx[:int(idx.size / 3)]
 	>>> cal = idx[int(idx.size / 3):int(2 * idx.size / 3)]
 	>>> test = idx[int(2 * idx.size / 3):]
-	>>> nc = ProbEstClassifierNc(DecisionTreeClassifier, margin)
+	>>> nc = ProbEstClassifierNc(DecisionTreeClassifier, MarginErrFunc())
 	>>> icp = IcpClassifier(nc)
 	>>> icp.fit(iris.data[train, :], iris.target[train])
 	>>> icp.calibrate(iris.data[cal, :], iris.target[cal])
@@ -313,13 +313,13 @@ class IcpRegressor(BaseIcp, RegressorMixin):
 	>>> from sklearn.datasets import load_boston
 	>>> from sklearn.tree import DecisionTreeRegressor
 	>>> from nonconformist.icp import IcpRegressor
-	>>> from nonconformist.nc import RegressorNc, abs_error, abs_error_inv
+	>>> from nonconformist.nc import RegressorNc, AbsErrorErrFunc
 	>>> boston = load_boston()
 	>>> idx = np.random.permutation(boston.target.size)
 	>>> train = idx[:int(idx.size / 3)]
 	>>> cal = idx[int(idx.size / 3):int(2 * idx.size / 3)]
 	>>> test = idx[int(2 * idx.size / 3):]
-	>>> nc = RegressorNc(DecisionTreeRegressor, abs_error, abs_error_inv)
+	>>> nc = RegressorNc(DecisionTreeRegressor, AbsErrorErrFunc())
 	>>> icp = IcpRegressor(nc)
 	>>> icp.fit(boston.data[train, :], boston.target[train])
 	>>> icp.calibrate(boston.data[cal, :], boston.target[cal])
