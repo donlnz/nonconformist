@@ -97,6 +97,7 @@ class BaseModelAdapter(object):
 		return {'model': self.model,
 		        'fit_params': self.fit_params}
 
+
 class ClassifierAdapter(BaseModelAdapter):
 	def __init__(self, model, fit_params=None):
 		super(ClassifierAdapter, self).__init__(model, fit_params)
@@ -111,3 +112,41 @@ class RegressorAdapter(BaseModelAdapter):
 
 	def _underlying_predict(self, x):
 		return self.model.predict(x)
+
+
+class OobMixin(object):
+	def __init__(self, model, fit_params=None):
+		super(OobMixin, self).__init__(model, fit_params)
+		self.train_x = None
+
+	def fit(self, x, y):
+		super(OobMixin, self).fit(x, y)
+		self.train_x = x
+
+	def _underlying_predict(self, x):
+		# TODO: sub-sampling of ensemble for test patterns
+		oob = x == self.train_x
+
+		if hasattr(oob, 'all'):
+			oob = oob.all()
+
+		if oob:
+			return self._oob_prediction()
+		else:
+			return super(OobMixin, self)._underlying_predict(x)
+
+
+class OobClassifierAdapter(OobMixin, ClassifierAdapter):
+	def __init__(self, model, fit_params=None):
+		super(OobClassifierAdapter, self).__init__(model, fit_params)
+
+	def _oob_prediction(self):
+		return self.model.oob_decision_function
+
+
+class OobRegressorAdapter(OobMixin, RegressorAdapter):
+	def __init__(self, model, fit_params=None):
+		super(OobRegressorAdapter, self).__init__(model, fit_params)
+
+	def _oob_prediction(self):
+		return self.model.oob_prediction_
