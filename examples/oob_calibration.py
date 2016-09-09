@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.datasets import load_iris, load_diabetes
 
 from nonconformist.base import OobClassifierAdapter, OobRegressorAdapter
-from nonconformist.icp import IcpClassifier, IcpRegressor
+from nonconformist.icp import OobCpClassifier, OobCpRegressor
 from nonconformist.nc import ClassifierNc, RegressorNc
 
 from nonconformist.evaluation import cross_val_score
@@ -27,7 +27,7 @@ from nonconformist.evaluation import reg_mean_errors, reg_median_size
 # -----------------------------------------------------------------------------
 data = load_iris()
 
-icp = IcpClassifier(ClassifierNc(OobClassifierAdapter(RandomForestClassifier(n_estimators=100))))
+icp = OobCpClassifier(ClassifierNc(OobClassifierAdapter(RandomForestClassifier(n_estimators=100, oob_score=True))))
 icp_cv = ClassIcpCvHelper(icp)
 
 scores = cross_val_score(icp_cv,
@@ -47,7 +47,7 @@ print(scores.groupby(['significance']).mean())
 # -----------------------------------------------------------------------------
 data = load_diabetes()
 
-icp = IcpRegressor(RegressorNc(OobRegressorAdapter(RandomForestRegressor(n_estimators=100))))
+icp = OobCpRegressor(RegressorNc(OobRegressorAdapter(RandomForestRegressor(n_estimators=100, oob_score=True))))
 icp_cv = RegIcpCvHelper(icp)
 
 scores = cross_val_score(icp_cv,

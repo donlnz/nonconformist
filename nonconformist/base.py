@@ -141,7 +141,7 @@ class OobClassifierAdapter(OobMixin, ClassifierAdapter):
 		super(OobClassifierAdapter, self).__init__(model, fit_params)
 
 	def _oob_prediction(self):
-		return self.model.oob_decision_function
+		return self.model.oob_decision_function_
 
 
 class OobRegressorAdapter(OobMixin, RegressorAdapter):

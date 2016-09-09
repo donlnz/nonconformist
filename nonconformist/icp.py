@@ -241,7 +241,6 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 		else:
 			return p
 
-
 	def predict_conf(self, x):
 		"""Predict the output values for a set of input patterns, using
 		the confidence-and-credibility output scheme.
@@ -268,6 +267,23 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 
 		return np.array([label, confidence, credibility]).T
 
+
+class OobCpClassifier(IcpClassifier):
+	def __init__(self,
+	             nc_function,
+	             condition=None,
+	             smoothing=True):
+		super(OobCpClassifier, self).__init__(nc_function,
+		                                      condition,
+		                                      smoothing)
+
+	def fit(self, x, y):
+		super(OobCpClassifier, self).fit(x, y)
+		super(OobCpClassifier, self).calibrate(x, y, False)
+
+	def calibrate(self, x, y, increment=False):
+		# Should throw exception (or really not be implemented for oob)
+		pass
 
 # -----------------------------------------------------------------------------
 # Inductive conformal regressor
@@ -383,3 +399,19 @@ class IcpRegressor(BaseIcp, RegressorMixin):
 					prediction[idx, :] = p
 
 		return prediction
+
+
+class OobCpRegressor(IcpRegressor):
+	def __init__(self,
+				 nc_function,
+				 condition=None):
+		super(OobCpRegressor, self).__init__(nc_function,
+											  condition)
+
+	def fit(self, x, y):
+		super(OobCpRegressor, self).fit(x, y)
+		super(OobCpRegressor, self).calibrate(x, y, False)
+
+	def calibrate(self, x, y, increment=False):
+		# Should throw exception (or really not be implemented for oob)
+		pass
