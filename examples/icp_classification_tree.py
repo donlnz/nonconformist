@@ -12,8 +12,9 @@ import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import load_iris
 
+from nonconformist.base import ClassifierAdapter
 from nonconformist.icp import IcpClassifier
-from nonconformist.nc import ProbEstClassifierNc, MarginErrFunc
+from nonconformist.nc import ClassifierNc, MarginErrFunc
 
 # -----------------------------------------------------------------------------
 # Setup training, calibration and test indices
@@ -28,8 +29,8 @@ test = idx[int(2 * idx.size / 3):]
 # -----------------------------------------------------------------------------
 # Train and calibrate
 # -----------------------------------------------------------------------------
-icp = IcpClassifier(ProbEstClassifierNc(DecisionTreeClassifier(),
-                                        MarginErrFunc()))
+icp = IcpClassifier(ClassifierNc(ClassifierAdapter(DecisionTreeClassifier()),
+                                 MarginErrFunc()))
 icp.fit(data.data[train, :], data.target[train])
 icp.calibrate(data.data[calibrate, :], data.target[calibrate])
 

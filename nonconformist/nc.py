@@ -12,7 +12,7 @@ import abc
 import numpy as np
 from scipy.stats import pearsonr
 from sklearn.base import clone
-
+from nonconformist.base import ClassifierAdapter, RegressorAdapter
 
 
 # -----------------------------------------------------------------------------
@@ -69,6 +69,13 @@ class RegressionErrFunc(object):
 		y : numpy array of shape [n_samples]
 			True output labels of each sample.
 
+		norm : numpy array of shape [n_samples]
+			Normalization values for normalized nonconformity.
+
+		beta : float
+			Beta parameter for normalized nonconformity. Larger beta reduces
+			influence of normalization model.
+
 		Returns
 		-------
 		nc : numpy array of shape [n_samples]
@@ -106,7 +113,8 @@ class RegressionErrFunc(object):
 		"""
 		pass
 
-	def _check_norm_beta(self, norm, beta):
+	@staticmethod
+	def _check_norm_beta(norm, beta):
 		if norm is None:
 			norm = 1
 			beta = 0
@@ -114,6 +122,7 @@ class RegressionErrFunc(object):
 			beta = 0
 
 		return norm, beta
+
 
 class InverseProbabilityErrFunc(ClassificationErrFunc):
 	"""Calculates the probability of not predicting the correct class.
@@ -177,7 +186,6 @@ class AbsErrorErrFunc(RegressionErrFunc):
 		norm, beta = self._check_norm_beta(norm, beta)
 		return np.abs(prediction - y) / (norm + beta)
 
-
 	def apply_inverse(self, prediction, nc, significance, norm=None, beta=0):
 		norm, beta = self._check_norm_beta(norm, beta)
 		nc = np.sort(nc)[::-1]
@@ -225,8 +233,17 @@ class SignErrorErrFunc(RegressionErrFunc):
 # -----------------------------------------------------------------------------
 # Base nonconformity scorer
 # -----------------------------------------------------------------------------
-class BaseNc(object):
+class BaseModelNc(object):
 	"""Base class for nonconformity scorers based on an underlying model.
+
+	Parameters
+	----------
+	model : ClassifierAdapter or RegressorAdapter
+		Underlying classification model used for calculating nonconformity
+		scores.
+
+	err_func : ClassificationErrFunc or RegressionErrFunc
+		Error function object.
 	"""
 	def __init__(self, model, err_func):
 		self.err_func = err_func
@@ -254,17 +271,6 @@ class BaseNc(object):
 		self.model.fit(x, y)
 		self.clean = False
 
-	def __get_prediction(self, x):
-		if (not self.clean or
-			self.last_x is None or
-		    not np.array_equal(self.last_x, x)):
-
-			self.last_x = x
-			self.last_prediction = self._underlying_predict(x)
-			self.clean = True
-
-		return self.last_prediction.copy()
-
 	def calc_nc(self, x, y):
 		"""Calculates the nonconformity score of a set of samples.
 
@@ -281,7 +287,7 @@ class BaseNc(object):
 		nc : numpy array of shape [n_samples]
 			Nonconformity scores of samples.
 		"""
-		prediction = self.__get_prediction(x)
+		prediction = self.model.predict(x)
 		return self.err_func.apply(prediction, y)
 
 	def get_params(self, deep=False):
@@ -300,27 +306,25 @@ class BaseNc(object):
 # -----------------------------------------------------------------------------
 # Classification nonconformity scorers
 # -----------------------------------------------------------------------------
-class ProbEstClassifierNc(BaseNc):
+class ClassifierNc(BaseModelNc):
 	"""Nonconformity scorer using an underlying class probability estimating
 	model.
 
 	Parameters
 	----------
-	model : object
+	model : ClassifierAdapter
 		Underlying classification model used for calculating nonconformity
-		scores. Should implement the ``fit(x, y)`` and ``predict_proba(x)``
-		methods, as used by the classification models present in the
-		scikit-learn library.
+		scores.
 
 	err_func : ClassificationErrFunc
-		Scorer callable object with signature ``score(estimator, x, y)``.
+		Error function object.
 
 	Attributes
 	----------
-	model : object
+	model : ClassifierAdapter
 		Underlying model object.
 
-	err_func : callable
+	err_func : ClassificationErrFunc
 		Scorer function used to calculate nonconformity scores.
 
 	See also
@@ -330,40 +334,31 @@ class ProbEstClassifierNc(BaseNc):
 	def __init__(self,
 	             model,
 	             err_func=MarginErrFunc()):
-		super(ProbEstClassifierNc, self).__init__(model,
-		                                          err_func)
-
-	def _underlying_predict(self, x):
-		return self.model.predict_proba(x)
+		super(ClassifierNc, self).__init__(model,
+		                                   err_func)
 
 
 # -----------------------------------------------------------------------------
 # Regression nonconformity scorers
 # -----------------------------------------------------------------------------
-class RegressorNc(BaseNc):
+class RegressorNc(BaseModelNc):
 	"""Nonconformity scorer using an underlying regression model.
 
 	Parameters
 	----------
-	model : object
+	model : RegressorAdapter
 		Underlying regression model used for calculating nonconformity scores.
-		Should implement the ``fit(x, y)`` and ``predict(x)`` methods, as used
-		by the regression models present in the scikit-learn library.
 
 	err_func : RegressionErrFunc
-		Scorer callable object with signature ``score(estimator, x, y)``.
-
+		Error function object.
 
 	Attributes
 	----------
-	model : object
+	model : RegressorAdapter
 		Underlying model object.
 
-	err_func : callable
+	err_func : RegressionErrFunc
 		Scorer function used to calculate nonconformity scores.
-
-	inverse_err_func : callable
-		Inverse function (partial) of nonconformity function.
 
 	See also
 	--------
@@ -374,9 +369,6 @@ class RegressorNc(BaseNc):
 	             err_func=AbsErrorErrFunc()):
 		super(RegressorNc, self).__init__(model,
 		                                  err_func)
-
-	def _underlying_predict(self, x):
-		return self.model.predict(x)
 
 	def predict(self, x, nc, significance=None):
 		"""Constructs prediction intervals for a set of test examples.
@@ -406,7 +398,7 @@ class RegressorNc(BaseNc):
 			maximum	boundaries) for the set of test patterns at the chosen
 			significance level.
 		"""
-		prediction = self._underlying_predict(x)
+		prediction = self.model.predict(x)
 		if significance:
 			return self.err_func.apply_inverse(prediction, nc, significance)
 		else:
@@ -421,15 +413,11 @@ class NormalizedRegressorNc(RegressorNc):
 
 	Parameters
 	----------
-	model : object
+	model : RegressorAdapter
 		Underlying regression model used for calculating nonconformity scores.
-		Should implement the ``fit(x, y)`` and ``predict(x)`` methods, as used
-		by the regression models present in the scikit-learn library.
 
-	normalizer_model : object
+	normalizer_model : RegressorAdapter
 		Normalizer regression model used for calculating nonconformity scores.
-		Should implement the ``fit(x, y)`` and ``predict(x)`` methods, as used
-		by the regression models present in the scikit-learn library.
 
 	err_func : RegressionErrFunc
 		Scorer callable object with signature ``score(estimator, x, y)``.
@@ -441,17 +429,14 @@ class NormalizedRegressorNc(RegressorNc):
 
 	Attributes
 	----------
-	model : object
+	model : RegressorAdapter
 		Underlying model object.
 
-	normalizer_model : object
+	normalizer_model : RegressorAdapter
 		Underlying normalizer object.
 
-	err_func : object
+	err_func : RegressionErrFunc
 		Scorer function used to calculate nonconformity scores.
-
-	inverse_err_func : callable
-		Inverse function (partial) of nonconformity function.
 
 	beta : float
 		Normalization weight.
@@ -473,14 +458,14 @@ class NormalizedRegressorNc(RegressorNc):
 
 	def fit(self, x, y):
 		super(NormalizedRegressorNc, self).fit(x, y)
-		err = np.abs(self._underlying_predict(x) - y)
+		err = np.abs(self.model.predict(x) - y)
 		err += 0.00001  # Add a small error to each sample to avoid log(0)
 		log_err = np.log(err)
 		self.normalizer_model.fit(x, log_err)
 
 	def calc_nc(self, x, y):
 		norm = np.exp(self.normalizer_model.predict(x))
-		prediction = self._underlying_predict(x)
+		prediction = self.model.predict(x)
 
 		if self.beta == 'auto':
 			r = pearsonr(norm, prediction)[0]
@@ -496,21 +481,21 @@ class NormalizedRegressorNc(RegressorNc):
 		return self.err_func.apply(prediction, y, norm, self.beta_)
 
 	def predict(self, x, nc, significance=None):
-		prediction = self._underlying_predict(x)
+		prediction = self.model.predict(x)
 		norm = np.exp(self.normalizer_model.predict(x))
 		if significance:
 			return self.err_func.apply_inverse(prediction,
-			                             nc,
-			                             significance,
-			                             norm,
-			                             self.beta_)
+			                                   nc,
+			                                   significance,
+			                                   norm,
+			                                   self.beta_)
 		else:
 			significance = np.arange(0.01, 1.0, 0.01)
 			return np.dstack([self.err_func.apply_inverse(prediction,
-			                                        nc,
-			                                        s,
-			                                        norm,
-			                                        self.beta_)
+			                                              nc,
+			                                              s,
+			                                              norm,
+			                                              self.beta_)
 			                  for s in significance])
 
 	def get_params(self, deep=False):

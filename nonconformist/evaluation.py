@@ -54,7 +54,7 @@ class ClassIcpCvHelper(BaseIcpCvHelper, ClassifierMixin):
 	>>> from sklearn.datasets import load_iris
 	>>> from sklearn.ensemble import RandomForestClassifier
 	>>> from nonconformist.icp import IcpClassifier
-	>>> from nonconformist.nc import ProbEstClassifierNc, MarginErrFunc
+	>>> from nonconformist.nc import ClassifierNc, MarginErrFunc
 	>>> from nonconformist.evaluation import ClassIcpCvHelper
 	>>> from nonconformist.evaluation import class_mean_errors
 	>>> from nonconformist.evaluation import cross_val_score

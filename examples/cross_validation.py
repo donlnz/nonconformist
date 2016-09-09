@@ -12,9 +12,10 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.datasets import load_iris, load_diabetes
 
+from nonconformist.base import ClassifierAdapter, RegressorAdapter
 from nonconformist.icp import IcpClassifier, IcpRegressor
 from nonconformist.nc import MarginErrFunc
-from nonconformist.nc import ProbEstClassifierNc, RegressorNc
+from nonconformist.nc import ClassifierNc, RegressorNc
 from nonconformist.nc import NormalizedRegressorNc
 from nonconformist.nc import AbsErrorErrFunc, SignErrorErrFunc
 
@@ -29,15 +30,15 @@ from nonconformist.evaluation import reg_mean_errors, reg_median_size
 # -----------------------------------------------------------------------------
 data = load_iris()
 
-icp = IcpClassifier(ProbEstClassifierNc(RandomForestClassifier(n_estimators=100),
-                                        MarginErrFunc()))
+icp = IcpClassifier(ClassifierNc(ClassifierAdapter(RandomForestClassifier(n_estimators=100)),
+                                 MarginErrFunc()))
 icp_cv = ClassIcpCvHelper(icp)
 
 scores = cross_val_score(icp_cv,
                          data.data,
                          data.target,
-                         iterations=10,
-                         folds=10,
+                         iterations=5,
+                         folds=5,
                          scoring_funcs=[class_mean_errors, class_avg_c],
                          significance_levels=[0.05, 0.1, 0.2])
 
@@ -50,15 +51,15 @@ print(scores.groupby(['significance']).mean())
 # -----------------------------------------------------------------------------
 data = load_diabetes()
 
-icp = IcpRegressor(RegressorNc(RandomForestRegressor(n_estimators=100),
+icp = IcpRegressor(RegressorNc(RegressorAdapter(RandomForestRegressor(n_estimators=100)),
                                AbsErrorErrFunc()))
 icp_cv = RegIcpCvHelper(icp)
 
 scores = cross_val_score(icp_cv,
                          data.data,
                          data.target,
-                         iterations=10,
-                         folds=10,
+                         iterations=5,
+                         folds=5,
                          scoring_funcs=[reg_mean_errors, reg_median_size],
                          significance_levels=[0.05, 0.1, 0.2])
 
@@ -72,16 +73,16 @@ print(scores.groupby(['significance']).mean())
 # -----------------------------------------------------------------------------
 data = load_diabetes()
 
-icp = IcpRegressor(NormalizedRegressorNc(RandomForestRegressor(n_estimators=100),
-                                         RandomForestRegressor(n_estimators=100),
+icp = IcpRegressor(NormalizedRegressorNc(RegressorAdapter(RandomForestRegressor(n_estimators=100)),
+                                         RegressorAdapter(RandomForestRegressor(n_estimators=100)),
                                          AbsErrorErrFunc()))
 icp_cv = RegIcpCvHelper(icp)
 
 scores = cross_val_score(icp_cv,
                          data.data,
                          data.target,
-                         iterations=10,
-                         folds=10,
+                         iterations=5,
+                         folds=5,
                          scoring_funcs=[reg_mean_errors, reg_median_size],
                          significance_levels=[0.05, 0.1, 0.2])
 
@@ -95,15 +96,15 @@ print(scores.groupby(['significance']).mean())
 # -----------------------------------------------------------------------------
 data = load_diabetes()
 
-icp = IcpRegressor(RegressorNc(RandomForestRegressor(n_estimators=100),
+icp = IcpRegressor(RegressorNc(RegressorAdapter(RandomForestRegressor(n_estimators=100)),
                                SignErrorErrFunc()))
 icp_cv = RegIcpCvHelper(icp)
 
 scores = cross_val_score(icp_cv,
                          data.data,
                          data.target,
-                         iterations=10,
-                         folds=10,
+                         iterations=5,
+                         folds=5,
                          scoring_funcs=[reg_mean_errors, reg_median_size],
                          significance_levels=[0.05, 0.1, 0.2])
 
@@ -116,16 +117,16 @@ print(scores.groupby(['significance']).mean())
 # -----------------------------------------------------------------------------
 data = load_diabetes()
 
-icp = IcpRegressor(NormalizedRegressorNc(RandomForestRegressor(n_estimators=100),
-                                         RandomForestRegressor(n_estimators=100),
+icp = IcpRegressor(NormalizedRegressorNc(RegressorAdapter(RandomForestRegressor(n_estimators=100)),
+                                         RegressorAdapter(RandomForestRegressor(n_estimators=100)),
                                          AbsErrorErrFunc()))
 icp_cv = RegIcpCvHelper(icp)
 
 scores = cross_val_score(icp_cv,
                          data.data,
                          data.target,
-                         iterations=10,
-                         folds=10,
+                         iterations=5,
+                         folds=5,
                          scoring_funcs=[reg_mean_errors, reg_median_size],
                          significance_levels=[0.05, 0.1, 0.2])
 

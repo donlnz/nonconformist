@@ -12,7 +12,8 @@ import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import load_iris
 
-from nonconformist.nc import  ProbEstClassifierNc
+from nonconformist.base import ClassifierAdapter
+from nonconformist.nc import  ClassifierNc
 from nonconformist.icp import IcpClassifier
 from nonconformist.acp import AggregatedCp
 from nonconformist.acp import BootstrapSampler, CrossSampler, RandomSubSampler
@@ -39,27 +40,27 @@ significance = 0.1
 
 models = {  'ACP-RandomSubSampler'  : AggregatedCp(
                                         IcpClassifier(
-                                            ProbEstClassifierNc(
-                                                DecisionTreeClassifier())),
+                                            ClassifierNc(
+                                                ClassifierAdapter(DecisionTreeClassifier()))),
                                         RandomSubSampler()),
             'ACP-CrossSampler'      : AggregatedCp(
                                         IcpClassifier(
-                                            ProbEstClassifierNc(
-                                                DecisionTreeClassifier())),
+                                            ClassifierNc(
+                                                ClassifierAdapter(DecisionTreeClassifier()))),
                                         CrossSampler()),
             'ACP-BootstrapSampler'  : AggregatedCp(
                                         IcpClassifier(
-                                            ProbEstClassifierNc(
-                                                DecisionTreeClassifier())),
+                                            ClassifierNc(
+                                                ClassifierAdapter(DecisionTreeClassifier()))),
                                         BootstrapSampler()),
             'CCP'                   : CrossConformalClassifier(
                                         IcpClassifier(
-                                            ProbEstClassifierNc(
-                                                DecisionTreeClassifier()))),
+                                            ClassifierNc(
+                                                ClassifierAdapter(DecisionTreeClassifier())))),
             'BCP'                   : BootstrapConformalClassifier(
                                         IcpClassifier(
-                                            ProbEstClassifierNc(
-                                                DecisionTreeClassifier())))
+                                            ClassifierNc(
+                                                ClassifierAdapter(DecisionTreeClassifier()))))
           }
 
 # -----------------------------------------------------------------------------

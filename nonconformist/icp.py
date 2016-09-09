@@ -154,7 +154,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 	>>> from sklearn.datasets import load_iris
 	>>> from sklearn.tree import DecisionTreeClassifier
 	>>> from nonconformist.icp import IcpClassifier
-	>>> from nonconformist.nc import ProbEstClassifierNc, MarginErrFunc
+	>>> from nonconformist.nc import ClassifierNc, MarginErrFunc
 	>>> iris = load_iris()
 	>>> idx = np.random.permutation(iris.target.size)
 	>>> train = idx[:int(idx.size / 3)]

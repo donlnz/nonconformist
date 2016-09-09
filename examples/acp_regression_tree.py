@@ -12,6 +12,7 @@ import pandas as pd
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.datasets import load_diabetes
 
+from nonconformist.base import RegressorAdapter
 from nonconformist.icp import IcpRegressor
 from nonconformist.nc import RegressorNc
 from nonconformist.acp import AggregatedCp
@@ -38,17 +39,17 @@ significance = 0.1
 models = {  'ACP-RandomSubSampler'  : AggregatedCp(
                                     IcpRegressor(
                                         RegressorNc(
-                                            DecisionTreeRegressor())),
+                                            RegressorAdapter(DecisionTreeRegressor()))),
                                     RandomSubSampler()),
             'ACP-CrossSampler'      : AggregatedCp(
                                         IcpRegressor(
                                             RegressorNc(
-                                                DecisionTreeRegressor())),
+                                                RegressorAdapter(DecisionTreeRegressor()))),
                                         CrossSampler()),
             'ACP-BootstrapSampler'  : AggregatedCp(
                                         IcpRegressor(
                                             RegressorNc(
-                                                DecisionTreeRegressor())),
+                                                RegressorAdapter(DecisionTreeRegressor()))),
                                         BootstrapSampler())
       }
 

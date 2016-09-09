@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
 
-from nonconformist.icp import IcpClassifier
-from nonconformist.nc import ProbEstClassifierNc
-
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import load_iris
+
+from nonconformist.base import ClassifierAdapter
+from nonconformist.icp import IcpClassifier
+from nonconformist.nc import ClassifierNc
 
 data = load_iris()
 x, y = data.data, data.target
@@ -20,7 +21,7 @@ train_idx = idx[:int(n_instances / 3)]
 cal_idx = idx[int(n_instances / 3):2 * int(n_instances / 3)]
 test_idx = idx[2 * int(n_instances / 3):]
 
-nc = ProbEstClassifierNc(RandomForestClassifier())
+nc = ClassifierNc(ClassifierAdapter(RandomForestClassifier()))
 icp = IcpClassifier(nc)
 
 icp.fit(x[train_idx, :], y[train_idx])
