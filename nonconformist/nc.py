@@ -11,6 +11,7 @@ from __future__ import division
 import abc
 import numpy as np
 from scipy.stats import pearsonr
+from sklearn.base import BaseEstimator
 from nonconformist.base import ClassifierAdapter, RegressorAdapter
 
 
@@ -232,7 +233,7 @@ class SignErrorErrFunc(RegressionErrFunc):
 # -----------------------------------------------------------------------------
 # Base nonconformity scorer
 # -----------------------------------------------------------------------------
-class BaseModelNc(object):
+class BaseModelNc(BaseEstimator):
 	"""Base class for nonconformity scorers based on an underlying model.
 
 	Parameters
@@ -245,6 +246,7 @@ class BaseModelNc(object):
 		Error function object.
 	"""
 	def __init__(self, model, err_func):
+		super(BaseModelNc, self).__init__()
 		self.err_func = err_func
 		self.model = model
 
