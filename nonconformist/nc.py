@@ -11,7 +11,6 @@ from __future__ import division
 import abc
 import numpy as np
 from scipy.stats import pearsonr
-from sklearn.base import clone
 from nonconformist.base import ClassifierAdapter, RegressorAdapter
 
 
@@ -290,18 +289,6 @@ class BaseModelNc(object):
 		prediction = self.model.predict(x)
 		return self.err_func.apply(prediction, y)
 
-	def get_params(self, deep=False):
-		if deep:
-			return {
-				'model': clone(self.model),
-				'err_func': self.err_func
-			}
-		else:
-			return {
-				'model': self.model,
-				'err_func': self.err_func
-			}
-
 
 # -----------------------------------------------------------------------------
 # Classification nonconformity scorers
@@ -497,12 +484,3 @@ class NormalizedRegressorNc(RegressorNc):
 			                                              norm,
 			                                              self.beta_)
 			                  for s in significance])
-
-	def get_params(self, deep=False):
-		params = super(RegressorNc, self).get_params()
-		params['beta'] = self.beta
-		if deep:
-			params['normalizer_model'] = clone(self.normalizer_model)
-		else:
-			params['normalizer_model'] = self.normalizer_model
-		return params

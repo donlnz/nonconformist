@@ -9,20 +9,28 @@ docstring
 import abc
 import numpy as np
 
+from sklearn.base import BaseEstimator
+
 
 class RegressorMixin(object):
+	def __init__(self):
+		super(RegressorMixin, self).__init__()
+
 	@classmethod
 	def get_problem_type(cls):
 		return 'regression'
 
 
 class ClassifierMixin(object):
+	def __init__(self):
+		super(ClassifierMixin, self).__init__()
+
 	@classmethod
 	def get_problem_type(cls):
 		return 'classification'
 
 
-class BaseModelAdapter(object):
+class BaseModelAdapter(BaseEstimator):
 	__metaclass__ = abc.ABCMeta
 
 	def __init__(self, model, fit_params=None):
@@ -92,10 +100,6 @@ class BaseModelAdapter(object):
 			Predicted outputs of test examples.
 		"""
 		pass
-
-	def get_params(self, deep=False):
-		return {'model': self.model,
-		        'fit_params': self.fit_params}
 
 
 class ClassifierAdapter(BaseModelAdapter):

@@ -11,7 +11,7 @@ from collections import defaultdict
 from functools import partial
 
 import numpy as np
-from sklearn.base import clone
+from sklearn.base import BaseEstimator
 
 from nonconformist.base import RegressorMixin, ClassifierMixin
 
@@ -19,13 +19,25 @@ from nonconformist.base import RegressorMixin, ClassifierMixin
 # -----------------------------------------------------------------------------
 # Base inductive conformal predictor
 # -----------------------------------------------------------------------------
-class BaseIcp(object):
+class BaseIcp(BaseEstimator):
 	"""Base class for inductive conformal predictors.
 	"""
 	def __init__(self, nc_function, condition=None):
 		self.cal_x, self.cal_y = None, None
 		self.nc_function = nc_function
-		if condition is not None:
+
+		# Check if condition-parameter is the default function (i.e.,
+		# lambda x: 0). This is so we can safely clone the object without
+		# the clone accidentally having self.conditional = True.
+		default_condition = lambda x: 0
+		is_default = (callable(condition) and
+		              (condition.__code__.co_code ==
+		               default_condition.__code__.co_code))
+
+		if is_default:
+			self.condition = condition
+			self.conditional = False
+		elif callable(condition):
 			self.condition = condition
 			self.conditional = True
 		else:
@@ -101,14 +113,6 @@ class BaseIcp(object):
 			self.cal_y = np.hstack([self.cal_y, y])
 		else:
 			self.cal_x, self.cal_y = x, y
-
-	def get_params(self, deep=False):
-		if deep:
-			return {'nc_function': clone(self.nc_function),
-					'condition': self.condition}
-		else:
-			return {'nc_function': self.nc_function,
-					'condition': self.condition}
 
 
 # -----------------------------------------------------------------------------

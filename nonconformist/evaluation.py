@@ -19,26 +19,19 @@ import pandas as pd
 from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.cross_validation import KFold
 from sklearn.cross_validation import train_test_split
-from sklearn.base import clone
+from sklearn.base import clone, BaseEstimator
 
 
-class BaseIcpCvHelper(object):
+class BaseIcpCvHelper(BaseEstimator):
 	"""Base class for cross validation helpers.
 	"""
 	def __init__(self, icp, calibration_portion):
+		super(BaseIcpCvHelper, self).__init__()
 		self.icp = icp
-		self.cal_port = calibration_portion
+		self.calibration_portion = calibration_portion
 
 	def predict(self, x, significance=None):
 			return self.icp.predict(x, significance)
-
-	def get_params(self, deep=False):
-		if deep:
-			return {'icp': clone(self.icp),
-					'calibration_portion': self.cal_port}
-		else:
-			return {'icp': self.icp,
-					'calibration_portion': self.cal_port}
 
 
 class ClassIcpCvHelper(BaseIcpCvHelper, ClassifierMixin):
@@ -80,7 +73,8 @@ class ClassIcpCvHelper(BaseIcpCvHelper, ClassifierMixin):
 		super(ClassIcpCvHelper, self).__init__(icp, calibration_portion)
 
 	def fit(self, x, y):
-		split = StratifiedShuffleSplit(y, n_iter=1, test_size=self.cal_port)
+		split = StratifiedShuffleSplit(y, n_iter=1,
+		                               test_size=self.calibration_portion)
 		for train, cal in split:
 			self.icp.fit(x[train, :], y[train])
 			self.icp.calibrate(x[cal, :], y[cal])
@@ -125,7 +119,7 @@ class RegIcpCvHelper(BaseIcpCvHelper, RegressorMixin):
 		super(RegIcpCvHelper, self).__init__(icp, calibration_portion)
 
 	def fit(self, x, y):
-		split = train_test_split(x, y, test_size=self.cal_port)
+		split = train_test_split(x, y, test_size=self.calibration_portion)
 		x_tr, x_cal, y_tr, y_cal = split[0], split[1], split[2], split[3]
 		self.icp.fit(x_tr, y_tr)
 		self.icp.calibrate(x_cal, y_cal)
