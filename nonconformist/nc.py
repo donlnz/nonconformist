@@ -10,10 +10,9 @@ from __future__ import division
 
 import abc
 import numpy as np
-from scipy.stats import pearsonr
-from sklearn.base import BaseEstimator
+import sklearn.base
 from nonconformist.base import ClassifierAdapter, RegressorAdapter
-
+from nonconformist.base import OobClassifierAdapter, OobRegressorAdapter
 
 # -----------------------------------------------------------------------------
 # Error functions
@@ -58,7 +57,7 @@ class RegressionErrFunc(object):
 		super(RegressionErrFunc, self).__init__()
 
 	@abc.abstractmethod
-	def apply(self, prediction, y, norm=None, beta=0):
+	def apply(self, prediction, y):#, norm=None, beta=0):
 		"""Apply the nonconformity function.
 
 		Parameters
@@ -69,13 +68,6 @@ class RegressionErrFunc(object):
 		y : numpy array of shape [n_samples]
 			True output labels of each sample.
 
-		norm : numpy array of shape [n_samples]
-			Normalization values for normalized nonconformity.
-
-		beta : float
-			Beta parameter for normalized nonconformity. Larger beta reduces
-			influence of normalization model.
-
 		Returns
 		-------
 		nc : numpy array of shape [n_samples]
@@ -84,27 +76,17 @@ class RegressionErrFunc(object):
 		pass
 
 	@abc.abstractmethod
-	def apply_inverse(self, prediction, nc, significance, norm=None, beta=0):
+	def apply_inverse(self, nc, significance):#, norm=None, beta=0):
 		"""Apply the inverse of the nonconformity function (i.e.,
 		calculate prediction interval).
 
 		Parameters
 		----------
-		prediction : numpy array of shape [n_samples]
-			Point (regression) predictions of a test examples.
-
 		nc : numpy array of shape [n_calibration_samples]
 			Nonconformity scores obtained for conformal predictor.
 
 		significance : float
 			Significance level (0, 1).
-
-		norm : numpy array of shape [n_samples]
-			Normalization values for normalized nonconformity.
-
-		beta : float
-			Beta parameter for normalized nonconformity. Larger beta reduces
-			influence of normalization model.
 
 		Returns
 		-------
@@ -112,16 +94,6 @@ class RegressionErrFunc(object):
 			Minimum and maximum interval boundaries for each prediction.
 		"""
 		pass
-
-	@staticmethod
-	def _check_norm_beta(norm, beta):
-		if norm is None:
-			norm = 1
-			beta = 0
-		elif beta is None:
-			beta = 0
-
-		return norm, beta
 
 
 class InverseProbabilityErrFunc(ClassificationErrFunc):
@@ -182,18 +154,15 @@ class AbsErrorErrFunc(RegressionErrFunc):
 	def __init__(self):
 		super(AbsErrorErrFunc, self).__init__()
 
-	def apply(self, prediction, y, norm=None, beta=0):
-		norm, beta = self._check_norm_beta(norm, beta)
-		return np.abs(prediction - y) / (norm + beta)
+	def apply(self, prediction, y):
+		return np.abs(prediction - y)
 
-	def apply_inverse(self, prediction, nc, significance, norm=None, beta=0):
-		norm, beta = self._check_norm_beta(norm, beta)
+	def apply_inverse(self, nc, significance):
 		nc = np.sort(nc)[::-1]
 		border = int(np.floor(significance * (nc.size + 1))) - 1
 		# TODO: should probably warn against too few calibration examples
 		border = min(max(border, 0), nc.size - 1)
-		return np.vstack([prediction - (nc[border] * (norm + beta)),
-		                  prediction + (nc[border] * (norm + beta))]).T
+		return np.vstack([nc[border], nc[border]])
 
 
 class SignErrorErrFunc(RegressionErrFunc):
@@ -214,26 +183,112 @@ class SignErrorErrFunc(RegressionErrFunc):
 	def __init__(self):
 		super(SignErrorErrFunc, self).__init__()
 
-	def apply(self, prediction, y, norm=None, beta=0):
-		norm, beta = self._check_norm_beta(norm, beta)
-		return (prediction - y) / (norm + beta)
+	def apply(self, prediction, y):
+		return (prediction - y)
 
-	def apply_inverse(self, prediction, nc, significance, norm=None, beta=0):
-		norm, beta = self._check_norm_beta(norm, beta)
+	def apply_inverse(self, nc, significance):
 		nc = np.sort(nc)[::-1]
 		upper = int(np.floor((significance / 2) * (nc.size + 1)))
 		lower = int(np.floor((1 - significance / 2) * (nc.size + 1)))
 		# TODO: should probably warn against too few calibration examples
 		upper = min(max(upper, 0), nc.size - 1)
 		lower = max(min(lower, nc.size - 1), 0)
-		return np.vstack([prediction + (nc[lower] * (norm + beta)),
-		                  prediction + (nc[upper] * (norm + beta))]).T
+		return np.vstack([-nc[lower], nc[upper]])
 
 
 # -----------------------------------------------------------------------------
 # Base nonconformity scorer
 # -----------------------------------------------------------------------------
-class BaseModelNc(BaseEstimator):
+class BaseScorer(sklearn.base.BaseEstimator):
+	__metaclass__ = abc.ABCMeta
+
+	def __init__(self):
+		super(BaseScorer, self).__init__()
+
+	@abc.abstractmethod
+	def fit(self, x, y):
+		pass
+
+	@abc.abstractmethod
+	def score(self, x, y=None):
+		pass
+
+
+class RegressorNormalizer(BaseScorer):
+	def __init__(self, base_model, normalizer_model, err_func):
+		super(RegressorNormalizer, self).__init__()
+		self.base_model = base_model
+		self.normalizer_model = normalizer_model
+		self.err_func = err_func
+
+	def fit(self, x, y):
+		residual_prediction = self.base_model.predict(x)
+		residual_error = np.abs(self.err_func.apply(residual_prediction, y))
+		residual_error += 0.00001 # Add small term to avoid log(0)
+		log_err = np.log(residual_error)
+		self.normalizer_model.fit(x, log_err)
+
+	def score(self, x, y=None):
+		norm = np.exp(self.normalizer_model.predict(x))
+		return norm
+
+
+class NcFactory(object):
+	@staticmethod
+	def create_nc(model, err_func=None, normalizer_model=None, oob=False):
+		if normalizer_model is not None:
+			normalizer_adapter = RegressorAdapter(normalizer_model)
+		else:
+			normalizer_adapter = None
+
+		if isinstance(model, sklearn.base.ClassifierMixin):
+			err_func = MarginErrFunc() if err_func is None else err_func
+			if oob:
+				c = sklearn.base.clone(model)
+				c.fit([[0], [1]], [0, 1])
+				if hasattr(c, 'oob_decision_function_'):
+					adapter = OobClassifierAdapter(model)
+				else:
+					raise AttributeError('Cannot use out-of-bag '
+					                      'calibration with {}'.format(
+						model.__class__.__name__
+					))
+			else:
+				adapter = ClassifierAdapter(model)
+
+			if normalizer_adapter is not None:
+				normalizer = RegressorNormalizer(adapter,
+				                                 normalizer_adapter,
+				                                 err_func)
+				return ClassifierNc(adapter, err_func, normalizer)
+			else:
+				return ClassifierNc(adapter, err_func)
+
+		elif isinstance(model, sklearn.base.RegressorMixin):
+			err_func = AbsErrorErrFunc() if err_func is None else err_func
+			if oob:
+				c = sklearn.base.clone(model)
+				c.fit([[0], [1]], [0, 1])
+				if hasattr(c, 'oob_prediction_'):
+					adapter = OobRegressorAdapter(model)
+				else:
+					raise AttributeError('Cannot use out-of-bag '
+					                     'calibration with {}'.format(
+						model.__class__.__name__
+					))
+			else:
+				adapter = RegressorAdapter(model)
+
+			if normalizer_adapter is not None:
+				normalizer = RegressorNormalizer(adapter,
+				                                 normalizer_adapter,
+				                                 err_func)
+				return RegressorNc(adapter, err_func, normalizer)
+			else:
+				return RegressorNc(adapter, err_func)
+
+
+class BaseModelNc(BaseScorer):#, sklearn.base.BaseEstimator):
 	"""Base class for nonconformity scorers based on an underlying model.
 
 	Parameters
@@ -245,10 +300,19 @@ class BaseModelNc(BaseEstimator):
 	err_func : ClassificationErrFunc or RegressionErrFunc
 		Error function object.
 	"""
-	def __init__(self, model, err_func):
+	def __init__(self, model, err_func, normalizer=None, beta=0):
 		super(BaseModelNc, self).__init__()
 		self.err_func = err_func
 		self.model = model
+		self.normalizer = normalizer
+		self.beta = beta
+
+		# If we use sklearn.base.clone (e.g., during cross-validation),
+		# object references get jumbled, so we need to make sure that the
+		# normalizer has a reference to the proper model adapter, if applicable.
+		if (self.normalizer is not None and
+			hasattr(self.normalizer, 'base_model')):
+			self.normalizer.base_model = self.model
 
 		self.last_x, self.last_y = None, None
 		self.last_prediction = None
@@ -270,9 +334,11 @@ class BaseModelNc(BaseEstimator):
 		None
 		"""
 		self.model.fit(x, y)
+		if self.normalizer is not None:
+			self.normalizer.fit(x, y)
 		self.clean = False
 
-	def calc_nc(self, x, y):
+	def score(self, x, y=None):
 		"""Calculates the nonconformity score of a set of samples.
 
 		Parameters
@@ -289,7 +355,13 @@ class BaseModelNc(BaseEstimator):
 			Nonconformity scores of samples.
 		"""
 		prediction = self.model.predict(x)
-		return self.err_func.apply(prediction, y)
+		n_test = x.shape[0]
+		if self.normalizer is not None:
+			norm = self.normalizer.score(x) + self.beta
+		else:
+			norm = np.ones(n_test)
+
+		return self.err_func.apply(prediction, y) / norm
 
 
 # -----------------------------------------------------------------------------
@@ -322,9 +394,13 @@ class ClassifierNc(BaseModelNc):
 	"""
 	def __init__(self,
 	             model,
-	             err_func=MarginErrFunc()):
+	             err_func=MarginErrFunc(),
+	             normalizer=None,
+	             beta=0):
 		super(ClassifierNc, self).__init__(model,
-		                                   err_func)
+		                                   err_func,
+		                                   normalizer,
+		                                   beta)
 
 
 # -----------------------------------------------------------------------------
@@ -355,9 +431,13 @@ class RegressorNc(BaseModelNc):
 	"""
 	def __init__(self,
 	             model,
-	             err_func=AbsErrorErrFunc()):
+	             err_func=AbsErrorErrFunc(),
+	             normalizer=None,
+	             beta=0):
 		super(RegressorNc, self).__init__(model,
-		                                  err_func)
+		                                  err_func,
+		                                  normalizer,
+		                                  beta)
 
 	def predict(self, x, nc, significance=None):
 		"""Constructs prediction intervals for a set of test examples.
@@ -379,7 +459,7 @@ class RegressorNc(BaseModelNc):
 
 		Returns
 		-------
-		p : numpy array of shape [n_samples, 2] or [n_samples, 2, 99}
+		p : numpy array of shape [n_samples, 2] or [n_samples, 2, 99]
 			If significance is ``None``, then p contains the interval (minimum
 			and maximum boundaries) for each test pattern, and each significance
 			level (0.01, 0.02, ..., 0.99). If significance is a float between
@@ -387,102 +467,33 @@ class RegressorNc(BaseModelNc):
 			maximum	boundaries) for the set of test patterns at the chosen
 			significance level.
 		"""
+		n_test = x.shape[0]
 		prediction = self.model.predict(x)
+		if self.normalizer is not None:
+			norm = self.normalizer.score(x) + self.beta
+		else:
+			norm = np.ones(n_test)
+
 		if significance:
-			return self.err_func.apply_inverse(prediction, nc, significance)
+			intervals = np.zeros((x.shape[0], 2))
+			err_dist = self.err_func.apply_inverse(nc, significance)
+			err_dist = np.hstack([err_dist] * n_test)
+			err_dist *= norm
+
+			intervals[:, 0] = prediction - err_dist[0, :]
+			intervals[:, 1] = prediction + err_dist[1, :]
+
+			return intervals
 		else:
 			significance = np.arange(0.01, 1.0, 0.01)
-			return np.dstack([self.err_func.apply_inverse(prediction, nc, s)
-			                  for s in significance])
+			intervals = np.zeros((x.shape[0], 2, significance.size))
 
+			for i, s in enumerate(significance):
+				err_dist = self.err_func.apply_inverse(nc, s)
+				err_dist = np.hstack([err_dist] * n_test)
+				err_dist *= norm
 
-class NormalizedRegressorNc(RegressorNc):
-	"""Nonconformity scorer using an underlying regression model together
-	with a normalization model.
+				intervals[:, 0, i] = prediction - err_dist[0, :]
+				intervals[:, 1, i] = prediction + err_dist[0, :]
 
-	Parameters
-	----------
-	model : RegressorAdapter
-		Underlying regression model used for calculating nonconformity scores.
-
-	normalizer_model : RegressorAdapter
-		Normalizer regression model used for calculating nonconformity scores.
-
-	err_func : RegressionErrFunc
-		Scorer callable object with signature ``score(estimator, x, y)``.
-
-	beta : float
-		Parameter for normalization weighting. A larger beta results in the
-		normalization model having a smaller impact on the final prediction
-		interval size.
-
-	Attributes
-	----------
-	model : RegressorAdapter
-		Underlying model object.
-
-	normalizer_model : RegressorAdapter
-		Underlying normalizer object.
-
-	err_func : RegressionErrFunc
-		Scorer function used to calculate nonconformity scores.
-
-	beta : float
-		Normalization weight.
-
-	See also
-	--------
-	RegressorNc, ProbEstClassifierNc
-	"""
-	def __init__(self,
-	             model,
-	             normalizer_model,
-	             err_func=AbsErrorErrFunc(),
-	             beta='auto'):
-		super(NormalizedRegressorNc, self).__init__(model,
-		                                            err_func)
-		self.normalizer_model = normalizer_model
-		self.beta = beta
-		self.beta_ = None
-
-	def fit(self, x, y):
-		super(NormalizedRegressorNc, self).fit(x, y)
-		err = np.abs(self.model.predict(x) - y)
-		err += 0.00001  # Add a small error to each sample to avoid log(0)
-		log_err = np.log(err)
-		self.normalizer_model.fit(x, log_err)
-
-	def calc_nc(self, x, y):
-		norm = np.exp(self.normalizer_model.predict(x))
-		prediction = self.model.predict(x)
-
-		if self.beta == 'auto':
-			r = pearsonr(norm, prediction)[0]
-			if r < 0:
-				self.beta_ = 0
-			elif r < 0.3:
-				self.beta_ = 1
-			else:
-				self.beta_ = 10
-		else:
-			self.beta_ = self.beta
-
-		return self.err_func.apply(prediction, y, norm, self.beta_)
-
-	def predict(self, x, nc, significance=None):
-		prediction = self.model.predict(x)
-		norm = np.exp(self.normalizer_model.predict(x))
-		if significance:
-			return self.err_func.apply_inverse(prediction,
-			                                   nc,
-			                                   significance,
-			                                   norm,
-			                                   self.beta_)
-		else:
-			significance = np.arange(0.01, 1.0, 0.01)
-			return np.dstack([self.err_func.apply_inverse(prediction,
-			                                              nc,
-			                                              s,
-			                                              norm,
-			                                              self.beta_)
-			                  for s in significance])
+			return intervals
