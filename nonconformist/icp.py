@@ -96,12 +96,12 @@ class BaseIcp(BaseEstimator):
 
 			for cond in self.categories:
 				idx = category_map == cond
-				cal_scores = self.nc_function.calc_nc(self.cal_x[idx, :],
-				                                      self.cal_y[idx])
+				cal_scores = self.nc_function.score(self.cal_x[idx, :],
+				                                    self.cal_y[idx])
 				self.cal_scores[cond] = np.sort(cal_scores)[::-1]
 		else:
 			self.categories = np.array([0])
-			cal_scores = self.nc_function.calc_nc(self.cal_x, self.cal_y)
+			cal_scores = self.nc_function.score(self.cal_x, self.cal_y)
 			self.cal_scores = {0: np.sort(cal_scores)[::-1]}
 
 	def _calibrate_hook(self, x, y, increment):
@@ -123,7 +123,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 
 	Parameters
 	----------
-	nc_function : object
+	nc_function : BaseScorer
 		Nonconformity scorer object used to calculate nonconformity of
 		calibration examples and test patterns. Should implement ``fit(x, y)``
 		and ``calc_nc(x, y)``.
@@ -139,7 +139,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 	cal_y : numpy array of shape [n_cal_examples]
 		Outputs of calibration set.
 
-	nc_function : object
+	nc_function : BaseScorer
 		Nonconformity scorer object used to calculate nonconformity scores.
 
 	See also
@@ -223,7 +223,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 			# TODO: interpolated p-values
 
 			# TODO: nc_function.calc_nc should take X * {y1, y2, ... ,yn}
-			test_nc_scores = self.nc_function.calc_nc(x, test_class)
+			test_nc_scores = self.nc_function.score(x, test_class)
 			for j, nc in enumerate(test_nc_scores):
 				cal_scores = self.cal_scores[self.condition((x[j, :], c))][::-1]
 				n_cal = cal_scores.size
@@ -272,23 +272,6 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 		return np.array([label, confidence, credibility]).T
 
 
-class OobCpClassifier(IcpClassifier):
-	def __init__(self,
-	             nc_function,
-	             condition=None,
-	             smoothing=True):
-		super(OobCpClassifier, self).__init__(nc_function,
-		                                      condition,
-		                                      smoothing)
-
-	def fit(self, x, y):
-		super(OobCpClassifier, self).fit(x, y)
-		super(OobCpClassifier, self).calibrate(x, y, False)
-
-	def calibrate(self, x, y, increment=False):
-		# Should throw exception (or really not be implemented for oob)
-		pass
-
 # -----------------------------------------------------------------------------
 # Inductive conformal regressor
 # -----------------------------------------------------------------------------
@@ -297,7 +280,7 @@ class IcpRegressor(BaseIcp, RegressorMixin):
 
 	Parameters
 	----------
-	nc_function : object
+	nc_function : BaseScorer
 		Nonconformity scorer object used to calculate nonconformity of
 		calibration examples and test patterns. Should implement ``fit(x, y)``,
 		``calc_nc(x, y)`` and ``predict(x, nc_scores, significance)``.
@@ -310,7 +293,7 @@ class IcpRegressor(BaseIcp, RegressorMixin):
 	cal_y : numpy array of shape [n_cal_examples]
 		Outputs of calibration set.
 
-	nc_function : object
+	nc_function : BaseScorer
 		Nonconformity scorer object used to calculate nonconformity scores.
 
 	See also
@@ -403,6 +386,24 @@ class IcpRegressor(BaseIcp, RegressorMixin):
 					prediction[idx, :] = p
 
 		return prediction
+
+
+class OobCpClassifier(IcpClassifier):
+	def __init__(self,
+	             nc_function,
+	             condition=None,
+	             smoothing=True):
+		super(OobCpClassifier, self).__init__(nc_function,
+		                                      condition,
+		                                      smoothing)
+
+	def fit(self, x, y):
+		super(OobCpClassifier, self).fit(x, y)
+		super(OobCpClassifier, self).calibrate(x, y, False)
+
+	def calibrate(self, x, y, increment=False):
+		# Should throw exception (or really not be implemented for oob)
+		pass
 
 
 class OobCpRegressor(IcpRegressor):
