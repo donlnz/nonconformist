@@ -17,7 +17,6 @@ Requires numpy, scipy, pandas and scikit-learn.
 
 # TODO
 
-* Confidence and credibility predictions [1].
 * Exchangeability testing [2].
 * Transductive conformal prediction [1].
 * Interpolated p-values [3,4].
