@@ -16,7 +16,6 @@ from nonconformist.base import ClassifierAdapter, RegressorAdapter
 from nonconformist.icp import IcpClassifier, IcpRegressor
 from nonconformist.nc import MarginErrFunc
 from nonconformist.nc import ClassifierNc, RegressorNc
-from nonconformist.nc import NormalizedRegressorNc
 from nonconformist.nc import AbsErrorErrFunc, SignErrorErrFunc
 
 from nonconformist.evaluation import cross_val_score
