@@ -15,7 +15,7 @@ from sklearn.datasets import load_iris, load_diabetes
 from nonconformist.base import ClassifierAdapter, RegressorAdapter
 from nonconformist.icp import IcpClassifier, IcpRegressor
 from nonconformist.nc import MarginErrFunc
-from nonconformist.nc import ClassifierNc, RegressorNc
+from nonconformist.nc import ClassifierNc, RegressorNc, RegressorNormalizer
 from nonconformist.nc import AbsErrorErrFunc, SignErrorErrFunc
 
 from nonconformist.evaluation import cross_val_score
@@ -68,13 +68,16 @@ scores = scores.drop(['fold', 'iter'], axis=1)
 print(scores.groupby(['significance']).mean())
 
 # -----------------------------------------------------------------------------
-# Regression, absolute error
+# Regression, normalized absolute error
 # -----------------------------------------------------------------------------
 data = load_diabetes()
 
-icp = IcpRegressor(NormalizedRegressorNc(RegressorAdapter(RandomForestRegressor(n_estimators=100)),
-                                         RegressorAdapter(RandomForestRegressor(n_estimators=100)),
-                                         AbsErrorErrFunc()))
+underlying_model = RegressorAdapter(RandomForestRegressor(n_estimators=100))
+normalizer_model = RegressorAdapter(RandomForestRegressor(n_estimators=100))
+normalizer = RegressorNormalizer(underlying_model, normalizer_model, AbsErrorErrFunc())
+nc = RegressorNc(underlying_model, AbsErrorErrFunc(), normalizer)
+
+icp = IcpRegressor(nc)
 icp_cv = RegIcpCvHelper(icp)
 
 scores = cross_val_score(icp_cv,
@@ -91,7 +94,7 @@ scores = scores.drop(['fold', 'iter'], axis=1)
 print(scores.groupby(['significance']).mean())
 
 # -----------------------------------------------------------------------------
-# Regression, signed error
+# Regression, normalized signed error
 # -----------------------------------------------------------------------------
 data = load_diabetes()
 
@@ -116,9 +119,15 @@ print(scores.groupby(['significance']).mean())
 # -----------------------------------------------------------------------------
 data = load_diabetes()
 
-icp = IcpRegressor(NormalizedRegressorNc(RegressorAdapter(RandomForestRegressor(n_estimators=100)),
-                                         RegressorAdapter(RandomForestRegressor(n_estimators=100)),
-                                         AbsErrorErrFunc()))
+underlying_model = RegressorAdapter(RandomForestRegressor(n_estimators=100))
+normalizer_model = RegressorAdapter(RandomForestRegressor(n_estimators=100))
+
+# The normalization model can use a different error function than is
+# used to measure errors on the underlying model
+normalizer = RegressorNormalizer(underlying_model, normalizer_model, AbsErrorErrFunc())
+nc = RegressorNc(underlying_model, SignErrorErrFunc(), normalizer)
+
+icp = IcpRegressor(nc)
 icp_cv = RegIcpCvHelper(icp)
 
 scores = cross_val_score(icp_cv,
