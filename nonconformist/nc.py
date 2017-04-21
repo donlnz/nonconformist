@@ -288,7 +288,7 @@ class NcFactory(object):
 				return RegressorNc(adapter, err_func)
 
 
-class BaseModelNc(BaseScorer):#, sklearn.base.BaseEstimator):
+class BaseModelNc(BaseScorer):
 	"""Base class for nonconformity scorers based on an underlying model.
 
 	Parameters
@@ -299,6 +299,14 @@ class BaseModelNc(BaseScorer):#, sklearn.base.BaseEstimator):
 
 	err_func : ClassificationErrFunc or RegressionErrFunc
 		Error function object.
+
+	normalizer : BaseScorer
+		Normalization model.
+
+	beta : float
+		Normalization smoothing parameter. As the beta-value increases,
+		the normalized nonconformity function approaches a non-normalized
+		equivalent.
 	"""
 	def __init__(self, model, err_func, normalizer=None, beta=0):
 		super(BaseModelNc, self).__init__()
@@ -380,6 +388,14 @@ class ClassifierNc(BaseModelNc):
 	err_func : ClassificationErrFunc
 		Error function object.
 
+	normalizer : BaseScorer
+		Normalization model.
+
+	beta : float
+		Normalization smoothing parameter. As the beta-value increases,
+		the normalized nonconformity function approaches a non-normalized
+		equivalent.
+
 	Attributes
 	----------
 	model : ClassifierAdapter
@@ -416,6 +432,14 @@ class RegressorNc(BaseModelNc):
 
 	err_func : RegressionErrFunc
 		Error function object.
+
+	normalizer : BaseScorer
+		Normalization model.
+
+	beta : float
+		Normalization smoothing parameter. As the beta-value increases,
+		the normalized nonconformity function approaches a non-normalized
+		equivalent.
 
 	Attributes
 	----------
