@@ -305,7 +305,7 @@ def reg_n_correct(prediction, y, significance=None):
 	return y[correct].size
 
 
-def reg_mean_errors(prediction, y, significance):
+def reg_mean_errors(prediction, y, significance=None):
 	"""Calculates the average error rate of a conformal regression model.
 	"""
 	return 1 - reg_n_correct(prediction, y, significance) / y.size
@@ -378,34 +378,35 @@ def class_one_err_one_class(prediction, y, significance, c=0):
 # -----------------------------------------------------------------------------
 # Efficiency measures
 # -----------------------------------------------------------------------------
-def _reg_interval_size(prediction, y, significance):
-	idx = int(significance * 100 - 1)
-	prediction = prediction[:, :, idx]
+def _reg_interval_size(prediction, y, significance=None):
+	if significance is not None:
+		idx = int(significance * 100 - 1)
+		prediction = prediction[:, :, idx]
 
 	return prediction[:, 1] - prediction[:, 0]
 
 
-def reg_min_size(prediction, y, significance):
+def reg_min_size(prediction, y, significance=None):
 	return np.min(_reg_interval_size(prediction, y, significance))
 
 
-def reg_q1_size(prediction, y, significance):
+def reg_q1_size(prediction, y, significance=None):
 	return np.percentile(_reg_interval_size(prediction, y, significance), 25)
 
 
-def reg_median_size(prediction, y, significance):
+def reg_median_size(prediction, y, significance=None):
 	return np.median(_reg_interval_size(prediction, y, significance))
 
 
-def reg_q3_size(prediction, y, significance):
+def reg_q3_size(prediction, y, significance=None):
 	return np.percentile(_reg_interval_size(prediction, y, significance), 75)
 
 
-def reg_max_size(prediction, y, significance):
+def reg_max_size(prediction, y, significance=None):
 	return np.max(_reg_interval_size(prediction, y, significance))
 
 
-def reg_mean_size(prediction, y, significance):
+def reg_mean_size(prediction, y, significance=None):
 	"""Calculates the average prediction interval size of a conformal
 	regression model.
 	"""
