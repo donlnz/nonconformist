@@ -157,6 +157,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 	>>> import numpy as np
 	>>> from sklearn.datasets import load_iris
 	>>> from sklearn.tree import DecisionTreeClassifier
+	>>> from nonconformist.base import ClassifierAdapter
 	>>> from nonconformist.icp import IcpClassifier
 	>>> from nonconformist.nc import ClassifierNc, MarginErrFunc
 	>>> iris = load_iris()
@@ -164,7 +165,8 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 	>>> train = idx[:int(idx.size / 3)]
 	>>> cal = idx[int(idx.size / 3):int(2 * idx.size / 3)]
 	>>> test = idx[int(2 * idx.size / 3):]
-	>>> nc = ProbEstClassifierNc(DecisionTreeClassifier, MarginErrFunc())
+	>>> model = ClassifierAdapter(DecisionTreeClassifier())
+	>>> nc = ClassifierNc(model, MarginErrFunc())
 	>>> icp = IcpClassifier(nc)
 	>>> icp.fit(iris.data[train, :], iris.target[train])
 	>>> icp.calibrate(iris.data[cal, :], iris.target[cal])
@@ -179,7 +181,6 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 	def __init__(self, nc_function, condition=None, smoothing=True):
 		super(IcpClassifier, self).__init__(nc_function, condition)
 		self.classes = None
-		self.last_p = None
 		self.smoothing = smoothing
 
 	def _calibrate_hook(self, x, y, increment=False):
@@ -315,6 +316,7 @@ class IcpRegressor(BaseIcp, RegressorMixin):
 	>>> import numpy as np
 	>>> from sklearn.datasets import load_boston
 	>>> from sklearn.tree import DecisionTreeRegressor
+	>>> from nonconformist.base import RegressorAdapter
 	>>> from nonconformist.icp import IcpRegressor
 	>>> from nonconformist.nc import RegressorNc, AbsErrorErrFunc
 	>>> boston = load_boston()
@@ -322,7 +324,8 @@ class IcpRegressor(BaseIcp, RegressorMixin):
 	>>> train = idx[:int(idx.size / 3)]
 	>>> cal = idx[int(idx.size / 3):int(2 * idx.size / 3)]
 	>>> test = idx[int(2 * idx.size / 3):]
-	>>> nc = RegressorNc(DecisionTreeRegressor, AbsErrorErrFunc())
+	>>> model = RegressorAdapter(DecisionTreeRegressor())
+	>>> nc = RegressorNc(model, AbsErrorErrFunc())
 	>>> icp = IcpRegressor(nc)
 	>>> icp.fit(boston.data[train, :], boston.target[train])
 	>>> icp.calibrate(boston.data[cal, :], boston.target[cal])
