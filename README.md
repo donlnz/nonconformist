@@ -11,10 +11,6 @@ Tested under Python 3.5.
 
 Requires numpy, scipy, pandas and scikit-learn.
 
-# Known issues
-
-* Conformal classifiers only support numerical classes (0, 1, ...). This *might* change in the future.
-
 # TODO
 
 * Exchangeability testing [2].

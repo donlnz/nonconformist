@@ -315,6 +315,7 @@ def class_n_correct(prediction, y, significance):
 	"""Calculates the number of correct predictions made by a conformal
 	classification model.
 	"""
+	labels, y = np.unique(y, return_inverse=True)
 	prediction = prediction > significance
 	correct = np.zeros((y.size,), dtype=bool)
 	for i, y_ in enumerate(y):
@@ -332,6 +333,7 @@ def class_one_err(prediction, y, significance=None):
 	"""Calculates the error rate of conformal classifier predictions containing
 	 only a single output label.
 	"""
+	labels, y = np.unique(y, return_inverse=True)
 	prediction = prediction > significance
 	idx = np.arange(0, y.size, 1)
 	idx = filter(lambda x: np.sum(prediction[x, :]) == 1, idx)
@@ -348,6 +350,7 @@ def class_mean_errors_one_class(prediction, y, significance, c=0):
 	  considering only test examples belonging to class ``c``. Use
 	  ``functools.partial`` in order to test other classes.
 	"""
+	labels, y = np.unique(y, return_inverse=True)
 	prediction = prediction > significance
 	idx = np.arange(0, y.size, 1)[y == c]
 	errs = np.sum(1 for _ in filter(lambda x: not prediction[x, c], idx))
@@ -363,6 +366,7 @@ def class_one_err_one_class(prediction, y, significance, c=0):
 	 only a single output label. Considers only test examples belonging to
 	 class ``c``. Use ``functools.partial`` in order to test other classes.
 	"""
+	labels, y = np.unique(y, return_inverse=True)
 	prediction = prediction > significance
 	idx = np.arange(0, y.size, 1)
 	idx = filter(lambda x: prediction[x, c], idx)

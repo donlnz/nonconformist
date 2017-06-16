@@ -142,6 +142,10 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 	nc_function : BaseScorer
 		Nonconformity scorer object used to calculate nonconformity scores.
 
+	classes : numpy array of shape [n_classes]
+		List of class labels, with indices corresponding to output columns
+		 of IcpClassifier.predict()
+
 	See also
 	--------
 	IcpRegressor
@@ -217,7 +221,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 		n_test_objects = x.shape[0]
 		p = np.zeros((n_test_objects, self.classes.size))
 		for i, c in enumerate(self.classes):
-			test_class = np.zeros(x.shape[0])
+			test_class = np.zeros(x.shape[0], dtype=self.classes.dtype)
 			test_class.fill(c)
 
 			# TODO: maybe calculate p-values using cython or similar

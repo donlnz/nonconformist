@@ -29,6 +29,10 @@ class TcpClassifier(BaseEstimator, ClassifierMixin):
 	nc_function : BaseScorer
 		Nonconformity scorer object used to calculate nonconformity scores.
 
+	classes : numpy array of shape [n_classes]
+		List of class labels, with indices corresponding to output columns
+		 of TcpClassifier.predict()
+
 	See also
 	--------
 	IcpClassifier
@@ -94,11 +98,11 @@ class TcpClassifier(BaseEstimator, ClassifierMixin):
 			self.smoothing
 		)
 
-		self.labels = None
+		self.classes = None
 
 	def fit(self, x, y):
 		self.train_x, self.train_y = x, y
-		self.labels = np.unique(y)
+		self.classes = np.unique(y)
 
 	def predict(self, x, significance=None):
 		"""Predict the output values for a set of input patterns.
@@ -123,9 +127,9 @@ class TcpClassifier(BaseEstimator, ClassifierMixin):
 		"""
 		n_test = x.shape[0]
 		n_train = self.train_x.shape[0]
-		p = np.zeros((n_test, self.labels.size))
+		p = np.zeros((n_test, self.classes.size))
 		for i in range(n_test):
-			for j, y in enumerate(self.labels):
+			for j, y in enumerate(self.classes):
 				train_x = np.vstack([self.train_x, x[i, :]])
 				train_y = np.hstack([self.train_y, y])
 				self.base_icp.fit(train_x, train_y)

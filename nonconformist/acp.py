@@ -185,6 +185,9 @@ class AggregatedCp(object):
 			predictor.calibrate(x[cal, :], y[cal])
 			self.predictors.append(predictor)
 
+		if problem_type == 'classification':
+			self.classes = self.predictors[0].classes
+
 	def predict(self, x, significance=None):
 		"""Predict the output values for a set of input patterns.
 
