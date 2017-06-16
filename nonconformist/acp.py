@@ -10,6 +10,7 @@ import numpy as np
 from sklearn.cross_validation import KFold, StratifiedKFold
 from sklearn.cross_validation import ShuffleSplit, StratifiedShuffleSplit
 from sklearn.base import clone
+from nonconformist.base import BaseEstimator
 
 
 # -----------------------------------------------------------------------------
@@ -91,7 +92,7 @@ class RandomSubSampler(object):
 # -----------------------------------------------------------------------------
 # Conformal ensemble
 # -----------------------------------------------------------------------------
-class AggregatedCp(object):
+class AggregatedCp(BaseEstimator):
 	"""Aggregated conformal predictor.
 
 	Combines multiple IcpClassifier or IcpRegressor predictors into an
