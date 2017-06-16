@@ -7,7 +7,7 @@ Primarily to be used as an extension to the scikit-learn library.
 API documentation: http://donlnz.github.io/nonconformist/
 
 # Dependencies
-Tested under Python 2.7.
+Tested under Python 3.5.
 
 Requires numpy, scipy, pandas and scikit-learn.
 
@@ -18,11 +18,8 @@ Requires numpy, scipy, pandas and scikit-learn.
 # TODO
 
 * Exchangeability testing [2].
-* Transductive conformal prediction [1].
 * Interpolated p-values [3,4].
 * Conformal prediction trees [5].
-
-[1] Vovk, V., Gammerman, A., & Shafer, G. (2005). Algorithmic learning in a random world. Springer Science & Business Media.
 
 [2] Fedorova, V., Gammerman, A., Nouretdinov, I., & Vovk, V. (2012). Plug-in martingales for testing exchangeability on-line. In Proceedings of the 29th International Conference on Machine Learning (ICML-12) (pp. 1639-1646).
 
