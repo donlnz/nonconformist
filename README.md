@@ -7,8 +7,8 @@ Primarily to be used as an extension to the scikit-learn library.
 API documentation: http://donlnz.github.io/nonconformist/
 
 (API documentation is currently severely deprecated; for instructions on basic usage,
-please refer to [README.ipynb](https://github.com/donlnz/nonconformist/README.ipynb), and the running examples
-available under [/examples/](https://github.com/donlnz/nonconformist/examples) in the repository.)
+please refer to [README.ipynb](https://github.com/donlnz/nonconformist/blob/master/README.ipynb), and the running examples
+available under [/examples/](https://github.com/donlnz/nonconformist/tree/master/examples) in the repository.)
 
 # Installation
 
