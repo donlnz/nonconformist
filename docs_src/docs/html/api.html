@@ -1,0 +1,276 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>nonconformist API &#8212; nonconformist 2.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/js/copybutton.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="nonconformist 1.2 documentation" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="nonconformist-api">
+<h1>nonconformist API<a class="headerlink" href="#nonconformist-api" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-nonconformist.nc">
+<span id="nc"></span><span id="nonconformity-ref"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">nc</span></code><a class="headerlink" href="#module-nonconformist.nc" title="Permalink to this headline">¶</a></h2>
+<p>Nonconformity functions.</p>
+<div class="section" id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.ProbEstClassifierNc</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.nc.RegressorNc.html#nonconformist.nc.RegressorNc" title="nonconformist.nc.RegressorNc"><code class="xref py py-obj docutils literal"><span class="pre">nc.RegressorNc</span></code></a>(model[,&nbsp;err_func,&nbsp;…])</td>
+<td>Nonconformity scorer using an underlying regression model.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.NormalizedRegressorNc</span></code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.abs_error</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.abs_error_inv</span></code></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.sign_error</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.sign_error_inv</span></code></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.margin</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.inverse_probability</span></code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="module-nonconformist.icp">
+<span id="icp"></span><span id="icp-ref"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">icp</span></code><a class="headerlink" href="#module-nonconformist.icp" title="Permalink to this headline">¶</a></h2>
+<p>Inductive conformal predictors.</p>
+<div class="section" id="id1">
+<h3>Classes<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.icp.IcpClassifier.html#nonconformist.icp.IcpClassifier" title="nonconformist.icp.IcpClassifier"><code class="xref py py-obj docutils literal"><span class="pre">icp.IcpClassifier</span></code></a>(nc_function[,&nbsp;condition,&nbsp;…])</td>
+<td>Inductive conformal classifier.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.icp.IcpRegressor.html#nonconformist.icp.IcpRegressor" title="nonconformist.icp.IcpRegressor"><code class="xref py py-obj docutils literal"><span class="pre">icp.IcpRegressor</span></code></a>(nc_function[,&nbsp;condition])</td>
+<td>Inductive conformal regressor.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="module-nonconformist.acp">
+<span id="acp"></span><span id="ensemble-ref"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">acp</span></code><a class="headerlink" href="#module-nonconformist.acp" title="Permalink to this headline">¶</a></h2>
+<p>Aggregated conformal predictors</p>
+<div class="section" id="id2">
+<h3>Classes<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.acp.AggregatedCp.html#nonconformist.acp.AggregatedCp" title="nonconformist.acp.AggregatedCp"><code class="xref py py-obj docutils literal"><span class="pre">acp.AggregatedCp</span></code></a>(predictor[,&nbsp;sampler,&nbsp;…])</td>
+<td>Aggregated conformal predictor.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.acp.RandomSubSampler.html#nonconformist.acp.RandomSubSampler" title="nonconformist.acp.RandomSubSampler"><code class="xref py py-obj docutils literal"><span class="pre">acp.RandomSubSampler</span></code></a>([calibration_portion])</td>
+<td>Random subsample sampler.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.acp.BootstrapSampler.html#nonconformist.acp.BootstrapSampler" title="nonconformist.acp.BootstrapSampler"><code class="xref py py-obj docutils literal"><span class="pre">acp.BootstrapSampler</span></code></a></td>
+<td>Bootstrap sampler.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.acp.CrossSampler.html#nonconformist.acp.CrossSampler" title="nonconformist.acp.CrossSampler"><code class="xref py py-obj docutils literal"><span class="pre">acp.CrossSampler</span></code></a></td>
+<td>Cross-fold sampler.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="module-nonconformist.evaluation">
+<span id="evaluation"></span><span id="evaluation-ref"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">evaluation</span></code><a class="headerlink" href="#module-nonconformist.evaluation" title="Permalink to this headline">¶</a></h2>
+<p>Evaluation of conformal predictors.</p>
+<div class="section" id="id3">
+<h3>Classes<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.evaluation.ClassIcpCvHelper.html#nonconformist.evaluation.ClassIcpCvHelper" title="nonconformist.evaluation.ClassIcpCvHelper"><code class="xref py py-obj docutils literal"><span class="pre">evaluation.ClassIcpCvHelper</span></code></a>(icp[,&nbsp;…])</td>
+<td>Helper class for running the <code class="docutils literal"><span class="pre">cross_val_score</span></code> evaluation method on IcpClassifiers.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.evaluation.RegIcpCvHelper.html#nonconformist.evaluation.RegIcpCvHelper" title="nonconformist.evaluation.RegIcpCvHelper"><code class="xref py py-obj docutils literal"><span class="pre">evaluation.RegIcpCvHelper</span></code></a>(icp[,&nbsp;…])</td>
+<td>Helper class for running the <code class="docutils literal"><span class="pre">cross_val_score</span></code> evaluation method on IcpRegressors.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id4">
+<h3>Functions<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.evaluation.cross_val_score.html#nonconformist.evaluation.cross_val_score" title="nonconformist.evaluation.cross_val_score"><code class="xref py py-obj docutils literal"><span class="pre">evaluation.cross_val_score</span></code></a>(model,&nbsp;x,&nbsp;y[,&nbsp;…])</td>
+<td>Evaluates a conformal predictor using cross-validation.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.evaluation.run_experiment.html#nonconformist.evaluation.run_experiment" title="nonconformist.evaluation.run_experiment"><code class="xref py py-obj docutils literal"><span class="pre">evaluation.run_experiment</span></code></a>(models,&nbsp;csv_files)</td>
+<td>Performs a cross-validation evaluation of one or several conformal predictors on a collection of data sets in csv format.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.evaluation.reg_mean_errors.html#nonconformist.evaluation.reg_mean_errors" title="nonconformist.evaluation.reg_mean_errors"><code class="xref py py-obj docutils literal"><span class="pre">evaluation.reg_mean_errors</span></code></a>(prediction,&nbsp;y,&nbsp;…)</td>
+<td>Calculates the average error rate of a conformal regression model.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.evaluation.class_mean_errors.html#nonconformist.evaluation.class_mean_errors" title="nonconformist.evaluation.class_mean_errors"><code class="xref py py-obj docutils literal"><span class="pre">evaluation.class_mean_errors</span></code></a>(prediction,&nbsp;y)</td>
+<td>Calculates the average error rate of a conformal classification model.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.evaluation.reg_mean_size.html#nonconformist.evaluation.reg_mean_size" title="nonconformist.evaluation.reg_mean_size"><code class="xref py py-obj docutils literal"><span class="pre">evaluation.reg_mean_size</span></code></a>(prediction,&nbsp;y,&nbsp;…)</td>
+<td>Calculates the average prediction interval size of a conformal regression model.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.evaluation.class_avg_c.html#nonconformist.evaluation.class_avg_c" title="nonconformist.evaluation.class_avg_c"><code class="xref py py-obj docutils literal"><span class="pre">evaluation.class_avg_c</span></code></a>(prediction,&nbsp;y,&nbsp;…)</td>
+<td>Calculates the average number of classes per prediction of a conformal classification model.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.evaluation.class_one_c.html#nonconformist.evaluation.class_one_c" title="nonconformist.evaluation.class_one_c"><code class="xref py py-obj docutils literal"><span class="pre">evaluation.class_one_c</span></code></a>(prediction,&nbsp;y,&nbsp;…)</td>
+<td>Calculates the rate of singleton predictions (prediction sets containing only a single class label) of a conformal classification model.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.evaluation.class_mean_p_val.html#nonconformist.evaluation.class_mean_p_val" title="nonconformist.evaluation.class_mean_p_val"><code class="xref py py-obj docutils literal"><span class="pre">evaluation.class_mean_p_val</span></code></a>(prediction,&nbsp;y,&nbsp;…)</td>
+<td>Calculates the mean of the p-values output by a conformal classification model.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/nonconformist.png" alt="Logo"/>
+    
+    <h1 class="logo logo-name">nonconformist</h1>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=donlnz&repo=nonconformist&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">nonconformist API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-nonconformist.nc"><code class="docutils literal"><span class="pre">nc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nonconformist.icp"><code class="docutils literal"><span class="pre">icp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nonconformist.acp"><code class="docutils literal"><span class="pre">acp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nonconformist.evaluation"><code class="docutils literal"><span class="pre">evaluation</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Henrik Linusson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

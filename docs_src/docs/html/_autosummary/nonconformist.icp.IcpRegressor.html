@@ -1,0 +1,346 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>nonconformist.icp.IcpRegressor &#8212; nonconformist 2.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/js/copybutton.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="nonconformist.acp.AggregatedCp" href="nonconformist.acp.AggregatedCp.html" />
+    <link rel="prev" title="nonconformist.icp.IcpClassifier" href="nonconformist.icp.IcpClassifier.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="nonconformist-icp-icpregressor">
+<h1><a class="reference internal" href="../api.html#module-nonconformist.icp" title="nonconformist.icp"><code class="xref py py-mod docutils literal"><span class="pre">nonconformist.icp</span></code></a>.IcpRegressor<a class="headerlink" href="#nonconformist-icp-icpregressor" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="nonconformist.icp.IcpRegressor">
+<em class="property">class </em><code class="descclassname">nonconformist.icp.</code><code class="descname">IcpRegressor</code><span class="sig-paren">(</span><em>nc_function</em>, <em>condition=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.icp.IcpRegressor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inductive conformal regressor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>nc_function</strong> : BaseScorer</p>
+<blockquote class="last">
+<div><p>Nonconformity scorer object used to calculate nonconformity of
+calibration examples and test patterns. Should implement <code class="docutils literal"><span class="pre">fit(x,</span> <span class="pre">y)</span></code>,
+<code class="docutils literal"><span class="pre">calc_nc(x,</span> <span class="pre">y)</span></code> and <code class="docutils literal"><span class="pre">predict(x,</span> <span class="pre">nc_scores,</span> <span class="pre">significance)</span></code>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="nonconformist.icp.IcpClassifier.html#nonconformist.icp.IcpClassifier" title="nonconformist.icp.IcpClassifier"><code class="xref py py-obj docutils literal"><span class="pre">IcpClassifier</span></code></a></p>
+</div>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r78" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[R78]</a></td><td>Papadopoulos, H., Proedrou, K., Vovk, V., &amp; Gammerman, A. (2002).
+Inductive confidence machines for regression. In Machine Learning: ECML
+2002 (pp. 345-356). Springer Berlin Heidelberg.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r88" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[R88]</a></td><td>Papadopoulos, H., &amp; Haralambous, H. (2011). Reliable prediction
+intervals with regression neural networks. Neural Networks, 24(8),
+842-851.</td></tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="k">import</span> <span class="n">load_boston</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="k">import</span> <span class="n">DecisionTreeRegressor</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nonconformist.icp</span> <span class="k">import</span> <span class="n">IcpRegressor</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nonconformist.nc</span> <span class="k">import</span> <span class="n">RegressorNc</span><span class="p">,</span> <span class="n">AbsErrorErrFunc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">boston</span> <span class="o">=</span> <span class="n">load_boston</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">boston</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">train</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[:</span><span class="nb">int</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cal</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="mi">3</span><span class="p">):</span><span class="nb">int</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">idx</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">idx</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="mi">3</span><span class="p">):]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nc</span> <span class="o">=</span> <span class="n">RegressorNc</span><span class="p">(</span><span class="n">DecisionTreeRegressor</span><span class="p">,</span> <span class="n">AbsErrorErrFunc</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">icp</span> <span class="o">=</span> <span class="n">IcpRegressor</span><span class="p">(</span><span class="n">nc</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">icp</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">boston</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">train</span><span class="p">,</span> <span class="p">:],</span> <span class="n">boston</span><span class="o">.</span><span class="n">target</span><span class="p">[</span><span class="n">train</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">icp</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">boston</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">cal</span><span class="p">,</span> <span class="p">:],</span> <span class="n">boston</span><span class="o">.</span><span class="n">target</span><span class="p">[</span><span class="n">cal</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">icp</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">boston</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">test</span><span class="p">,</span> <span class="p">:],</span> <span class="n">significance</span><span class="o">=</span><span class="mf">0.10</span><span class="p">)</span>
+<span class="gp">... </span>    
+<span class="go">array([[  5. ,  20.6],</span>
+<span class="go">        [ 15.5,  31.1],</span>
+<span class="go">        ...,</span>
+<span class="go">        [ 14.2,  29.8],</span>
+<span class="go">        [ 11.6,  27.2]])</span>
+</pre></div>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="16%" />
+<col width="84%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>cal_x</strong></td>
+<td>(numpy array of shape [n_cal_examples, n_features]) Inputs of calibration set.</td>
+</tr>
+<tr class="row-even"><td><strong>cal_y</strong></td>
+<td>(numpy array of shape [n_cal_examples]) Outputs of calibration set.</td>
+</tr>
+<tr class="row-odd"><td><strong>nc_function</strong></td>
+<td>(BaseScorer) Nonconformity scorer object used to calculate nonconformity scores.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="nonconformist.icp.IcpRegressor.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>nc_function</em>, <em>condition=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.icp.IcpRegressor.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="nonconformist.icp.IcpRegressor.calibrate">
+<code class="descname">calibrate</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>increment=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.icp.IcpRegressor.calibrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calibrate conformal predictor based on underlying nonconformity
+scorer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x</strong> : numpy array of shape [n_samples, n_features]</p>
+<blockquote>
+<div><p>Inputs of examples for calibrating the conformal predictor.</p>
+</div></blockquote>
+<p><strong>y</strong> : numpy array of shape [n_samples, n_features]</p>
+<blockquote>
+<div><p>Outputs of examples for calibrating the conformal predictor.</p>
+</div></blockquote>
+<p><strong>increment</strong> : boolean</p>
+<blockquote>
+<div><p>If <code class="docutils literal"><span class="pre">True</span></code>, performs an incremental recalibration of the conformal
+predictor. The supplied <code class="docutils literal"><span class="pre">x</span></code> and <code class="docutils literal"><span class="pre">y</span></code> are added to the set of
+previously existing calibration examples, and the conformal
+predictor is then calibrated on both the old and new calibration
+examples.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nonconformist.icp.IcpRegressor.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.icp.IcpRegressor.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit underlying nonconformity scorer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x</strong> : numpy array of shape [n_samples, n_features]</p>
+<blockquote>
+<div><p>Inputs of examples for fitting the nonconformity scorer.</p>
+</div></blockquote>
+<p><strong>y</strong> : numpy array of shape [n_samples]</p>
+<blockquote>
+<div><p>Outputs of examples for fitting the nonconformity scorer.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nonconformist.icp.IcpRegressor.get_params">
+<code class="descname">get_params</code><span class="sig-paren">(</span><em>deep=True</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.icp.IcpRegressor.get_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get parameters for this estimator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>deep</strong> : boolean, optional</p>
+<blockquote>
+<div><p>If True, will return the parameters for this estimator and
+contained subobjects that are estimators.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>params</strong> : mapping of string to any</p>
+<blockquote class="last">
+<div><p>Parameter names mapped to their values.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nonconformist.icp.IcpRegressor.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>x</em>, <em>significance=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.icp.IcpRegressor.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the output values for a set of input patterns.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x</strong> : numpy array of shape [n_samples, n_features]</p>
+<blockquote>
+<div><p>Inputs of patters for which to predict output values.</p>
+</div></blockquote>
+<p><strong>significance</strong> : float</p>
+<blockquote>
+<div><p>Significance level (maximum allowed error rate) of predictions.
+Should be a float between 0 and 1. If <code class="docutils literal"><span class="pre">None</span></code>, then intervals for
+all significance levels (0.01, 0.02, …, 0.99) are output in a
+3d-matrix.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>p</strong> : numpy array of shape [n_samples, 2] or [n_samples, 2, 99}</p>
+<blockquote class="last">
+<div><p>If significance is <code class="docutils literal"><span class="pre">None</span></code>, then p contains the interval (minimum
+and maximum boundaries) for each test pattern, and each significance
+level (0.01, 0.02, …, 0.99). If significance is a float between
+0 and 1, then p contains the prediction intervals (minimum and
+maximum boundaries) for the set of test patterns at the chosen
+significance level.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nonconformist.icp.IcpRegressor.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>**params</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.icp.IcpRegressor.set_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the parameters of this estimator.</p>
+<p>The method works on simple estimators as well as on nested objects
+(such as pipelines). The latter have parameters of the form
+<code class="docutils literal"><span class="pre">&lt;component&gt;__&lt;parameter&gt;</span></code> so that it’s possible to update each
+component of a nested object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<div class="clearer"></div></div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/nonconformist.png" alt="Logo"/>
+    
+    <h1 class="logo logo-name">nonconformist</h1>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=donlnz&repo=nonconformist&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">nonconformist API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-nonconformist.nc"><code class="docutils literal"><span class="pre">nc</span></code></a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-nonconformist.icp"><code class="docutils literal"><span class="pre">icp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-nonconformist.acp"><code class="docutils literal"><span class="pre">acp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-nonconformist.evaluation"><code class="docutils literal"><span class="pre">evaluation</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Henrik Linusson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/_autosummary/nonconformist.icp.IcpRegressor.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
