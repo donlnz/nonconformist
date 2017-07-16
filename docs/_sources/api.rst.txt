@@ -9,31 +9,32 @@ nonconformist API
 	:no-members:
 	:no-inherited-members:
 
-Classes
-~~~~~~~
+Nonconformity Functions
+~~~~~~~~~~~~~~~~~~~~~~~
 .. currentmodule:: nonconformist
 
 .. autosummary::
 	:template: class.rst
 	:toctree: _autosummary/
 
-	nc.ProbEstClassifierNc
+	nc.BaseModelNc
+	nc.ClassifierNc
 	nc.RegressorNc
-	nc.NormalizedRegressorNc
 
-Functions
-~~~~~~~~~
+Error Functions
+~~~~~~~~~~~~~~~
 .. currentmodule:: nonconformist
 
 .. autosummary::
+	:template: class.rst
 	:toctree: _autosummary/
 
-	nc.abs_error
-	nc.abs_error_inv
-	nc.sign_error
-	nc.sign_error_inv
-	nc.margin
-	nc.inverse_probability
+	nc.ClassificationErrFunc
+	nc.RegressionErrFunc
+	nc.InverseProbabilityErrFunc
+	nc.MarginErrFunc
+	nc.AbsErrorErrFunc
+	nc.SignErrorErrFunc
 
 
 .. _icp_ref:

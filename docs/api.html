@@ -25,6 +25,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="nonconformist.nc.BaseModelNc" href="_autosummary/nonconformist.nc.BaseModelNc.html" />
     <link rel="prev" title="nonconformist 1.2 documentation" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -46,51 +47,51 @@
 <div class="section" id="module-nonconformist.nc">
 <span id="nc"></span><span id="nonconformity-ref"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">nc</span></code><a class="headerlink" href="#module-nonconformist.nc" title="Permalink to this headline">¶</a></h2>
 <p>Nonconformity functions.</p>
-<div class="section" id="classes">
-<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="nonconformity-functions">
+<h3>Nonconformity Functions<a class="headerlink" href="#nonconformity-functions" title="Permalink to this headline">¶</a></h3>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.ProbEstClassifierNc</span></code></td>
-<td></td>
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.nc.BaseModelNc.html#nonconformist.nc.BaseModelNc" title="nonconformist.nc.BaseModelNc"><code class="xref py py-obj docutils literal"><span class="pre">nc.BaseModelNc</span></code></a>(model,&nbsp;err_func[,&nbsp;…])</td>
+<td>Base class for nonconformity scorers based on an underlying model.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.nc.RegressorNc.html#nonconformist.nc.RegressorNc" title="nonconformist.nc.RegressorNc"><code class="xref py py-obj docutils literal"><span class="pre">nc.RegressorNc</span></code></a>(model[,&nbsp;err_func,&nbsp;…])</td>
+<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.nc.ClassifierNc.html#nonconformist.nc.ClassifierNc" title="nonconformist.nc.ClassifierNc"><code class="xref py py-obj docutils literal"><span class="pre">nc.ClassifierNc</span></code></a>(model[,&nbsp;err_func,&nbsp;…])</td>
+<td>Nonconformity scorer using an underlying class probability estimating model.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.nc.RegressorNc.html#nonconformist.nc.RegressorNc" title="nonconformist.nc.RegressorNc"><code class="xref py py-obj docutils literal"><span class="pre">nc.RegressorNc</span></code></a>(model[,&nbsp;err_func,&nbsp;…])</td>
 <td>Nonconformity scorer using an underlying regression model.</td>
-</tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.NormalizedRegressorNc</span></code></td>
-<td></td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="functions">
-<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="error-functions">
+<h3>Error Functions<a class="headerlink" href="#error-functions" title="Permalink to this headline">¶</a></h3>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.abs_error</span></code></td>
-<td></td>
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.nc.ClassificationErrFunc.html#nonconformist.nc.ClassificationErrFunc" title="nonconformist.nc.ClassificationErrFunc"><code class="xref py py-obj docutils literal"><span class="pre">nc.ClassificationErrFunc</span></code></a>()</td>
+<td>Base class for classification model error functions.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.abs_error_inv</span></code></td>
-<td></td>
+<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.nc.RegressionErrFunc.html#nonconformist.nc.RegressionErrFunc" title="nonconformist.nc.RegressionErrFunc"><code class="xref py py-obj docutils literal"><span class="pre">nc.RegressionErrFunc</span></code></a>()</td>
+<td>Base class for regression model error functions.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.sign_error</span></code></td>
-<td></td>
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.nc.InverseProbabilityErrFunc.html#nonconformist.nc.InverseProbabilityErrFunc" title="nonconformist.nc.InverseProbabilityErrFunc"><code class="xref py py-obj docutils literal"><span class="pre">nc.InverseProbabilityErrFunc</span></code></a>()</td>
+<td>Calculates the probability of not predicting the correct class.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.sign_error_inv</span></code></td>
-<td></td>
+<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.nc.MarginErrFunc.html#nonconformist.nc.MarginErrFunc" title="nonconformist.nc.MarginErrFunc"><code class="xref py py-obj docutils literal"><span class="pre">nc.MarginErrFunc</span></code></a>()</td>
+<td>Calculates the margin error.</td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.margin</span></code></td>
-<td></td>
+<tr class="row-odd"><td><a class="reference internal" href="_autosummary/nonconformist.nc.AbsErrorErrFunc.html#nonconformist.nc.AbsErrorErrFunc" title="nonconformist.nc.AbsErrorErrFunc"><code class="xref py py-obj docutils literal"><span class="pre">nc.AbsErrorErrFunc</span></code></a>()</td>
+<td>Calculates absolute error nonconformity for regression problems.</td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">nc.inverse_probability</span></code></td>
-<td></td>
+<tr class="row-even"><td><a class="reference internal" href="_autosummary/nonconformist.nc.SignErrorErrFunc.html#nonconformist.nc.SignErrorErrFunc" title="nonconformist.nc.SignErrorErrFunc"><code class="xref py py-obj docutils literal"><span class="pre">nc.SignErrorErrFunc</span></code></a>()</td>
+<td>Calculates signed error nonconformity for regression problems.</td>
 </tr>
 </tbody>
 </table>
@@ -99,8 +100,8 @@
 <div class="section" id="module-nonconformist.icp">
 <span id="icp"></span><span id="icp-ref"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">icp</span></code><a class="headerlink" href="#module-nonconformist.icp" title="Permalink to this headline">¶</a></h2>
 <p>Inductive conformal predictors.</p>
-<div class="section" id="id1">
-<h3>Classes<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -120,8 +121,8 @@
 <div class="section" id="module-nonconformist.acp">
 <span id="acp"></span><span id="ensemble-ref"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">acp</span></code><a class="headerlink" href="#module-nonconformist.acp" title="Permalink to this headline">¶</a></h2>
 <p>Aggregated conformal predictors</p>
-<div class="section" id="id2">
-<h3>Classes<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id1">
+<h3>Classes<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -147,8 +148,8 @@
 <div class="section" id="module-nonconformist.evaluation">
 <span id="evaluation"></span><span id="evaluation-ref"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">evaluation</span></code><a class="headerlink" href="#module-nonconformist.evaluation" title="Permalink to this headline">¶</a></h2>
 <p>Evaluation of conformal predictors.</p>
-<div class="section" id="id3">
-<h3>Classes<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id2">
+<h3>Classes<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
@@ -164,8 +165,8 @@
 </tbody>
 </table>
 </div>
-<div class="section" id="id4">
-<h3>Functions<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
 <table border="1" class="longtable docutils">
 <colgroup>
 <col width="10%" />
