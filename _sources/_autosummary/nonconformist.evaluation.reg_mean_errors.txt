@@ -1,6 +1,0 @@
-nonconformist.evaluation.reg_mean_errors
-========================================
-
-.. currentmodule:: nonconformist.evaluation
-
-.. autofunction:: reg_mean_errors

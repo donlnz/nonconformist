@@ -1,6 +1,0 @@
-nonconformist.nc.inverse_probability
-====================================
-
-.. currentmodule:: nonconformist.nc
-
-.. autofunction:: inverse_probability

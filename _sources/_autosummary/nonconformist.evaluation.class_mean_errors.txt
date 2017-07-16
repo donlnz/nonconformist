@@ -1,6 +1,0 @@
-nonconformist.evaluation.class_mean_errors
-==========================================
-
-.. currentmodule:: nonconformist.evaluation
-
-.. autofunction:: class_mean_errors

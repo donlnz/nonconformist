@@ -1,0 +1,134 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>nonconformist.nc.MarginErrFunc &#8212; nonconformist 2.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/js/copybutton.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="nonconformist.nc.AbsErrorErrFunc" href="nonconformist.nc.AbsErrorErrFunc.html" />
+    <link rel="prev" title="nonconformist.nc.InverseProbabilityErrFunc" href="nonconformist.nc.InverseProbabilityErrFunc.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="nonconformist-nc-marginerrfunc">
+<h1><a class="reference internal" href="../api.html#module-nonconformist.nc" title="nonconformist.nc"><code class="xref py py-mod docutils literal"><span class="pre">nonconformist.nc</span></code></a>.MarginErrFunc<a class="headerlink" href="#nonconformist-nc-marginerrfunc" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="nonconformist.nc.MarginErrFunc">
+<em class="property">class </em><code class="descclassname">nonconformist.nc.</code><code class="descname">MarginErrFunc</code><a class="headerlink" href="#nonconformist.nc.MarginErrFunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the margin error.</p>
+<p>For each correct output in <code class="docutils literal"><span class="pre">y</span></code>, nonconformity is defined as</p>
+<div class="math">
+\[0.5 - \dfrac{\hat{P}(y_i | x) - max_{y \, != \, y_i} \hat{P}(y | x)}{2}\]</div>
+<dl class="method">
+<dt id="nonconformist.nc.MarginErrFunc.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.MarginErrFunc.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<div class="clearer"></div></div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/nonconformist.png" alt="Logo"/>
+    
+    <h1 class="logo logo-name">nonconformist</h1>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=donlnz&repo=nonconformist&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">nonconformist API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-nonconformist.nc"><code class="docutils literal"><span class="pre">nc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-nonconformist.icp"><code class="docutils literal"><span class="pre">icp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-nonconformist.acp"><code class="docutils literal"><span class="pre">acp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-nonconformist.evaluation"><code class="docutils literal"><span class="pre">evaluation</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Henrik Linusson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/_autosummary/nonconformist.nc.MarginErrFunc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

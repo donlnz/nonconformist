@@ -1,59 +1,41 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>nonconformist.nc.RegressorNc &mdash; nonconformist 1.2.0 documentation</title>
-    
+    <title>nonconformist.nc.RegressorNc &#8212; nonconformist 2.0.0 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.2.0',
+        VERSION:     '2.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="../_static/js/copybutton.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="nonconformist 1.2.0 documentation" href="../index.html" />
-    <link rel="up" title="nonconformist API" href="../api.html" />
-    <link rel="next" title="nonconformist.nc.NormalizedRegressorNc" href="nonconformist.nc.NormalizedRegressorNc.html" />
-    <link rel="prev" title="nonconformist.nc.ProbEstClassifierNc" href="nonconformist.nc.ProbEstClassifierNc.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="nonconformist.nc.ClassificationErrFunc" href="nonconformist.nc.ClassificationErrFunc.html" />
+    <link rel="prev" title="nonconformist.nc.ClassifierNc" href="nonconformist.nc.ClassifierNc.html" />
    
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="nonconformist.nc.NormalizedRegressorNc.html" title="nonconformist.nc.NormalizedRegressorNc"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="nonconformist.nc.ProbEstClassifierNc.html" title="nonconformist.nc.ProbEstClassifierNc"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">nonconformist 1.2.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../api.html" accesskey="U">nonconformist API</a> &raquo;</li> 
-      </ul>
-    </div>  
+  <body>
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -64,30 +46,19 @@
 <h1><a class="reference internal" href="../api.html#module-nonconformist.nc" title="nonconformist.nc"><code class="xref py py-mod docutils literal"><span class="pre">nonconformist.nc</span></code></a>.RegressorNc<a class="headerlink" href="#nonconformist-nc-regressornc" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="nonconformist.nc.RegressorNc">
-<em class="property">class </em><code class="descclassname">nonconformist.nc.</code><code class="descname">RegressorNc</code><span class="sig-paren">(</span><em>model_class</em>, <em>err_func=&lt;function abs_error at 0x000000000E3C5D68&gt;</em>, <em>inverse_err_func=&lt;function abs_error_inv at 0x000000000E3C5DD8&gt;</em>, <em>model_params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.RegressorNc" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">nonconformist.nc.</code><code class="descname">RegressorNc</code><span class="sig-paren">(</span><em>model</em>, <em>err_func=&lt;nonconformist.nc.AbsErrorErrFunc object&gt;</em>, <em>normalizer=None</em>, <em>beta=0</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.RegressorNc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Nonconformity scorer using an underlying regression model.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>model_class</strong> : class</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>model</strong> : RegressorAdapter</p>
 <blockquote>
-<div><p>The model_class should be implement the <code class="docutils literal"><span class="pre">fit(x,</span> <span class="pre">y)</span></code> and
-<code class="docutils literal"><span class="pre">predict(x)</span></code> methods, as used by the regression models
-present in the scikit-learn library.</p>
+<div><p>Underlying regression model used for calculating nonconformity scores.</p>
 </div></blockquote>
-<p><strong>err_func</strong> : callable</p>
-<blockquote>
-<div><p>Scorer callable object with signature <code class="docutils literal"><span class="pre">score(estimator,</span> <span class="pre">x,</span> <span class="pre">y)</span></code>.</p>
-</div></blockquote>
-<p><strong>inverse_error_func</strong> : callable</p>
-<blockquote>
-<div><p>Inverse (or partial inverse) of err_func.</p>
-</div></blockquote>
-<p><strong>model_params</strong> : dict, optional</p>
+<p><strong>err_func</strong> : RegressionErrFunc</p>
 <blockquote class="last">
-<div><p>Dict containing keyword parameters to pass to model_class upon
-initialization.</p>
+<div><p>Error function object.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -95,64 +66,27 @@ initialization.</p>
 </table>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="nonconformist.nc.ProbEstClassifierNc.html#nonconformist.nc.ProbEstClassifierNc" title="nonconformist.nc.ProbEstClassifierNc"><code class="xref py py-obj docutils literal"><span class="pre">ProbEstClassifierNc</span></code></a></p>
+<p class="last"><code class="xref py py-obj docutils literal"><span class="pre">ProbEstClassifierNc</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">NormalizedRegressorNc</span></code></p>
 </div>
 <p class="rubric">Attributes</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="20%" />
-<col width="80%" />
+<col width="14%" />
+<col width="86%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td>model_class</td>
-<td>(class) Class used to construct the underlying model.</td>
+<tr class="row-odd"><td><strong>model</strong></td>
+<td>(RegressorAdapter) Underlying model object.</td>
 </tr>
-<tr class="row-even"><td>err_func</td>
-<td>(callable) Scorer function used to calculate nonconformity scores.</td>
-</tr>
-<tr class="row-odd"><td>inverse_err_func</td>
-<td>(callable) Inverse function (partial) of nonconformity function.</td>
-</tr>
-<tr class="row-even"><td>model_params</td>
-<td>(dict) Parameters sent to underlying model.</td>
-</tr>
-<tr class="row-odd"><td>model</td>
-<td>(object) Underlying model object.</td>
+<tr class="row-even"><td><strong>err_func</strong></td>
+<td>(RegressionErrFunc) Scorer function used to calculate nonconformity scores.</td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="nonconformist.nc.RegressorNc.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>model_class</em>, <em>err_func=&lt;function abs_error at 0x000000000E3C5D68&gt;</em>, <em>inverse_err_func=&lt;function abs_error_inv at 0x000000000E3C5DD8&gt;</em>, <em>model_params=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.RegressorNc.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>model</em>, <em>err_func=&lt;nonconformist.nc.AbsErrorErrFunc object&gt;</em>, <em>normalizer=None</em>, <em>beta=0</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.RegressorNc.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="method">
-<dt id="nonconformist.nc.RegressorNc.calc_nc">
-<code class="descname">calc_nc</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.RegressorNc.calc_nc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the nonconformity score of a set of samples.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x</strong> : numpy array of shape [n_samples, n_features]</p>
-<blockquote>
-<div><p>Inputs of examples for which to calculate a nonconformity score.</p>
-</div></blockquote>
-<p><strong>y</strong> : numpy array of shape [n_samples, n_features]</p>
-<blockquote>
-<div><p>Outputs of examples for which to calculate a nonconformity score.</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>nc</strong> : numpy array of shape [n_samples]</p>
-<blockquote class="last">
-<div><p>Nonconformity scores of samples.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
 
 <dl class="method">
 <dt id="nonconformist.nc.RegressorNc.fit">
@@ -180,6 +114,31 @@ initialization.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="nonconformist.nc.RegressorNc.get_params">
+<code class="descname">get_params</code><span class="sig-paren">(</span><em>deep=True</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.RegressorNc.get_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get parameters for this estimator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>deep</strong> : boolean, optional</p>
+<blockquote>
+<div><p>If True, will return the parameters for this estimator and
+contained subobjects that are estimators.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>params</strong> : mapping of string to any</p>
+<blockquote class="last">
+<div><p>Parameter names mapped to their values.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="nonconformist.nc.RegressorNc.predict">
 <code class="descname">predict</code><span class="sig-paren">(</span><em>x</em>, <em>nc</em>, <em>significance=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.RegressorNc.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs prediction intervals for a set of test examples.</p>
@@ -198,21 +157,67 @@ prediction, resulting in a prediction interval for each test pattern.</p>
 <blockquote>
 <div><p>Significance level (maximum allowed error rate) of predictions.
 Should be a float between 0 and 1. If <code class="docutils literal"><span class="pre">None</span></code>, then intervals for
-all significance levels (0.01, 0.02, ..., 0.99) are output in a
+all significance levels (0.01, 0.02, …, 0.99) are output in a
 3d-matrix.</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>p</strong> : numpy array of shape [n_samples, 2] or [n_samples, 2, 99}</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>p</strong> : numpy array of shape [n_samples, 2] or [n_samples, 2, 99]</p>
 <blockquote class="last">
 <div><p>If significance is <code class="docutils literal"><span class="pre">None</span></code>, then p contains the interval (minimum
 and maximum boundaries) for each test pattern, and each significance
-level (0.01, 0.02, ..., 0.99). If significance is a float between
+level (0.01, 0.02, …, 0.99). If significance is a float between
 0 and 1, then p contains the prediction intervals (minimum and
 maximum boundaries) for the set of test patterns at the chosen
 significance level.</p>
 </div></blockquote>
 </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nonconformist.nc.RegressorNc.score">
+<code class="descname">score</code><span class="sig-paren">(</span><em>x</em>, <em>y=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.RegressorNc.score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the nonconformity score of a set of samples.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x</strong> : numpy array of shape [n_samples, n_features]</p>
+<blockquote>
+<div><p>Inputs of examples for which to calculate a nonconformity score.</p>
+</div></blockquote>
+<p><strong>y</strong> : numpy array of shape [n_samples]</p>
+<blockquote>
+<div><p>Outputs of examples for which to calculate a nonconformity score.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>nc</strong> : numpy array of shape [n_samples]</p>
+<blockquote class="last">
+<div><p>Nonconformity scores of samples.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nonconformist.nc.RegressorNc.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>**params</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.RegressorNc.set_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the parameters of this estimator.</p>
+<p>The method works on simple estimators as well as on nested objects
+(such as pipelines). The latter have parameters of the form
+<code class="docutils literal"><span class="pre">&lt;component&gt;__&lt;parameter&gt;</span></code> so that it’s possible to update each
+component of a nested object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">self</td>
 </tr>
 </tbody>
 </table>
@@ -232,7 +237,7 @@ significance level.</p>
   <a href="../index.html">
     <img class="logo" src="../_static/nonconformist.png" alt="Logo"/>
     
-    <h1 class="logo logo-name">nonconformist</h2>
+    <h1 class="logo logo-name">nonconformist</h1>
     
   </a>
 </p>
@@ -241,10 +246,14 @@ significance level.</p>
 
 
 
+
 <p>
-<iframe src="https://ghbtns.com/github-btn.html?user=donlnz&repo=nonconformist&type=watch&count=true&size=large"
+<iframe src="https://ghbtns.com/github-btn.html?user=donlnz&repo=nonconformist&type=watch&count=true&size=large&v=2"
   allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
+
+
+
 
 
 <h3>Navigation</h3>
@@ -262,14 +271,11 @@ significance level.</p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -280,12 +286,12 @@ significance level.</p>
       &copy;2015, Henrik Linusson.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
-      <a href="../_sources/_autosummary/nonconformist.nc.RegressorNc.txt"
-          rel="nofollow">Page source</a></li>
+      <a href="../_sources/_autosummary/nonconformist.nc.RegressorNc.rst.txt"
+          rel="nofollow">Page source</a>
     </div>
 
     

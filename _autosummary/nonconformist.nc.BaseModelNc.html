@@ -1,0 +1,244 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>nonconformist.nc.BaseModelNc &#8212; nonconformist 2.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/js/copybutton.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="nonconformist.nc.ClassifierNc" href="nonconformist.nc.ClassifierNc.html" />
+    <link rel="prev" title="nonconformist API" href="../api.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="nonconformist-nc-basemodelnc">
+<h1><a class="reference internal" href="../api.html#module-nonconformist.nc" title="nonconformist.nc"><code class="xref py py-mod docutils literal"><span class="pre">nonconformist.nc</span></code></a>.BaseModelNc<a class="headerlink" href="#nonconformist-nc-basemodelnc" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="nonconformist.nc.BaseModelNc">
+<em class="property">class </em><code class="descclassname">nonconformist.nc.</code><code class="descname">BaseModelNc</code><span class="sig-paren">(</span><em>model</em>, <em>err_func</em>, <em>normalizer=None</em>, <em>beta=0</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.BaseModelNc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for nonconformity scorers based on an underlying model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>model</strong> : ClassifierAdapter or RegressorAdapter</p>
+<blockquote>
+<div><p>Underlying classification model used for calculating nonconformity
+scores.</p>
+</div></blockquote>
+<p><strong>err_func</strong> : ClassificationErrFunc or RegressionErrFunc</p>
+<blockquote class="last">
+<div><p>Error function object.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="nonconformist.nc.BaseModelNc.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>model</em>, <em>err_func</em>, <em>normalizer=None</em>, <em>beta=0</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.BaseModelNc.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="nonconformist.nc.BaseModelNc.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.BaseModelNc.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits the underlying model of the nonconformity scorer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x</strong> : numpy array of shape [n_samples, n_features]</p>
+<blockquote>
+<div><p>Inputs of examples for fitting the underlying model.</p>
+</div></blockquote>
+<p><strong>y</strong> : numpy array of shape [n_samples]</p>
+<blockquote>
+<div><p>Outputs of examples for fitting the underlying model.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nonconformist.nc.BaseModelNc.get_params">
+<code class="descname">get_params</code><span class="sig-paren">(</span><em>deep=True</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.BaseModelNc.get_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get parameters for this estimator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>deep</strong> : boolean, optional</p>
+<blockquote>
+<div><p>If True, will return the parameters for this estimator and
+contained subobjects that are estimators.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>params</strong> : mapping of string to any</p>
+<blockquote class="last">
+<div><p>Parameter names mapped to their values.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nonconformist.nc.BaseModelNc.score">
+<code class="descname">score</code><span class="sig-paren">(</span><em>x</em>, <em>y=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.BaseModelNc.score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the nonconformity score of a set of samples.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x</strong> : numpy array of shape [n_samples, n_features]</p>
+<blockquote>
+<div><p>Inputs of examples for which to calculate a nonconformity score.</p>
+</div></blockquote>
+<p><strong>y</strong> : numpy array of shape [n_samples]</p>
+<blockquote>
+<div><p>Outputs of examples for which to calculate a nonconformity score.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>nc</strong> : numpy array of shape [n_samples]</p>
+<blockquote class="last">
+<div><p>Nonconformity scores of samples.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nonconformist.nc.BaseModelNc.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>**params</em><span class="sig-paren">)</span><a class="headerlink" href="#nonconformist.nc.BaseModelNc.set_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the parameters of this estimator.</p>
+<p>The method works on simple estimators as well as on nested objects
+(such as pipelines). The latter have parameters of the form
+<code class="docutils literal"><span class="pre">&lt;component&gt;__&lt;parameter&gt;</span></code> so that it’s possible to update each
+component of a nested object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<div class="clearer"></div></div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/nonconformist.png" alt="Logo"/>
+    
+    <h1 class="logo logo-name">nonconformist</h1>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=donlnz&repo=nonconformist&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">nonconformist API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-nonconformist.nc"><code class="docutils literal"><span class="pre">nc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-nonconformist.icp"><code class="docutils literal"><span class="pre">icp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-nonconformist.acp"><code class="docutils literal"><span class="pre">acp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-nonconformist.evaluation"><code class="docutils literal"><span class="pre">evaluation</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Henrik Linusson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/_autosummary/nonconformist.nc.BaseModelNc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

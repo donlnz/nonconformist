@@ -1,6 +1,0 @@
-nonconformist.nc.margin
-=======================
-
-.. currentmodule:: nonconformist.nc
-
-.. autofunction:: margin
