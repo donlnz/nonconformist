@@ -72,7 +72,7 @@ author = u'Henrik Linusson'
 # built documents.
 #
 # The short X.Y version.
-version = '1.1'
+version = '2.1'
 # The full version, including alpha/beta/rc tags.
 import nonconformist
 release = nonconformist.__version__

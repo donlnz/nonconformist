@@ -3,8 +3,14 @@
 	You can adapt this file completely to your liking, but it should at least
 	contain the root `toctree` directive.
 
-nonconformist 1.2 documentation
-===============================
+nonconformist 2.1.0 documentation
+=================================
+
+This website contains the API documentation for the nonconformist Python
+package, generated using Sphinx. For an introduction to the basic usage of
+nonconformist, please refer to `README.ipynb <https://github.com/donlnz/nonconformist/blob/master/README.ipynb>`_.
+
+Source is available on `GitHub <https://github.com/donlnz/nonconformist>`_.
 
 Contents:
 
