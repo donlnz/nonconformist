@@ -489,12 +489,12 @@ class OobCp(BaseEstimator):
 		oob_models = defaultdict(list)
 		cal_scores = np.zeros(y.size)
 		cal_count = np.zeros(y.size)
-		while i < self.n_models:
+		while i < self.n_models or (cal_count == 0).sum() > 0:
 			train = np.random.choice(idx, y.size, replace=True)
 			cal = [i for i in filter(lambda x: x not in train, idx)]
 			cal = np.array(cal)
 
-			if cal.size < 1 or train.size < 2:
+			if cal.size < 1:
 				continue
 			else:
 				from sklearn.base import clone
@@ -502,10 +502,11 @@ class OobCp(BaseEstimator):
 				nc.fit(x[train, :], y[train])
 				self.models.append(nc)
 
+				cal_scores[cal] += nc.score(x[cal, :], y[cal])
+				cal_count[cal] += 1
+
 				for j in cal:
 					oob_models[j].append(i)
-					cal_scores[cal] += nc.score(x[cal, :], y[cal])
-					cal_count[cal] += 1
 
 				i += 1
 
@@ -530,6 +531,7 @@ class OobCp(BaseEstimator):
 			# TODO: nc_function.calc_nc should take X * {y1, y2, ... ,yn}
 			train_idx = np.random.choice(np.arange(0, len(self.oob_models)), 1)[0]
 			model_idx = self.oob_models[train_idx]
+			#print(train_idx, model_idx)
 
 			test_nc_scores = np.zeros(n_test_objects)
 
