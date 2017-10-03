@@ -283,31 +283,61 @@ class CrossConformalClassifier(AggregatedCp):
 	"""
 	def __init__(self,
 				 predictor,
-				 n_models=10):
+				 n_models=10,
+	             smooth_fold=False):
 		super(CrossConformalClassifier, self).__init__(predictor,
 													   CrossSampler(),
 													   n_models)
+		self.smooth_fold = smooth_fold
 
 	def predict(self, x, significance=None):
-		predictions = np.dstack([p.predict(x, significance=None)
-		                         for p in self.predictors])
-		n_cal_tot = 0
-		for i, predictor in enumerate(self.predictors):
-			n_cal = predictor.cal_scores[0].size
-			n_cal_tot += n_cal
-			predictions[:, :, i] *= (n_cal + 1)
-			if predictor.smoothing == False:
-				predictions[:, :, i] -= 1
+		if not self.smooth_fold:
+			predictions = np.stack(
+				[p.predict(x, significance=None, ngt_neq=True)
+				 for p in self.predictors])
+			n_test_objects = x.shape[0]
+			p = np.zeros((n_test_objects, self.predictors[0].classes.size))
+			p_ = np.zeros((n_test_objects, self.predictors[0].classes.size))
+			n_cal_tot = 0
+
+			for i, predictor in enumerate(self.predictors):
+				n_cal = predictor.cal_scores[0].size
+				n_cal_tot += n_cal
+
+				p += predictions[i, :, :, 0]
+				p_ += predictions[i, :, :, 1]
+
+			if predictor.smoothing:
+				p += (p_ + 1) * np.random.uniform(0, 1)
 			else:
-				predictions[:, :, i] -= np.random.uniform(0, 1)
+				p += (p_ + 1)
 
-		predictions = np.sum(predictions, axis=2) + 1
-		predictions /= (n_cal_tot + 1)
+			p /= (n_cal_tot + 1)
 
-		if significance:
-			return predictions > significance
+			if significance:
+				return p > significance
+			else:
+				return p
 		else:
-			return predictions
+			predictions = np.dstack([p.predict(x, significance=None)
+			                         for p in self.predictors])
+			n_cal_tot = 0
+			for i, predictor in enumerate(self.predictors):
+				n_cal = predictor.cal_scores[0].size
+				n_cal_tot += n_cal
+				predictions[:, :, i] *= (n_cal + 1)
+				if predictor.smoothing == False:
+					predictions[:, :, i] -= 1
+				else:
+					predictions[:, :, i] -= np.random.uniform(0, 1)
+
+			predictions = np.sum(predictions, axis=2) + 1
+			predictions /= (n_cal_tot + 1)
+
+			if significance:
+				return predictions > significance
+			else:
+				return predictions
 
 
 class BootstrapConformalClassifier(AggregatedCp):

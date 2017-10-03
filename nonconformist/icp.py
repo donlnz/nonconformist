@@ -196,7 +196,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 		else:
 			self.classes = np.unique(np.hstack([self.classes, y]))
 
-	def predict(self, x, significance=None):
+	def predict(self, x, significance=None, ngt_neq=False):
 		"""Predict the output values for a set of input patterns.
 
 		Parameters
@@ -219,7 +219,35 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 		"""
 		# TODO: if x == self.last_x ...
 		n_test_objects = x.shape[0]
+
+		if ngt_neq:
+			ngtneq = np.zeros((n_test_objects, self.classes.size, 2))
+			for i, c in enumerate(self.classes):
+				test_class = np.zeros(x.shape[0], dtype=self.classes.dtype)
+				test_class.fill(c)
+
+				# TODO: maybe calculate p-values using cython or similar
+				# TODO: interpolated p-values
+
+				# TODO: nc_function.calc_nc should take X * {y1, y2, ... ,yn}
+				test_nc_scores = self.nc_function.score(x, test_class)
+				for j, nc in enumerate(test_nc_scores):
+					cal_scores = self.cal_scores[self.condition((x[j, :], c))][
+					             ::-1]
+					n_cal = cal_scores.size
+
+					idx_left = np.searchsorted(cal_scores, nc, 'left')
+					idx_right = np.searchsorted(cal_scores, nc, 'right')
+					n_gt = n_cal - idx_right
+					n_eq = idx_right - idx_left
+
+					ngtneq[j, i, 0] = n_gt
+					ngtneq[j, i, 1] = n_eq
+
+			return ngtneq
+
 		p = np.zeros((n_test_objects, self.classes.size))
+
 		for i, c in enumerate(self.classes):
 			test_class = np.zeros(x.shape[0], dtype=self.classes.dtype)
 			test_class.fill(c)
