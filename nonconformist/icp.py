@@ -427,3 +427,109 @@ class OobCpRegressor(IcpRegressor):
 	def calibrate(self, x, y, increment=False):
 		# Should throw exception (or really not be implemented for oob)
 		pass
+
+
+class OobCp(BaseEstimator):
+	def __init__(self, nc_func, smoothing=True, condition=None, n_models=100):
+		self.nc_func = nc_func
+		self.n_models = n_models
+		self.models = []
+		self.cal_scores = None
+		self.smoothing = smoothing
+		self.oob_models = {}
+
+		default_condition = lambda x: 0
+		is_default = (callable(condition) and
+		              (condition.__code__.co_code ==
+		               default_condition.__code__.co_code))
+
+		if is_default:
+			self.condition = condition
+			self.conditional = False
+		elif callable(condition):
+			self.condition = condition
+			self.conditional = True
+		else:
+			self.condition = lambda x: 0
+			self.conditional = False
+
+	def fit(self, x, y):
+		#oob_mat = np.zeros((self.n_models, y.size), dtype=bool)
+		i = 0
+		idx = np.arange(y.size)
+		from collections import defaultdict
+		oob_models = defaultdict(list)
+		cal_scores = np.zeros(y.size)
+		cal_count = np.zeros(y.size)
+		while i < self.n_models:
+			train = np.random.choice(idx, y.size, replace=True)
+			cal = [i for i in filter(lambda x: x not in train, idx)]
+			cal = np.array(cal)
+
+			if cal.size < 1 or train.size < 2:
+				continue
+			else:
+				from sklearn.base import clone
+				nc = clone(self.nc_func)
+				nc.fit(x[train, :], y[train])
+				self.models.append(nc)
+
+				for j in cal:
+					oob_models[j].append(i)
+					cal_scores[cal] += nc.score(x[cal, :], y[cal])
+					cal_count[cal] += 1
+
+				i += 1
+
+		self.cal_scores = np.sort(cal_scores / cal_count)[::-1]
+		self.classes = np.unique(y)
+		self.oob_models = oob_models
+
+		#for instance_idx, cal_idx in oob_models.items():
+		#	instance_cal = [self.models[i].score(x[i, :], y[i])]
+		#	print(instance_idx)
+
+	def predict(self, x, significance=None):
+		n_test_objects = x.shape[0]
+		p = np.zeros((n_test_objects, self.classes.size))
+		for i, c in enumerate(self.classes):
+			test_class = np.zeros(x.shape[0], dtype=self.classes.dtype)
+			test_class.fill(c)
+
+			# TODO: maybe calculate p-values using cython or similar
+			# TODO: interpolated p-values
+
+			# TODO: nc_function.calc_nc should take X * {y1, y2, ... ,yn}
+			train_idx = np.random.choice(np.arange(0, len(self.oob_models)), 1)[0]
+			model_idx = self.oob_models[train_idx]
+
+			test_nc_scores = np.zeros(n_test_objects)
+
+			for m in model_idx:
+				test_nc_scores += self.models[m].score(x, test_class)
+
+			test_nc_scores /= len(model_idx)
+
+			cal_scores = np.hstack([self.cal_scores[:train_idx],
+									self.cal_scores[train_idx + 1:]])[::-1]
+
+			for j, nc in enumerate(test_nc_scores):
+				#cal_scores = cal_scores[self.condition((x[j, :], c))][::-1]
+				n_cal = cal_scores.size
+
+				idx_left = np.searchsorted(cal_scores, nc, 'left')
+				idx_right = np.searchsorted(cal_scores, nc, 'right')
+				n_gt = n_cal - idx_right
+				n_eq = idx_right - idx_left + 1
+
+				p[j, i] = n_gt / (n_cal + 1)
+
+				if self.smoothing:
+					p[j, i] += (n_eq * np.random.uniform(0, 1, 1)) / (n_cal + 1)
+				else:
+					p[j, i] += n_eq / (n_cal + 1)
+
+		if significance is not None:
+			return p > significance
+		else:
+			return p
