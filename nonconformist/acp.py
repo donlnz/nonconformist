@@ -295,7 +295,11 @@ class CrossConformalClassifier(AggregatedCp):
 		for i, predictor in enumerate(self.predictors):
 			n_cal = predictor.cal_scores[0].size
 			n_cal_tot += n_cal
-			predictions[:, :, i] = predictions[:, :, i] * (n_cal + 1) - 1
+			predictions[:, :, i] *= (n_cal + 1)
+			if predictor.smoothing == False:
+				predictions[:, :, i] -= 1
+			else:
+				predictions[:, :, i] -= np.random.uniform(0, 1)
 
 		predictions = np.sum(predictions, axis=2) + 1
 		predictions /= (n_cal_tot + 1)
@@ -361,7 +365,11 @@ class BootstrapConformalClassifier(AggregatedCp):
 		for i, predictor in enumerate(self.predictors):
 			n_cal = predictor.cal_scores[0].size
 			n_cal_tot += n_cal
-			predictions[:, :, i] = predictions[:, :, i] * (n_cal + 1) - 1
+			predictions[:, :, i] *= (n_cal + 1)
+			if predictor.smoothing == False:
+				predictions[:, :, i] -= 1
+			else:
+				predictions[:, :, i] -= np.random.uniform(0, 1)
 
 		predictions = np.sum(predictions, axis=2) + (n_cal_tot / self.n_train)
 		predictions /= (n_cal_tot + (n_cal_tot / self.n_train))
