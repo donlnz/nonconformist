@@ -136,7 +136,10 @@ class TcpClassifier(BaseEstimator, ClassifierMixin):
 				self.base_icp.calibrate(train_x, train_y)
 				p[i, j] = self.base_icp.predict(np.array([x[i, :]]))[0, j]
 				p[i, j] *= (n_train + 2)
-				p[i, j] -= np.random.uniform(0, 1)
+				if self.smoothing:
+					p[i, j] -= np.random.uniform(0, 1)
+				else:
+					p[i, j] -= 1
 				p[i, j] /= (n_train + 1)
 
 		if significance is not None:
