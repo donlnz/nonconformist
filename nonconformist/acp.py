@@ -296,28 +296,28 @@ class CrossConformalClassifier(AggregatedCp):
 				[p.predict(x, significance=None, ngt_neq=True)
 				 for p in self.predictors])
 			n_test_objects = x.shape[0]
-			p = np.zeros((n_test_objects, self.predictors[0].classes.size))
-			p_ = np.zeros((n_test_objects, self.predictors[0].classes.size))
+			n_gt = np.zeros((n_test_objects, self.predictors[0].classes.size))
+			n_eq = np.zeros((n_test_objects, self.predictors[0].classes.size))
 			n_cal_tot = 0
 
 			for i, predictor in enumerate(self.predictors):
 				n_cal = predictor.cal_scores[0].size
 				n_cal_tot += n_cal
 
-				p += predictions[i, :, :, 0]
-				p_ += predictions[i, :, :, 1]
+				n_gt += predictions[i, :, :, 0]
+				n_eq += predictions[i, :, :, 1]
 
 			if predictor.smoothing:
-				p += (p_ + 1) * np.random.uniform(0, 1)
+				n_gt += (n_eq + 1) * np.random.uniform(0, 1)
 			else:
-				p += (p_ + 1)
+				n_gt += (n_eq + 1)
 
-			p /= (n_cal_tot + 1)
+			n_gt /= (n_cal_tot + 1)
 
 			if significance:
-				return p > significance
+				return n_gt > significance
 			else:
-				return p
+				return n_gt
 		else:
 			predictions = np.dstack([p.predict(x, significance=None)
 			                         for p in self.predictors])
@@ -331,7 +331,13 @@ class CrossConformalClassifier(AggregatedCp):
 				else:
 					predictions[:, :, i] -= np.random.uniform(0, 1)
 
-			predictions = np.sum(predictions, axis=2) + 1
+			predictions = np.sum(predictions, axis=2)
+
+			if predictor.smoothing:
+				predictions += np.random.uniform(0, 1)
+			else:
+				predictions += 1
+
 			predictions /= (n_cal_tot + 1)
 
 			if significance:
