@@ -66,7 +66,7 @@ models = {  'ACP-RandomSubSampler'  : AggregatedCp(
 # -----------------------------------------------------------------------------
 # Train, predict and evaluate
 # -----------------------------------------------------------------------------
-for name, model in models.iteritems():
+for name, model in models.items():
     model.fit(data.data[train, :], data.target[train])
     prediction = model.predict(data.data[test, :], significance=significance)
     table = np.hstack((prediction, truth))
