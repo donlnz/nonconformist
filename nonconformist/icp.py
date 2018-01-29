@@ -257,7 +257,7 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 
 				ncal_ngt_neq[j, i, 0] = n_cal
 				ncal_ngt_neq[j, i, 1] = n_cal - idx_right
-				ncal_ngt_neq[j, i, 2] = idx_right - idx_left + 1
+				ncal_ngt_neq[j, i, 2] = idx_right - idx_left
 
 		return ncal_ngt_neq
 
