@@ -14,6 +14,7 @@ import numpy as np
 from sklearn.base import BaseEstimator
 
 from nonconformist.base import RegressorMixin, ClassifierMixin
+from nonconformist.util import calc_p
 
 
 # -----------------------------------------------------------------------------
@@ -220,6 +221,24 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 		# TODO: if x == self.last_x ...
 		n_test_objects = x.shape[0]
 		p = np.zeros((n_test_objects, self.classes.size))
+
+		ncal_ngt_neq = self._get_stats(x)
+
+		for i in range(len(self.classes)):
+			for j in range(n_test_objects):
+				p[j, i] = calc_p(ncal_ngt_neq[j, i, 0],
+				                 ncal_ngt_neq[j, i, 1],
+				                 ncal_ngt_neq[j, i, 2],
+				                 self.smoothing)
+
+		if significance is not None:
+			return p > significance
+		else:
+			return p
+
+	def _get_stats(self, x):
+		n_test_objects = x.shape[0]
+		ncal_ngt_neq = np.zeros((n_test_objects, self.classes.size, 3))
 		for i, c in enumerate(self.classes):
 			test_class = np.zeros(x.shape[0], dtype=self.classes.dtype)
 			test_class.fill(c)
@@ -235,20 +254,12 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 
 				idx_left = np.searchsorted(cal_scores, nc, 'left')
 				idx_right = np.searchsorted(cal_scores, nc, 'right')
-				n_gt = n_cal - idx_right
-				n_eq = idx_right - idx_left + 1
 
-				p[j, i] = n_gt / (n_cal + 1)
+				ncal_ngt_neq[j, i, 0] = n_cal
+				ncal_ngt_neq[j, i, 1] = n_cal - idx_right
+				ncal_ngt_neq[j, i, 2] = idx_right - idx_left + 1
 
-				if self.smoothing:
-					p[j, i] += (n_eq * np.random.uniform(0, 1, 1)) / (n_cal + 1)
-				else:
-					p[j, i] += n_eq / (n_cal + 1)
-
-		if significance is not None:
-			return p > significance
-		else:
-			return p
+		return ncal_ngt_neq
 
 	def predict_conf(self, x):
 		"""Predict the output values for a set of input patterns, using
