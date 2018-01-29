@@ -11,6 +11,7 @@ from sklearn.cross_validation import KFold, StratifiedKFold
 from sklearn.cross_validation import ShuffleSplit, StratifiedShuffleSplit
 from sklearn.base import clone
 from nonconformist.base import BaseEstimator
+from nonconformist.util import calc_p
 
 
 # -----------------------------------------------------------------------------
@@ -289,25 +290,19 @@ class CrossConformalClassifier(AggregatedCp):
 													   n_models)
 
 	def predict(self, x, significance=None):
-		predictions = np.dstack([p.predict(x, significance=None)
-		                         for p in self.predictors])
-		n_cal_tot = 0
-		for i, predictor in enumerate(self.predictors):
-			n_cal = predictor.cal_scores[0].size
-			n_cal_tot += n_cal
-			predictions[:, :, i] *= (n_cal + 1)
-			if predictor.smoothing == False:
-				predictions[:, :, i] -= 1
-			else:
-				predictions[:, :, i] -= np.random.uniform(0, 1)
+		ncal_ngt_neq = np.stack([p._get_stats(x) for p in self.predictors],
+		                        axis=3)
+		ncal_ngt_neq = ncal_ngt_neq.sum(axis=3)
 
-		predictions = np.sum(predictions, axis=2) + 1
-		predictions /= (n_cal_tot + 1)
+		p = calc_p(ncal_ngt_neq[:, :, 0],
+		           ncal_ngt_neq[:, :, 1],
+		           ncal_ngt_neq[:, :, 2],
+		           smoothing=self.predictors[0].smoothing)
 
 		if significance:
-			return predictions > significance
+			return p > significance
 		else:
-			return predictions
+			return p
 
 
 class BootstrapConformalClassifier(AggregatedCp):
@@ -359,22 +354,16 @@ class BootstrapConformalClassifier(AggregatedCp):
 														   n_models)
 
 	def predict(self, x, significance=None):
-		predictions = np.dstack([p.predict(x, significance=None)
-		                         for p in self.predictors])
-		n_cal_tot = 0
-		for i, predictor in enumerate(self.predictors):
-			n_cal = predictor.cal_scores[0].size
-			n_cal_tot += n_cal
-			predictions[:, :, i] *= (n_cal + 1)
-			if predictor.smoothing == False:
-				predictions[:, :, i] -= 1
-			else:
-				predictions[:, :, i] -= np.random.uniform(0, 1)
+		ncal_ngt_neq = np.stack([p._get_stats(x) for p in self.predictors],
+		                        axis=3)
+		ncal_ngt_neq = ncal_ngt_neq.sum(axis=3)
 
-		predictions = np.sum(predictions, axis=2) + (n_cal_tot / self.n_train)
-		predictions /= (n_cal_tot + (n_cal_tot / self.n_train))
+		p = calc_p(ncal_ngt_neq[:, :, 0] + ncal_ngt_neq[:, :, 0] / self.n_train,
+		           ncal_ngt_neq[:, :, 1] + ncal_ngt_neq[:, :, 0] / self.n_train,
+		           ncal_ngt_neq[:, :, 2],
+		           smoothing=self.predictors[0].smoothing)
 
 		if significance:
-			return predictions > significance
+			return p > significance
 		else:
-			return predictions
+			return p
