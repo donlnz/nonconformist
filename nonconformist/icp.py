@@ -224,22 +224,23 @@ class IcpClassifier(BaseIcp, ClassifierMixin):
 
 			# TODO: nc_function.calc_nc should take X * {y1, y2, ... ,yn}
 			test_nc_scores = self.nc_function.score(x, test_class)
-			for j, nc in enumerate(test_nc_scores):
-				cal_scores = self.cal_scores[self.condition((x[j, :], c))][::-1]
-				n_cal = cal_scores.size
 
+			for j, nc in enumerate(test_nc_scores):
+				
+				### lambda x: 0. Returns the same vector and [::-1] make it to invert the order
+				
+				cal_scores = self.cal_scores[self.condition((x[j, :], c))][::-1]
+
+				n_cal = cal_scores.size
 				idx_left = np.searchsorted(cal_scores, nc, 'left')
 				idx_right = np.searchsorted(cal_scores, nc, 'right')
 				n_gt = n_cal - idx_right
 				n_eq = idx_right - idx_left + 1
-
 				p[j, i] = n_gt / (n_cal + 1)
-
 				if self.smoothing:
 					p[j, i] += (n_eq * np.random.uniform(0, 1, 1)) / (n_cal + 1)
 				else:
 					p[j, i] += n_eq / (n_cal + 1)
-
 		if significance is not None:
 			return p > significance
 		else:

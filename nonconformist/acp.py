@@ -7,8 +7,8 @@ Aggregated conformal predictors
 # Authors: Henrik Linusson
 
 import numpy as np
-from sklearn.cross_validation import KFold, StratifiedKFold
-from sklearn.cross_validation import ShuffleSplit, StratifiedShuffleSplit
+from sklearn.model_selection import KFold, StratifiedKFold
+from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit
 from sklearn.base import clone
 
 
@@ -145,7 +145,7 @@ class AggregatedCp(object):
 	             predictor,
 	             sampler=BootstrapSampler(),
 	             aggregation_func=None,
-	             n_models=10):
+	             n_models= 50):
 		self.predictors = []
 		self.n_models = n_models
 		self.predictor = predictor
@@ -154,8 +154,7 @@ class AggregatedCp(object):
 		if aggregation_func is not None:
 			self.agg_func = aggregation_func
 		else:
-			self.agg_func = lambda x: np.mean(x, axis=2)
-
+			self.agg_func = lambda x: np.median(x, axis=2)
 	def fit(self, x, y):
 		"""Fit underlying conformal predictors.
 
