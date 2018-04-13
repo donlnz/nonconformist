@@ -26,9 +26,10 @@ class BootstrapSampler(object):
 	--------
 	"""
 	def gen_samples(self, y, n_samples, problem_type):
+		np.random.seed(46)
 		for i in range(n_samples):
 			idx = np.array(range(y.size))
-			train = np.random.choice(y.size, y.size, replace=True)
+			train = np.random.choice(y.size, y.size, replace=True, )
 			cal_mask = np.array(np.ones(idx.size), dtype=bool)
 			for j in train:
 				cal_mask[j] = False
@@ -49,10 +50,12 @@ class CrossSampler(object):
 	"""
 	def gen_samples(self, y, n_samples, problem_type):
 		if problem_type == 'classification':
-			folds = StratifiedKFold(y, n_folds=n_samples)
+			folds = StratifiedKFold(y, n_folds=n_samples,
+									random_state=46)
 		else:
-			folds = KFold(y.size, n_folds=n_samples)
-		for train, cal in folds:
+			folds = KFold(n_splits=n_samples,
+							random_state=46)
+		for train, cal in folds.split(y):
 			yield train, cal
 
 
@@ -77,14 +80,16 @@ class RandomSubSampler(object):
 	def gen_samples(self, y, n_samples, problem_type):
 		if problem_type == 'classification':
 			splits = StratifiedShuffleSplit(y,
-			                                n_iter=n_samples,
-			                                test_size=self.cal_portion)
+			                                n_splits=n_samples,
+			                                test_size=self.cal_portion,
+											random_state=46)
 		else:
-			splits = ShuffleSplit(y.size,
-			                      n_iter=n_samples,
-			                      test_size=self.cal_portion)
+			splits = ShuffleSplit(
+			                      n_splits=n_samples,
+			                      test_size=self.cal_portion,
+								  random_state=46)
 
-		for train, cal in splits:
+		for train, cal in splits.split(y):
 			yield train, cal
 
 
@@ -111,7 +116,7 @@ class AggregatedCp(object):
 		Function used to aggregate the predictions of the underlying
 		conformal predictors. Defaults to ``numpy.mean``.
 
-	n_models : int
+	n_models : intpredict
 		Number of models to aggregate.
 
 	Attributes
@@ -145,7 +150,7 @@ class AggregatedCp(object):
 	             predictor,
 	             sampler=BootstrapSampler(),
 	             aggregation_func=None,
-	             n_models= 50):
+	             n_models= 10):
 		self.predictors = []
 		self.n_models = n_models
 		self.predictor = predictor
@@ -154,7 +159,13 @@ class AggregatedCp(object):
 		if aggregation_func is not None:
 			self.agg_func = aggregation_func
 		else:
-			self.agg_func = lambda x: np.median(x, axis=2)
+			self.agg_func = self.agg #lambda x: np.median(x, axis=2)
+		np.random.seed(46)
+
+	
+	def agg(self, x):
+    		return np.median(x, axis=2)
+
 	def fit(self, x, y):
 		"""Fit underlying conformal predictors.
 
