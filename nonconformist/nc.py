@@ -221,8 +221,16 @@ class RegressorNormalizer(BaseScorer):
 		self.normalizer_model = normalizer_model
 		self.err_func = err_func
 
-	def fit(self, x, y):
-		residual_prediction = self.base_model.predict(x)
+	def fit(self, x, y, y_hat=None):
+		if self.base_model is None:
+			try:
+				if y_hat is None:
+					raise ValueError('y_hat cannot be None when base_model is None')
+			except ValueError:
+				raise
+			residual_prediction=y_hat
+		else:
+			residual_prediction = self.base_model.predict(x)
 		residual_error = np.abs(self.err_func.apply(residual_prediction, y))
 		residual_error += 0.00001 # Add small term to avoid log(0)
 		log_err = np.log(residual_error)
@@ -241,7 +249,17 @@ class NcFactory(object):
 		else:
 			normalizer_adapter = None
 
-		if isinstance(model, sklearn.base.ClassifierMixin):
+		if model is None:
+			err_func = AbsErrorErrFunc() if err_func is None else err_func
+			adapter = None
+			if normalizer_adapter is not None:
+				normalizer = RegressorNormalizer(adapter,
+												 normalizer_adapter,
+												 err_func)
+				return RegressorNc(adapter, err_func, normalizer)
+			else:
+				return RegressorNc(adapter, err_func)
+		elif isinstance(model, sklearn.base.ClassifierMixin):
 			err_func = MarginErrFunc() if err_func is None else err_func
 			if oob:
 				c = sklearn.base.clone(model)
@@ -326,7 +344,7 @@ class BaseModelNc(BaseScorer):
 		self.last_prediction = None
 		self.clean = False
 
-	def fit(self, x, y):
+	def fit(self, x, y, y_hat=None):
 		"""Fits the underlying model of the nonconformity scorer.
 
 		Parameters
@@ -337,16 +355,26 @@ class BaseModelNc(BaseScorer):
 		y : numpy array of shape [n_samples]
 			Outputs of examples for fitting the underlying model.
 
+		y_hat : numpy array of shape [n_samples]
+			Outputs of examples for which to calculate a nonconformity score when bfase model is not available.
+
 		Returns
 		-------
 		None
 		"""
-		self.model.fit(x, y)
+		if self.model is not None:
+			self.model.fit(x, y)
+		else:
+			try:
+				if y_hat is None:
+					raise ValueError('y_hat cannot be None when base_model is None')
+			except ValueError:
+				raise
 		if self.normalizer is not None:
 			self.normalizer.fit(x, y)
 		self.clean = False
 
-	def score(self, x, y=None):
+	def score(self, x, y=None, y_hat=None):
 		"""Calculates the nonconformity score of a set of samples.
 
 		Parameters
@@ -357,12 +385,24 @@ class BaseModelNc(BaseScorer):
 		y : numpy array of shape [n_samples]
 			Outputs of examples for which to calculate a nonconformity score.
 
+		y_hat : numpy array of shape [n_samples]
+			Outputs of examples for which to calculate a nonconformity score when base model is not available.
+
 		Returns
 		-------
 		nc : numpy array of shape [n_samples]
 			Nonconformity scores of samples.
 		"""
-		prediction = self.model.predict(x)
+		if self.model is None:
+			try:
+				if y_hat is None:
+					raise ValueError('y_hat cannot be None when base_model is None')
+			except ValueError:
+				raise
+			prediction = y_hat
+
+		else:
+			prediction = self.model.predict(x)
 		n_test = x.shape[0]
 		if self.normalizer is not None:
 			norm = self.normalizer.score(x) + self.beta
@@ -463,7 +503,7 @@ class RegressorNc(BaseModelNc):
 		                                  normalizer,
 		                                  beta)
 
-	def predict(self, x, nc, significance=None):
+	def predict(self, x, nc, y_hat=None,significance=None):
 		"""Constructs prediction intervals for a set of test examples.
 
 		Predicts the output of each test pattern using the underlying model,
@@ -474,6 +514,9 @@ class RegressorNc(BaseModelNc):
 		----------
 		x : numpy array of shape [n_samples, n_features]
 			Inputs of patters for which to predict output values.
+
+		y_hat: numpy array of shape [n_samples]
+			Outputs of examples from the fitted underlying model.
 
 		significance : float
 			Significance level (maximum allowed error rate) of predictions.
@@ -492,7 +535,18 @@ class RegressorNc(BaseModelNc):
 			significance level.
 		"""
 		n_test = x.shape[0]
-		prediction = self.model.predict(x)
+
+		if self.model is None:
+			try:
+				if y_hat is None:
+					raise ValueError('y_hat cannot be None when base_model is None')
+			except ValueError:
+				raise
+			prediction = y_hat
+
+		else:
+			prediction = self.model.predict(x)
+
 		if self.normalizer is not None:
 			norm = self.normalizer.score(x) + self.beta
 		else:
