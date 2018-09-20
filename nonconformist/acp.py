@@ -224,7 +224,7 @@ class AggregatedCp(object):
 			self.predictor.__class__.get_problem_type() == 'regression'
 
 		n_examples = x.shape[0]
-
+		np.random.seed(46)
 		if is_regression and significance is None:
 			signs = np.arange(0.01, 1.0, 0.01)
 			pred = np.zeros((n_examples, 2, signs.size))
