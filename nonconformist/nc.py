@@ -371,7 +371,7 @@ class BaseModelNc(BaseScorer):
 			except ValueError:
 				raise
 		if self.normalizer is not None:
-			self.normalizer.fit(x, y)
+			self.normalizer.fit(x, y, y_hat)
 		self.clean = False
 
 	def score(self, x, y=None, y_hat=None):
