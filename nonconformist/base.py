@@ -9,7 +9,10 @@ docstring
 import abc
 import numpy as np
 
-from sklearn.base import BaseEstimator
+# from sklearn.base import BaseEstimator
+
+
+BaseEstimator = object
 
 
 class RegressorMixin(object):
