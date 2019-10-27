@@ -7,8 +7,8 @@ Aggregated conformal predictors
 # Authors: Henrik Linusson
 
 import numpy as np
-from sklearn.cross_validation import KFold, StratifiedKFold
-from sklearn.cross_validation import ShuffleSplit, StratifiedShuffleSplit
+from sklearn.model_selection import KFold, StratifiedKFold
+from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit
 from sklearn.base import clone
 from nonconformist.base import BaseEstimator
 from nonconformist.util import calc_p
@@ -27,7 +27,7 @@ class BootstrapSampler(object):
 	Examples
 	--------
 	"""
-	def gen_samples(self, y, n_samples, problem_type):
+	def gen_samples(self, x, y, n_samples, problem_type):
 		for i in range(n_samples):
 			idx = np.array(range(y.size))
 			train = np.random.choice(y.size, y.size, replace=True)
@@ -49,12 +49,12 @@ class CrossSampler(object):
 	Examples
 	--------
 	"""
-	def gen_samples(self, y, n_samples, problem_type):
+	def gen_samples(self, x, y, n_samples, problem_type):
 		if problem_type == 'classification':
-			folds = StratifiedKFold(y, n_folds=n_samples)
+			splits = StratifiedKFold(n_splits=n_samples).split(x, y)
 		else:
-			folds = KFold(y.size, n_folds=n_samples)
-		for train, cal in folds:
+			splits = KFold(n_splits=n_samples).split(x)
+		for train, cal in splits:
 			yield train, cal
 
 
@@ -76,15 +76,15 @@ class RandomSubSampler(object):
 	def __init__(self, calibration_portion=0.3):
 		self.cal_portion = calibration_portion
 
-	def gen_samples(self, y, n_samples, problem_type):
+	def gen_samples(self, x, y, n_samples, problem_type):
 		if problem_type == 'classification':
-			splits = StratifiedShuffleSplit(y,
-			                                n_iter=n_samples,
-			                                test_size=self.cal_portion)
+			sss = StratifiedShuffleSplit(n_splits=n_samples,
+			                             test_size=self.cal_portion)
+			splits = sss.split(x, y)
 		else:
-			splits = ShuffleSplit(y.size,
-			                      n_iter=n_samples,
-			                      test_size=self.cal_portion)
+			rs = ShuffleSplit(n_splits=n_samples,
+			                  test_size=self.cal_portion)
+			splits = rs.split(x)
 
 		for train, cal in splits:
 			yield train, cal
@@ -178,7 +178,7 @@ class AggregatedCp(BaseEstimator):
 		idx = np.random.permutation(y.size)
 		x, y = x[idx, :], y[idx]
 		problem_type = self.predictor.__class__.get_problem_type()
-		samples = self.sampler.gen_samples(y,
+		samples = self.sampler.gen_samples(x, y,
 		                                   self.n_models,
 		                                   problem_type)
 		for train, cal in samples:
