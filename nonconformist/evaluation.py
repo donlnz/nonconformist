@@ -16,9 +16,9 @@ import sys
 import numpy as np
 import pandas as pd
 
-from sklearn.cross_validation import StratifiedShuffleSplit
-from sklearn.cross_validation import KFold
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import KFold
+from sklearn.model_selection import train_test_split
 from sklearn.base import clone, BaseEstimator
 
 
@@ -73,9 +73,9 @@ class ClassIcpCvHelper(BaseIcpCvHelper, ClassifierMixin):
 		super(ClassIcpCvHelper, self).__init__(icp, calibration_portion)
 
 	def fit(self, x, y):
-		split = StratifiedShuffleSplit(y, n_iter=1,
+		split = StratifiedShuffleSplit(n_splits=1,
 		                               test_size=self.calibration_portion)
-		for train, cal in split:
+		for train, cal in split.split(np.zeros((y.size, 1)), y):
 			self.icp.fit(x[train, :], y[train])
 			self.icp.calibrate(x[cal, :], y[cal])
 
@@ -185,8 +185,8 @@ def cross_val_score(model,x, y, iterations=10, folds=10, fit_params=None,
 	for i in range(iterations):
 		idx = np.random.permutation(y.size)
 		x, y = x[idx, :], y[idx]
-		cv = KFold(y.size, folds)
-		for j, (train, test) in enumerate(cv):
+		cv = KFold(folds)
+		for j, (train, test) in enumerate(cv.split(x)):
 			if verbose:
 				sys.stdout.write('\riter {}/{} fold {}/{}'.format(
 					i + 1,

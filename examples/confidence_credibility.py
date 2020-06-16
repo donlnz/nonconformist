@@ -21,7 +21,7 @@ train_idx = idx[:int(n_instances / 3)]
 cal_idx = idx[int(n_instances / 3):2 * int(n_instances / 3)]
 test_idx = idx[2 * int(n_instances / 3):]
 
-nc = ClassifierNc(ClassifierAdapter(RandomForestClassifier()))
+nc = ClassifierNc(ClassifierAdapter(RandomForestClassifier(n_estimators=100)))
 icp = IcpClassifier(nc)
 
 icp.fit(x[train_idx, :], y[train_idx])
