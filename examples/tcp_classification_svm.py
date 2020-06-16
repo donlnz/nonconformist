@@ -28,8 +28,13 @@ test = idx[int(idx.size / 2):]
 # -----------------------------------------------------------------------------
 # Train and calibrate
 # -----------------------------------------------------------------------------
-tcp = TcpClassifier(ClassifierNc(ClassifierAdapter(SVC(probability=True)),
-                                 MarginErrFunc()))
+tcp = TcpClassifier(
+	ClassifierNc(
+		ClassifierAdapter(SVC(probability=True, gamma='scale')),
+		MarginErrFunc()
+	)
+)
+
 tcp.fit(data.data[train, :], data.target[train])
 
 # -----------------------------------------------------------------------------
