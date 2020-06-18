@@ -133,11 +133,15 @@ class TcpClassifier(BaseEstimator, ClassifierMixin):
 				train_x = np.vstack([self.train_x, x[i, :]])
 				train_y = np.hstack([self.train_y, y])
 				self.base_icp.fit(train_x, train_y)
-				scores = self.base_icp.nc_function.score(train_x, train_y)
-				ngt = (scores[:-1] > scores[-1]).sum()
-				neq = (scores[:-1] == scores[-1]).sum()
+				self.base_icp.calibrate(train_x, train_y)
 
-				p[i, j] = calc_p(n_train, ngt, neq, self.smoothing)
+				ncal_ngt_neq = self.base_icp._get_stats(x[i, :].reshape(1, x.shape[1]))
+
+				ncal = ncal_ngt_neq[:, j, 0]
+				ngt = ncal_ngt_neq[:, j, 1]
+				neq = ncal_ngt_neq[:, j, 2]
+
+				p[i, j] = calc_p(ncal - 1, ngt, neq - 1, self.smoothing)
 
 		if significance is not None:
 			return p > significance
