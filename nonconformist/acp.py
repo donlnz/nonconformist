@@ -50,12 +50,13 @@ class CrossSampler(object):
 	"""
 	def gen_samples(self, y, n_samples, problem_type):
 		if problem_type == 'classification':
-			folds = StratifiedKFold(y, n_folds=n_samples,
+			print(n_samples)
+			folds = StratifiedKFold(n_splits=n_samples,
 									random_state=46)
 		else:
 			folds = KFold(n_splits=n_samples,
 							random_state=46)
-		for train, cal in folds.split(y):
+		for train, cal in folds.split(y, y):
 			yield train, cal
 
 
@@ -79,7 +80,7 @@ class RandomSubSampler(object):
 
 	def gen_samples(self, y, n_samples, problem_type):
 		if problem_type == 'classification':
-			splits = StratifiedShuffleSplit(y,
+			splits = StratifiedShuffleSplit(
 			                                n_splits=n_samples,
 			                                test_size=self.cal_portion,
 											random_state=46)
@@ -89,7 +90,7 @@ class RandomSubSampler(object):
 			                      test_size=self.cal_portion,
 								  random_state=46)
 
-		for train, cal in splits.split(y):
+		for train, cal in splits.split(y, y):
 			yield train, cal
 
 
@@ -157,14 +158,19 @@ class AggregatedCp(object):
 		self.sampler = sampler
 
 		if aggregation_func is not None:
-			self.agg_func = aggregation_func
+			if aggregation_func == "median":
+				self.agg_func = self.agg_median
+			if aggregation_func == "mean":
+				self.agg_func = self.agg_mean
 		else:
-			self.agg_func = self.agg #lambda x: np.median(x, axis=2)
+			self.agg_func = self.agg_median #lambda x: np.median(x, axis=2)
 		np.random.seed(46)
 
-	
-	def agg(self, x):
+	def agg_median(self, x):
     		return np.median(x, axis=2)
+
+	def agg_mean(self, x):
+    		return np.mean(x, axis=2)
 
 	def fit(self, x, y):
 		"""Fit underlying conformal predictors.
