@@ -162,6 +162,10 @@ class AggregatedCp(object):
 				self.agg_func = self.agg_median
 			if aggregation_func == "mean":
 				self.agg_func = self.agg_mean
+			if aggregation_func == "max":
+				self.agg_func = self.agg_max
+			if aggregation_func == "min":
+				self.agg_func = self.agg_max
 		else:
 			self.agg_func = self.agg_median #lambda x: np.median(x, axis=2)
 		np.random.seed(46)
@@ -171,6 +175,12 @@ class AggregatedCp(object):
 
 	def agg_mean(self, x):
     		return np.mean(x, axis=2)
+
+	def agg_max(self, x):
+    		return np.max(x, axis=2)
+
+	def agg_min(self, x):
+    		return np.min(x, axis=2)
 
 	def fit(self, x, y):
 		"""Fit underlying conformal predictors.
