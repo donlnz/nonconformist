@@ -170,6 +170,10 @@ class AggregatedCp(object):
 			self.agg_func = self.agg_median #lambda x: np.median(x, axis=2)
 		np.random.seed(46)
 
+	# kept for retrocompatibility
+	def agg(self, x):
+    		return np.median(x, axis=2)
+
 	def agg_median(self, x):
     		return np.median(x, axis=2)
 
