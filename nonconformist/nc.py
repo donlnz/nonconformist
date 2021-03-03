@@ -235,9 +235,10 @@ class RegressorNormalizer(BaseScorer):
 
 class NcFactory(object):
 	@staticmethod
-	def create_nc(model, err_func=None, normalizer_model=None, oob=False):
+	def create_nc(model, err_func=None, normalizer_model=None, oob=False,
+                      fit_params=None, fit_params_normalizer=None):
 		if normalizer_model is not None:
-			normalizer_adapter = RegressorAdapter(normalizer_model)
+			normalizer_adapter = RegressorAdapter(normalizer_model, fit_params_normalizer)
 		else:
 			normalizer_adapter = None
 
@@ -247,14 +248,14 @@ class NcFactory(object):
 				c = sklearn.base.clone(model)
 				c.fit([[0], [1]], [0, 1])
 				if hasattr(c, 'oob_decision_function_'):
-					adapter = OobClassifierAdapter(model)
+					adapter = OobClassifierAdapter(model, fit_params)
 				else:
 					raise AttributeError('Cannot use out-of-bag '
 					                      'calibration with {}'.format(
 						model.__class__.__name__
 					))
 			else:
-				adapter = ClassifierAdapter(model)
+				adapter = ClassifierAdapter(model, fit_params)
 
 			if normalizer_adapter is not None:
 				normalizer = RegressorNormalizer(adapter,
@@ -270,14 +271,14 @@ class NcFactory(object):
 				c = sklearn.base.clone(model)
 				c.fit([[0], [1]], [0, 1])
 				if hasattr(c, 'oob_prediction_'):
-					adapter = OobRegressorAdapter(model)
+					adapter = OobRegressorAdapter(model, fit_params)
 				else:
 					raise AttributeError('Cannot use out-of-bag '
 					                     'calibration with {}'.format(
 						model.__class__.__name__
 					))
 			else:
-				adapter = RegressorAdapter(model)
+				adapter = RegressorAdapter(model, fit_params)
 
 			if normalizer_adapter is not None:
 				normalizer = RegressorNormalizer(adapter,
