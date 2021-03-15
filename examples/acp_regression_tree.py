@@ -56,7 +56,7 @@ models = {  'ACP-RandomSubSampler'  : AggregatedCp(
 # -----------------------------------------------------------------------------
 # Train, predict and evaluate
 # -----------------------------------------------------------------------------
-for name, model in models.items():
+for name, model in models.iteritems():
     model.fit(data.data[train, :], data.target[train])
     prediction = model.predict(data.data[test, :])
     prediction_sign = model.predict(data.data[test, :],

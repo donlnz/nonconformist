@@ -6,10 +6,12 @@ Aggregated conformal predictors
 
 # Authors: Henrik Linusson
 
+from types import MappingProxyType
 import numpy as np
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit
 from sklearn.base import clone
+from sklearn.utils import shuffle
 from nonconformist.base import BaseEstimator
 from nonconformist.util import calc_p
 
@@ -28,6 +30,7 @@ class BootstrapSampler(object):
 	--------
 	"""
 	def gen_samples(self, y, n_samples, problem_type):
+		np.random.seed(46)
 		for i in range(n_samples):
 			idx = np.array(range(y.size))
 			train = np.random.choice(y.size, y.size, replace=True)
@@ -51,10 +54,13 @@ class CrossSampler(object):
 	"""
 	def gen_samples(self, y, n_samples, problem_type):
 		if problem_type == 'classification':
-			folds = StratifiedKFold(n_splits=n_samples)
+			# MP: added random state and shuffle = true (required)
+			folds = StratifiedKFold(n_splits=n_samples, random_state=46, shuffle=True)
 			split_ = folds.split(np.zeros((y.size, 1)), y)
+
 		else:
-			folds = KFold(n_splits=n_samples)
+			# MP: added random state and shuffle = true (required)
+			folds = KFold(n_splits=n_samples, random_state=46, shuffle=True)
 			split_ = folds.split(np.zeros((y.size, 1)))
 		
 		for train, cal in split_:
@@ -81,17 +87,21 @@ class RandomSubSampler(object):
 
 	def gen_samples(self, y, n_samples, problem_type):
 		if problem_type == 'classification':
+			# MP added random state 
 			splits = StratifiedShuffleSplit(
 					n_splits=n_samples,
-					test_size=self.cal_portion
+					test_size=self.cal_portion, 
+					random_state=46						
 				)
 
 			split_ = splits.split(np.zeros((y.size, 1)), y)
 		
 		else:
+			# MP added random state 
 			splits = ShuffleSplit(
 				n_splits=n_samples,
-				test_size=self.cal_portion
+				test_size=self.cal_portion,
+				random_state = 46
 			)
 
 			split_ = splits.split(np.zeros((y.size, 1)))
@@ -163,10 +173,38 @@ class AggregatedCp(BaseEstimator):
 		self.predictor = predictor
 		self.sampler = sampler
 
+		# MP lambda replacements
 		if aggregation_func is not None:
-			self.agg_func = aggregation_func
+			# self.agg_func = aggregation_func
+		# else:
+			# self.agg_func = lambda x: np.mean(x, axis=2)
+			if aggregation_func == "median":
+				self.agg_func = self.agg_median
+			if aggregation_func == "mean":
+				self.agg_func = self.agg_mean
+			if aggregation_func == "max":
+				self.agg_func = self.agg_max
+			if aggregation_func == "min":
+				self.agg_func = self.agg_max
 		else:
-			self.agg_func = lambda x: np.mean(x, axis=2)
+			self.agg_func = self.agg_median 
+		np.random.seed(46)
+
+	# MP functions replacing lambdas
+	def agg(self, x):
+    		return np.median(x, axis=2)
+
+	def agg_median(self, x):
+    		return np.median(x, axis=2)
+
+	def agg_mean(self, x):
+    		return np.mean(x, axis=2)
+
+	def agg_max(self, x):
+    		return np.max(x, axis=2)
+
+	def agg_min(self, x):
+    		return np.min(x, axis=2)
 
 	def fit(self, x, y):
 		"""Fit underlying conformal predictors.
@@ -229,6 +267,9 @@ class AggregatedCp(BaseEstimator):
 			self.predictor.__class__.get_problem_type() == 'regression'
 
 		n_examples = x.shape[0]
+
+		# MP added random seed
+		np.random.seed(46)
 
 		if is_regression and significance is None:
 			signs = np.arange(0.01, 1.0, 0.01)

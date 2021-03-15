@@ -73,8 +73,9 @@ class ClassIcpCvHelper(BaseIcpCvHelper, ClassifierMixin):
 		super(ClassIcpCvHelper, self).__init__(icp, calibration_portion)
 
 	def fit(self, x, y):
+		# MP added random_state
 		split = StratifiedShuffleSplit(n_splits=1,
-		                               test_size=self.calibration_portion)
+		                               test_size=self.calibration_portion, random_state=46)
 		for train, cal in split.split(np.zeros((y.size, 1)), y):
 			self.icp.fit(x[train, :], y[train])
 			self.icp.calibrate(x[cal, :], y[cal])
@@ -119,7 +120,8 @@ class RegIcpCvHelper(BaseIcpCvHelper, RegressorMixin):
 		super(RegIcpCvHelper, self).__init__(icp, calibration_portion)
 
 	def fit(self, x, y):
-		split = train_test_split(x, y, test_size=self.calibration_portion)
+		# MP added random_state
+		split = train_test_split(x, y, test_size=self.calibration_portion, random_state=46)
 		x_tr, x_cal, y_tr, y_cal = split[0], split[1], split[2], split[3]
 		self.icp.fit(x_tr, y_tr)
 		self.icp.calibrate(x_cal, y_cal)
@@ -185,7 +187,9 @@ def cross_val_score(model,x, y, iterations=10, folds=10, fit_params=None,
 	for i in range(iterations):
 		idx = np.random.permutation(y.size)
 		x, y = x[idx, :], y[idx]
-		cv = KFold(folds)
+
+		# MP added random_state
+		cv = KFold(folds, random_state=46)
 		for j, (train, test) in enumerate(cv.split(x)):
 			if verbose:
 				sys.stdout.write('\riter {}/{} fold {}/{}'.format(
