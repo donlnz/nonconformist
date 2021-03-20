@@ -8,8 +8,10 @@ docstring
 
 import abc
 import numpy as np
-
-from sklearn.base import BaseEstimator
+try:
+	from sklearn.base import BaseEstimator
+except ImportError:
+	BaseEstimator = object
 
 
 class RegressorMixin(object):

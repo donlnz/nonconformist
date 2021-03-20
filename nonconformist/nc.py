@@ -10,9 +10,13 @@ from __future__ import division
 
 import abc
 import numpy as np
-import sklearn.base
 from nonconformist.base import ClassifierAdapter, RegressorAdapter
 from nonconformist.base import OobClassifierAdapter, OobRegressorAdapter
+try:
+	from sklearn.base import BaseEstimator
+except ImportError:
+	BaseEstimator = object
+
 
 # -----------------------------------------------------------------------------
 # Error functions
@@ -199,7 +203,7 @@ class SignErrorErrFunc(RegressionErrFunc):
 # -----------------------------------------------------------------------------
 # Base nonconformity scorer
 # -----------------------------------------------------------------------------
-class BaseScorer(sklearn.base.BaseEstimator):
+class BaseScorer(BaseEstimator):
 	__metaclass__ = abc.ABCMeta
 
 	def __init__(self):
