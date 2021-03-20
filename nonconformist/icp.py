@@ -45,7 +45,7 @@ class BaseIcp(BaseEstimator):
 			self.condition = lambda x: 0
 			self.conditional = False
 
-	def fit(self, x, y):
+	def fit(self, x, y, y_hat=None):
 		"""Fit underlying nonconformity scorer.
 
 		Parameters
@@ -56,14 +56,17 @@ class BaseIcp(BaseEstimator):
 		y : numpy array of shape [n_samples]
 			Outputs of examples for fitting the nonconformity scorer.
 
+		y_hat : numpy array of shape [n_samples]
+			Outputs of examples for which to calculate a nonconformity score when base model is not available.
+
 		Returns
 		-------
 		None
 		"""
 		# TODO: incremental?
-		self.nc_function.fit(x, y)
+		self.nc_function.fit(x, y, y_hat)
 
-	def calibrate(self, x, y, increment=False):
+	def calibrate(self, x, y, y_hat=None, increment=False):
 		"""Calibrate conformal predictor based on underlying nonconformity
 		scorer.
 
@@ -74,6 +77,9 @@ class BaseIcp(BaseEstimator):
 
 		y : numpy array of shape [n_samples, n_features]
 			Outputs of examples for calibrating the conformal predictor.
+
+		y_hat : numpy array of shape [n_samples]
+			Outputs of examples for which to calculate a nonconformity score when base model is not available.
 
 		increment : boolean
 			If ``True``, performs an incremental recalibration of the conformal
@@ -98,11 +104,11 @@ class BaseIcp(BaseEstimator):
 			for cond in self.categories:
 				idx = category_map == cond
 				cal_scores = self.nc_function.score(self.cal_x[idx, :],
-				                                    self.cal_y[idx])
+				                                    self.cal_y[idx],y_hat=y_hat)
 				self.cal_scores[cond] = np.sort(cal_scores)[::-1]
 		else:
 			self.categories = np.array([0])
-			cal_scores = self.nc_function.score(self.cal_x, self.cal_y)
+			cal_scores = self.nc_function.score(self.cal_x, self.cal_y,y_hat=y_hat)
 			self.cal_scores = {0: np.sort(cal_scores)[::-1]}
 
 	def _calibrate_hook(self, x, y, increment):
@@ -355,7 +361,7 @@ class IcpRegressor(BaseIcp, RegressorMixin):
 	def __init__(self, nc_function, condition=None):
 		super(IcpRegressor, self).__init__(nc_function, condition)
 
-	def predict(self, x, significance=None):
+	def predict(self, x, y_hat=None, significance=None):
 		"""Predict the output values for a set of input patterns.
 
 		Parameters
@@ -397,6 +403,7 @@ class IcpRegressor(BaseIcp, RegressorMixin):
 			if np.sum(idx) > 0:
 				p = self.nc_function.predict(x[idx, :],
 				                             self.cal_scores[condition],
+											 y_hat,
 				                             significance)
 				if n_significance > 1:
 					prediction[idx, :, :] = p
